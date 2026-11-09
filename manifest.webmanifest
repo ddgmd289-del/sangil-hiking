@@ -1,0 +1,26 @@
+{
+  "name": "산길 - 개인·동호회·등산대회 통합 등산 앱",
+  "short_name": "산길",
+  "id": "./index.html",
+  "lang": "ko",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f7f3",
+  "theme_color": "#173e35",
+  "description": "GPS 산행 기록, 동호회 일정, 등산대회 출석·조별 점수 관리",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
