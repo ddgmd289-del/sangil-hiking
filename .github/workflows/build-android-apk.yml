@@ -1,0 +1,160 @@
+name: Build MYHIKING Android APK
+on:
+  push:
+    branches: [build/android-apk-20261110]
+  workflow_dispatch:
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
+      - name: Generate Android project
+        run: |
+          mkdir -p app/src/main/assets app/src/main/java/kr/sangil/myhiking
+          cp index.html extensions.js auth-config.js manifest.webmanifest service-worker.js app/src/main/assets/
+          cp -r icons app/src/main/assets/
+          cat > settings.gradle.kts <<'EOF'
+          pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
+          dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS); repositories { google(); mavenCentral() } }
+          rootProject.name = "SangilMYHIKING"
+          include(":app")
+          EOF
+          cat > build.gradle.kts <<'EOF'
+          plugins {
+              id("com.android.application") version "8.7.3" apply false
+              id("org.jetbrains.kotlin.android") version "2.0.21" apply false
+          }
+          EOF
+          cat > gradle.properties <<'EOF'
+          org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+          android.useAndroidX=true
+          EOF
+          cat > app/build.gradle.kts <<'EOF'
+          plugins { id("com.android.application"); id("org.jetbrains.kotlin.android") }
+          android {
+              namespace = "kr.sangil.myhiking"
+              compileSdk = 35
+              defaultConfig { applicationId = "kr.sangil.myhiking"; minSdk = 26; targetSdk = 35; versionCode = 2; versionName = "1.0.1" }
+              buildTypes { release { isMinifyEnabled = false } }
+              compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
+              kotlinOptions { jvmTarget = "17" }
+          }
+          EOF
+          cat > app/src/main/AndroidManifest.xml <<'EOF'
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <uses-permission android:name="android.permission.INTERNET"/>
+              <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+              <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+              <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+              <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
+              <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+              <application android:label="산길 MYHIKING" android:usesCleartextTraffic="false" android:theme="@android:style/Theme.Material.Light.NoActionBar">
+                  <activity android:name=".MainActivity" android:exported="true">
+                      <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter>
+                  </activity>
+                  <service android:name=".TrackingService" android:exported="false" android:foregroundServiceType="location"/>
+              </application>
+          </manifest>
+          EOF
+          cat > app/src/main/java/kr/sangil/myhiking/MainActivity.kt <<'EOF'
+          package kr.sangil.myhiking
+          import android.Manifest
+          import android.app.Activity
+          import android.content.Intent
+          import android.content.pm.PackageManager
+          import android.os.Build
+          import android.os.Bundle
+          import android.webkit.JavascriptInterface
+          import android.webkit.WebChromeClient
+          import android.webkit.WebView
+          import android.webkit.WebViewClient
+          import android.widget.Toast
+          import android.speech.tts.TextToSpeech
+          import java.util.Locale
+          class MainActivity : Activity() {
+              private lateinit var web: WebView
+              private var speech: TextToSpeech? = null
+              override fun onCreate(savedInstanceState: Bundle?) {
+                  super.onCreate(savedInstanceState)
+                  speech = TextToSpeech(this) { if (it == TextToSpeech.SUCCESS) speech?.language = Locale.KOREAN }
+                  web = WebView(this)
+                  web.settings.javaScriptEnabled = true
+                  web.settings.domStorageEnabled = true
+                  web.settings.allowFileAccess = true
+                  web.webChromeClient = WebChromeClient()
+                  web.webViewClient = WebViewClient()
+                  web.addJavascriptInterface(Bridge(), "SangilNative")
+                  setContentView(web)
+                  web.loadUrl("file:///android_asset/index.html")
+                  if (Build.VERSION.SDK_INT >= 33) requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.POST_NOTIFICATIONS), 10)
+                  else requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), 10)
+              }
+              inner class Bridge {
+                  @JavascriptInterface fun startTracking() { runOnUiThread {
+                      if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                          Toast.makeText(this@MainActivity, "위치 권한을 허용해 주세요", Toast.LENGTH_LONG).show()
+                          return@runOnUiThread
+                      }
+                      try { val i = Intent(this@MainActivity, TrackingService::class.java).setAction("START"); startForegroundService(i) }
+                      catch (e: Exception) { Toast.makeText(this@MainActivity, "GPS 시작 실패: " + e.message, Toast.LENGTH_LONG).show() }
+                  } }
+                  @JavascriptInterface fun stopTracking() { runOnUiThread { stopService(Intent(this@MainActivity, TrackingService::class.java)) } }
+                  @JavascriptInterface fun speak(text: String) { runOnUiThread { speech?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "sangil") } }
+                  @JavascriptInterface fun getTrackBackup(): String {
+                      val f = java.io.File(filesDir, "tracking_backup.jsonl")
+                      return if (f.exists()) f.readText() else ""
+                  }
+              }
+              override fun onDestroy() { speech?.shutdown(); web.destroy(); super.onDestroy() }
+          }
+          EOF
+          cat > app/src/main/java/kr/sangil/myhiking/TrackingService.kt <<'EOF'
+          package kr.sangil.myhiking
+          import android.Manifest
+          import android.app.*
+          import android.content.pm.PackageManager
+          import android.content.*
+          import android.location.*
+          import android.os.*
+          import org.json.JSONObject
+          class TrackingService : Service(), LocationListener {
+              private lateinit var location: LocationManager
+              override fun onBind(intent: Intent?): IBinder? = null
+              override fun onCreate() {
+                  super.onCreate()
+                  location = getSystemService(LOCATION_SERVICE) as LocationManager
+                  val channel = NotificationChannel("hiking", "산길 GPS 산행 기록", NotificationManager.IMPORTANCE_LOW)
+                  (getSystemService(NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(channel)
+              }
+              override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+                  if (intent?.action == "STOP") { stopSelf(); return START_NOT_STICKY }
+                  val notification = Notification.Builder(this, "hiking").setContentTitle("산길 MYHIKING").setContentText("산행 위치 기록 중").setSmallIcon(android.R.drawable.ic_menu_mylocation).build()
+                  startForeground(101, notification)
+                  if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                      try { location.removeUpdates(this); location.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000L, 3f, this) } catch (_: Exception) {}
+                  }
+                  return START_STICKY
+              }
+              override fun onLocationChanged(loc: Location) {
+                  val p = JSONObject().put("lat", loc.latitude).put("lng", loc.longitude).put("time", System.currentTimeMillis())
+                  java.io.File(filesDir, "tracking_backup.jsonl").appendText(p.toString() + "\n")
+              }
+              override fun onDestroy() { try { location.removeUpdates(this) } catch (_: Exception) {}; super.onDestroy() }
+          }
+          EOF
+      - name: Build debug APK
+        run: gradle --no-daemon :app:assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SANGIL-MYHIKING-Android-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
