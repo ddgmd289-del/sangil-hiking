@@ -60,7 +60,7 @@ jobs:
           android {
               namespace = "kr.sangil.myhiking"
               compileSdk = 35
-              defaultConfig { applicationId = "kr.sangil.myhiking"; minSdk = 26; targetSdk = 35; versionCode = 6; versionName = "1.0.5" }
+              defaultConfig { applicationId = "kr.sangil.myhiking.test"; minSdk = 26; targetSdk = 35; versionCode = 7; versionName = "1.0.6-test" }
               buildTypes { release { isMinifyEnabled = false } }
               compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
               kotlinOptions { jvmTarget = "17" }
@@ -74,7 +74,7 @@ jobs:
               <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
               <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
               <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-              <application android:label="산길 MYHIKING" android:usesCleartextTraffic="false" android:theme="@android:style/Theme.Material.Light.NoActionBar">
+              <application android:label="산길 MYHIKING 테스트" android:usesCleartextTraffic="false" android:theme="@android:style/Theme.Material.Light.NoActionBar">
                   <activity android:name=".MainActivity" android:exported="true">
                       <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter>
                   </activity>
@@ -191,5 +191,5 @@ jobs:
         run: gradle --no-daemon :app:assembleDebug
       - uses: actions/upload-artifact@v4
         with:
-          name: SANGIL-MYHIKING-Android-APK
+          name: SANGIL-MYHIKING-TEST-APK
           path: app/build/outputs/apk/debug/app-debug.apk
