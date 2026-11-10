@@ -14,7 +14,6 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - uses: android-actions/setup-android@v3
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.10.2'
@@ -84,6 +83,16 @@ jobs:
           class MainActivity : Activity() {
               private lateinit var web: WebView
               private var speech: TextToSpeech? = null
+              private val receiver = object : android.content.BroadcastReceiver() {
+                  override fun onReceive(context: android.content.Context?, intent: Intent?) {
+                      val lat = intent?.getDoubleExtra("lat", Double.NaN) ?: return
+                      val lon = intent.getDoubleExtra("lon", Double.NaN)
+                      val alt = intent.getDoubleExtra("alt", Double.NaN)
+                      val acc = intent.getFloatExtra("acc", 0f)
+                      val t = intent.getLongExtra("t", System.currentTimeMillis())
+                      if (!lat.isNaN() && !lon.isNaN()) web.evaluateJavascript("window.sangilNativeFix?.($lat,$lon,$alt,$acc,$t)", null)
+                  }
+              }
               override fun onCreate(savedInstanceState: Bundle?) {
                   super.onCreate(savedInstanceState)
                   speech = TextToSpeech(this) { if (it == TextToSpeech.SUCCESS) speech?.language = Locale.KOREAN }
@@ -94,6 +103,7 @@ jobs:
                   web.webChromeClient = WebChromeClient()
                   web.webViewClient = WebViewClient()
                   web.addJavascriptInterface(Bridge(), "SangilNative")
+                  web.addJavascriptInterface(Bridge(), "SangilAndroid")
                   setContentView(web)
                   web.loadUrl("file:///android_asset/index.html")
                   if (Build.VERSION.SDK_INT >= 33) requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.POST_NOTIFICATIONS), 10)
@@ -108,6 +118,10 @@ jobs:
                       try { val i = Intent(this@MainActivity, TrackingService::class.java).setAction("START"); startForegroundService(i) }
                       catch (e: Exception) { Toast.makeText(this@MainActivity, "GPS 시작 실패: " + e.message, Toast.LENGTH_LONG).show() }
                   } }
+                  @JavascriptInterface fun pauseTracking() { runOnUiThread { startService(Intent(this@MainActivity, TrackingService::class.java).setAction("PAUSE")) } }
+                  @JavascriptInterface fun resumeTracking() { startTracking() }
+                  @JavascriptInterface fun requestPermission() { runOnUiThread { requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), 10) } }
+                  @JavascriptInterface fun closeApp() { runOnUiThread { finish() } }
                   @JavascriptInterface fun stopTracking() { runOnUiThread { stopService(Intent(this@MainActivity, TrackingService::class.java)) } }
                   @JavascriptInterface fun speak(text: String) { runOnUiThread { speech?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "sangil") } }
                   @JavascriptInterface fun getTrackBackup(): String {
@@ -115,6 +129,8 @@ jobs:
                       return if (f.exists()) f.readText() else ""
                   }
               }
+              override fun onStart() { super.onStart(); val filter = android.content.IntentFilter("kr.sangil.myhiking.FIX"); if (Build.VERSION.SDK_INT >= 33) registerReceiver(receiver, filter, android.content.Context.RECEIVER_NOT_EXPORTED) else registerReceiver(receiver, filter) }
+              override fun onStop() { unregisterReceiver(receiver); super.onStop() }
               override fun onDestroy() { speech?.shutdown(); web.destroy(); super.onDestroy() }
           }
           EOF
@@ -138,6 +154,7 @@ jobs:
               }
               override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
                   if (intent?.action == "STOP") { stopSelf(); return START_NOT_STICKY }
+                  if (intent?.action == "PAUSE") { try { location.removeUpdates(this) } catch (_: Exception) {}; return START_STICKY }
                   val notification = Notification.Builder(this, "hiking").setContentTitle("산길 MYHIKING").setContentText("산행 위치 기록 중").setSmallIcon(android.R.drawable.ic_menu_mylocation).build()
                   startForeground(101, notification)
                   if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -148,6 +165,7 @@ jobs:
               override fun onLocationChanged(loc: Location) {
                   val p = JSONObject().put("lat", loc.latitude).put("lng", loc.longitude).put("time", System.currentTimeMillis())
                   java.io.File(filesDir, "tracking_backup.jsonl").appendText(p.toString() + "\n")
+                  sendBroadcast(Intent("kr.sangil.myhiking.FIX").setPackage(packageName).putExtra("lat",loc.latitude).putExtra("lon",loc.longitude).putExtra("alt",loc.altitude).putExtra("acc",loc.accuracy).putExtra("t",System.currentTimeMillis()))
               }
               override fun onDestroy() { try { location.removeUpdates(this) } catch (_: Exception) {}; super.onDestroy() }
           }
