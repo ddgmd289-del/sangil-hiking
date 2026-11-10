@@ -25,7 +25,7 @@ body.hike-fullscreen .map-wrap{position:fixed;inset:0;width:100vw;height:100dvh;
 body.hike-fullscreen .map-note{display:none}
 body.hike-fullscreen .float-controls{top:calc(env(safe-area-inset-top) + 104px);right:14px}
 .hike-hud{display:none;position:fixed;top:env(safe-area-inset-top);left:0;right:0;z-index:1000;padding:10px 12px;gap:8px;background:linear-gradient(#173e35f5,#173e35e0);color:white;align-items:center;justify-content:space-between}
-.hike-hud .hike-stat{display:flex;flex-direction:column;align-items:center;min-width:0;font-size:11px}.hike-hud .hike-stat strong{font-size:20px;white-space:nowrap}.hike-hud button{border:1px solid #ffffff77;background:#ffffff24;color:white;border-radius:10px;padding:9px;font-size:12px}
+.hike-hud .hike-stat{display:flex;flex-direction:column;align-items:center;min-width:0;font-size:11px}.hike-hud .hike-stat strong{font-size:clamp(13px,4vw,20px);white-space:nowrap}.hike-hud button{border:1px solid #ffffff77;background:#ffffff24;color:white;border-radius:10px;padding:9px;font-size:12px}
 .hike-toolbar{display:none;position:fixed;bottom:calc(env(safe-area-inset-bottom) + 14px);left:12px;right:12px;z-index:1000;gap:8px}.hike-toolbar button{flex:1;border:0;border-radius:14px;padding:15px 8px;font-size:15px;font-weight:700;background:#fff;color:#174d3c;box-shadow:0 4px 18px #0003}.hike-toolbar .hike-end{background:#a73e35;color:white}
 body.hike-fullscreen .hike-hud,body.hike-fullscreen .hike-toolbar{display:flex}
 </style>
@@ -71,7 +71,7 @@ function elapsed(){if(!trip)return 0;return Math.max(0,(trip.accMs||0)+(trip.sta
 let voiceEnabled=true,announcedStep=0;
 function resizeHikeMap(){if(!map)return;requestAnimationFrame(()=>{map.invalidateSize({pan:false});setTimeout(()=>map?.invalidateSize({pan:false}),250)})}
 function speakHike(message){if(!voiceEnabled||!('speechSynthesis' in window))return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(message);u.lang='ko-KR';u.rate=1;u.volume=1;speechSynthesis.speak(u)}catch{}}
-function syncHikeHud(){const active=!!trip&&trip.state!=='done';document.body.classList.toggle('hike-fullscreen',active);$('#hikeDistance').textContent=(trip?.distance||0).toFixed(2)+' km';$('#hikeDuration').textContent=fmtTime(elapsed());$('#hikeAltitude').textContent=(position&&Number.isFinite(position.alt)?Math.round(position.alt):'—')+' m';$('#hikePause').textContent=trip?.state==='paused'?'▶ 산행 재개':'Ⅱ 일시정지';if(active)resizeHikeMap()}
+function syncHikeHud(){const active=!!trip&&trip.state!=='done';const wasActive=document.body.classList.contains('hike-fullscreen');document.body.classList.toggle('hike-fullscreen',active);$('#hikeDistance').textContent=(trip?.distance||0).toFixed(2)+' km';$('#hikeDuration').textContent=fmtTime(elapsed());$('#hikeAltitude').textContent=(position&&Number.isFinite(position.alt)?Math.round(position.alt):'—')+' m';$('#hikePause').textContent=trip?.state==='paused'?'▶ 산행 재개':'Ⅱ 일시정지';if(active!==wasActive)resizeHikeMap()}
 function announceDistance(){if(!trip||trip.state!=='running'||trip.demo)return;const step=Math.floor((trip.distance||0)/0.5);if(step>announcedStep){announcedStep=step;speakHike('이동 거리 '+(step*0.5).toFixed(1)+' 킬로미터입니다.')}}
 $('#hikePause').addEventListener('click',()=>trip?.state==='paused'?resume():pause());
 $('#hikeFinish').addEventListener('click',finish);
