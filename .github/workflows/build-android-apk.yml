@@ -27,6 +27,18 @@ jobs:
           mkdir -p app/src/main/assets app/src/main/java/kr/sangil/myhiking
           cp index.html extensions.js auth-config.js manifest.webmanifest service-worker.js app/src/main/assets/
           cp -r icons app/src/main/assets/
+          mkdir -p app/src/main/assets/vendor
+          curl --fail --location --retry 3 --retry-all-errors --silent --show-error https://unpkg.com/leaflet@1.9.4/dist/leaflet.js -o app/src/main/assets/vendor/leaflet.js
+          curl --fail --location --retry 3 --retry-all-errors --silent --show-error https://unpkg.com/leaflet@1.9.4/dist/leaflet.css -o app/src/main/assets/vendor/leaflet.css
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('app/src/main/assets/index.html')
+          s=p.read_text()
+          import re
+          s=re.sub(r'<link rel="stylesheet" href="https://unpkg.com/leaflet@1\.9\.4/dist/leaflet\.css"[^>]*>', '<link rel="stylesheet" href="vendor/leaflet.css">', s)
+          s=re.sub(r'<script src="https://unpkg.com/leaflet@1\.9\.4/dist/leaflet\.js"[^>]*></script>', '<script src="vendor/leaflet.js"></script>', s)
+          p.write_text(s)
+          PY
           cat > settings.gradle.kts <<'EOF'
           pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
           dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS); repositories { google(); mavenCentral() } }
@@ -48,7 +60,7 @@ jobs:
           android {
               namespace = "kr.sangil.myhiking"
               compileSdk = 35
-              defaultConfig { applicationId = "kr.sangil.myhiking"; minSdk = 26; targetSdk = 35; versionCode = 3; versionName = "1.0.2" }
+              defaultConfig { applicationId = "kr.sangil.myhiking"; minSdk = 26; targetSdk = 35; versionCode = 4; versionName = "1.0.3" }
               buildTypes { release { isMinifyEnabled = false } }
               compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
               kotlinOptions { jvmTarget = "17" }
