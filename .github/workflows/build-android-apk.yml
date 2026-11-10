@@ -43,6 +43,18 @@ jobs:
           assert 'src="vendor/leaflet.js"' in s, 'Leaflet JS not localized'
           p.write_text(s)
           PY
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          html=Path('app/src/main/assets/index.html').read_text()
+          scripts=re.findall(r'<script(?:\\s[^>]*)?>(.*?)</script>',html,re.S|re.I)
+          for i,script in enumerate(scripts):
+              if script.strip():
+                  Path(f'/tmp/sangil-inline-{i}.js').write_text(script)
+          PY
+          for js in /tmp/sangil-inline-*.js app/src/main/assets/extensions.js app/src/main/assets/auth-config.js; do
+            node --check "$js"
+          done
           cat > settings.gradle.kts <<'EOF'
           pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
           dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS); repositories { google(); mavenCentral() } }
@@ -64,7 +76,7 @@ jobs:
           android {
               namespace = "kr.sangil.myhiking"
               compileSdk = 35
-              defaultConfig { applicationId = "kr.sangil.myhiking.test"; minSdk = 26; targetSdk = 35; versionCode = 10; versionName = "1.0.9-test" }
+              defaultConfig { applicationId = "kr.sangil.myhiking.test"; minSdk = 26; targetSdk = 35; versionCode = 11; versionName = "1.0.10-test" }
               buildTypes { release { isMinifyEnabled = false } }
               compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
               kotlinOptions { jvmTarget = "17" }
