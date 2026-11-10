@@ -195,7 +195,16 @@ jobs:
                   val notification = Notification.Builder(this, "hiking").setContentTitle("산길 MYHIKING").setContentText("산행 위치 기록 중").setSmallIcon(android.R.drawable.ic_menu_mylocation).build()
                   startForeground(101, notification)
                   if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                      try { location.removeUpdates(this); location.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000L, 3f, this) } catch (_: Exception) {}
+                      try {
+                          location.removeUpdates(this)
+                          // Network fixes provide a fast initial position indoors; GPS refines it outdoors.
+                          for (provider in listOf(LocationManager.NETWORK_PROVIDER, LocationManager.GPS_PROVIDER)) {
+                              if (location.isProviderEnabled(provider)) {
+                                  location.getLastKnownLocation(provider)?.let { onLocationChanged(it) }
+                                  location.requestLocationUpdates(provider, 2000L, 1f, this)
+                              }
+                          }
+                      } catch (e: Exception) { android.util.Log.e("SANGIL_GPS", "Location registration failed", e) }
                   }
                   return START_STICKY
               }
