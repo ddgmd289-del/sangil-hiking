@@ -37,6 +37,10 @@ jobs:
           import re
           s=re.sub(r'<link rel="stylesheet" href="https://unpkg.com/leaflet@1\.9\.4/dist/leaflet\.css"[^>]*>', '<link rel="stylesheet" href="vendor/leaflet.css">', s)
           s=re.sub(r'<script src="https://unpkg.com/leaflet@1\.9\.4/dist/leaflet\.js"[^>]*></script>', '<script src="vendor/leaflet.js"></script>', s)
+          # Avoid waiting for remote Firebase scripts when map initializes.
+          s=re.sub(r'<script src="https://www\.gstatic\.com/firebasejs/[^"]+"[^>]*></script>', '', s)
+          assert 'href="vendor/leaflet.css"' in s, 'Leaflet CSS not localized'
+          assert 'src="vendor/leaflet.js"' in s, 'Leaflet JS not localized'
           p.write_text(s)
           PY
           cat > settings.gradle.kts <<'EOF'
@@ -60,7 +64,7 @@ jobs:
           android {
               namespace = "kr.sangil.myhiking"
               compileSdk = 35
-              defaultConfig { applicationId = "kr.sangil.myhiking.test"; minSdk = 26; targetSdk = 35; versionCode = 7; versionName = "1.0.6-test" }
+              defaultConfig { applicationId = "kr.sangil.myhiking.test"; minSdk = 26; targetSdk = 35; versionCode = 8; versionName = "1.0.7-test" }
               buildTypes { release { isMinifyEnabled = false } }
               compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
               kotlinOptions { jvmTarget = "17" }
