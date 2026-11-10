@@ -17,6 +17,11 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.10.2'
+      - name: Reuse Android test signing key
+        uses: actions/cache@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: sangil-android-debug-signing-v1
       - name: Generate Android project
         run: |
           mkdir -p app/src/main/assets app/src/main/java/kr/sangil/myhiking
@@ -43,7 +48,7 @@ jobs:
           android {
               namespace = "kr.sangil.myhiking"
               compileSdk = 35
-              defaultConfig { applicationId = "kr.sangil.myhiking"; minSdk = 26; targetSdk = 35; versionCode = 2; versionName = "1.0.1" }
+              defaultConfig { applicationId = "kr.sangil.myhiking"; minSdk = 26; targetSdk = 35; versionCode = 3; versionName = "1.0.2" }
               buildTypes { release { isMinifyEnabled = false } }
               compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
               kotlinOptions { jvmTarget = "17" }
