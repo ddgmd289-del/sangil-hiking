@@ -18,10 +18,18 @@ jobs:
         with:
           gradle-version: '8.10.2'
       - name: Reuse Android test signing key
-        uses: actions/cache@v4
+        id: signing-key-cache
+        uses: actions/cache/restore@v4
         with:
           path: ~/.android/debug.keystore
           key: sangil-android-debug-signing-v1
+      - name: Require existing signing key for safe in-place updates
+        run: |
+          if [ ! -s "$HOME/.android/debug.keystore" ]; then
+            echo "::error::Previous test signing key unavailable. Refusing to create a differently signed APK that would require uninstalling the app."
+            exit 1
+          fi
+          keytool -list -v -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey | grep -E 'SHA256:|Alias name:'
       - name: Generate Android project
         run: |
           mkdir -p app/src/main/assets app/src/main/java/kr/sangil/myhiking
