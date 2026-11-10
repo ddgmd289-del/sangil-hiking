@@ -160,7 +160,7 @@ jobs:
                   @JavascriptInterface fun requestPermission() { runOnUiThread { requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), 10) } }
                   @JavascriptInterface fun closeApp() { runOnUiThread { finish() } }
                   @JavascriptInterface fun stopTracking() { runOnUiThread { stopService(Intent(this@MainActivity, TrackingService::class.java)) } }
-                  @JavascriptInterface fun speak(text: String) { runOnUiThread { speech?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "sangil") } }
+                  @JavascriptInterface fun speak(text: String) { runOnUiThread { speech?.apply { setSpeechRate(0.82f); speak(text, TextToSpeech.QUEUE_FLUSH, null, "sangil") } } }
                   @JavascriptInterface fun getTrackBackup(): String {
                       val f = java.io.File(filesDir, "tracking_backup.jsonl")
                       return if (f.exists()) f.readText() else ""
