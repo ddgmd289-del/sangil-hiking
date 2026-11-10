@@ -73,6 +73,30 @@ body.hike-fullscreen #screen-home #map{height:100%!important;width:100%!importan
 <nav class="bottomnav"><button class="navbtn active" data-tab="home"><b>⌂</b>홈</button><button class="navbtn" data-tab="records"><b>▤</b>산행 기록</button><button class="navbtn" data-tab="mountains"><b>⛰</b>산 정보</button><button class="navbtn" data-tab="club"><b>♧</b>동호회</button><button class="navbtn" data-tab="event"><b>⚑</b>대회</button><button class="navbtn" data-tab="safety"><b>✚</b>안전</button><button class="navbtn" data-tab="settings"><b>⚙</b>설정</button></nav><div class="toast" id="toast" role="status"></div></div>
 <div class="hike-hud" id="hikeHud" aria-label="산행 실시간 정보"><div class="hike-stat"><small>이동 거리</small><strong id="hikeDistance">0.00 km</strong></div><div class="hike-stat"><small>산행 시간</small><strong id="hikeDuration">00:00</strong></div><div class="hike-stat"><small>고도</small><strong id="hikeAltitude">— m</strong></div><button id="voiceToggle" type="button" aria-pressed="true">🔊 음성 켜짐</button></div><div class="hike-toolbar" id="hikeToolbar"><button id="hikePause" type="button">Ⅱ 일시정지</button><button id="hikeFinish" class="hike-end" type="button">■ 산행 종료</button></div><script src="./auth-config.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
+(function(){
+ function report(message){
+  var status=document.getElementById('gpsStatus');
+  if(status)status.textContent='앱 실행 오류 · '+String(message).slice(0,90);
+  var box=document.getElementById('appErrorStatus');
+  if(!box){box=document.createElement('div');box.id='appErrorStatus';box.style.cssText='position:fixed;bottom:72px;left:8px;right:8px;z-index:99999;background:#fff4d9;color:#542b18;padding:10px;border:2px solid #c17d3b;border-radius:8px;font-size:12px';document.body.appendChild(box)}
+  box.textContent='앱 오류: '+String(message).slice(0,180);
+ }
+ window.addEventListener('error',function(e){report(e.message||'스크립트 실행 실패')});
+ window.addEventListener('unhandledrejection',function(e){report(e.reason&&e.reason.message||e.reason||'비동기 실행 실패')});
+ document.addEventListener('DOMContentLoaded',function(){
+  document.querySelectorAll('.navbtn').forEach(function(btn){
+   btn.addEventListener('click',function(){
+    var id='screen-'+btn.dataset.tab;
+    if(!document.getElementById(id))return;
+    document.querySelectorAll('.screen').forEach(function(el){el.classList.toggle('active',el.id===id)});
+    document.querySelectorAll('.navbtn').forEach(function(el){el.classList.toggle('active',el===btn)});
+    if(btn.dataset.tab==='home')setTimeout(function(){window.dispatchEvent(new Event('resize'))},200);
+   });
+  });
+ });
+})();
+</script>
+<script>
 (()=>{'use strict';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)]; const STORE='sangil-hikes-v1';const CURRENT='sangil-current-v1';let map,trackLine,myMarker,marksLayer,savedRouteLayer=null,viewedRecord=null,watchId=null,position=null,trip=null,lastFix=0,focusNext=true,demo=false;let toastTimer;let selectedActivity='등산';function setActivity(v){if(trip){toast('활동 중에는 종류를 변경할 수 없습니다.');return}selectedActivity=v;const el=$('#activityStatus');if(el)el.textContent='현재 활동: '+v;document.querySelectorAll('[data-activity]').forEach(b=>{b.style.outline=b.dataset.activity===v?'2px solid #397e57':'none';b.setAttribute('aria-pressed',String(b.dataset.activity===v))});const name=$('#hikeName');if(name&&['오늘의 산행','오늘의 걷기','오늘의 달리기'].includes(name.value))name.value='오늘의 '+(v==='등산'?'산행':v)}document.addEventListener('DOMContentLoaded',()=>{document.querySelectorAll('[data-activity]').forEach(b=>b.addEventListener('click',()=>setActivity(b.dataset.activity)));setActivity('등산')});
 const clean=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
