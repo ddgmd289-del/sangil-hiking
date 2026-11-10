@@ -17,19 +17,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.10.2'
-      - name: Reuse Android test signing key
-        id: signing-key-cache
-        uses: actions/cache/restore@v4
-        with:
-          path: ~/.android/debug.keystore
-          key: sangil-android-debug-signing-v1
-      - name: Require existing signing key for safe in-place updates
-        run: |
-          if [ ! -s "$HOME/.android/debug.keystore" ]; then
-            echo "::error::Previous test signing key unavailable. Refusing to create a differently signed APK that would require uninstalling the app."
-            exit 1
-          fi
-          keytool -list -v -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey | grep -E 'SHA256:|Alias name:'
+      # Preview has its own application ID so it never overwrites the user's existing app.
+      # Debug signing is intentionally temporary; never use this package for production.
       - name: Generate Android project
         run: |
           mkdir -p app/src/main/assets app/src/main/java/kr/sangil/myhiking
@@ -84,7 +73,7 @@ jobs:
           android {
               namespace = "kr.sangil.myhiking"
               compileSdk = 35
-              defaultConfig { applicationId = "kr.sangil.myhiking.test"; minSdk = 26; targetSdk = 35; versionCode = 11; versionName = "1.0.10-test" }
+              defaultConfig { applicationId = "kr.sangil.myhiking.preview"; minSdk = 26; targetSdk = 35; versionCode = 1; versionName = "1.1.0-preview" }
               buildTypes { release { isMinifyEnabled = false } }
               compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
               kotlinOptions { jvmTarget = "17" }
@@ -98,7 +87,7 @@ jobs:
               <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
               <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
               <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-              <application android:label="산길 MYHIKING 테스트" android:usesCleartextTraffic="false" android:theme="@android:style/Theme.Material.Light.NoActionBar">
+              <application android:label="산길 MYHIKING 미리보기" android:usesCleartextTraffic="false" android:theme="@android:style/Theme.Material.Light.NoActionBar">
                   <activity android:name=".MainActivity" android:exported="true">
                       <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter>
                   </activity>
