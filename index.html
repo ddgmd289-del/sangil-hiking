@@ -393,9 +393,24 @@ async function loadNearbyTrails(forceRefresh=false){
  const button=$('#trailToggle');button.textContent='…';const note=$('#mapNote');if(note)note.textContent='🥾 등산로·보행 경로를 조회 중입니다…';
  try{
   const query='[out:json][timeout:20];way["highway"~"^(path|footway|track)$"]('+[south,west,north,east].map(n=>n.toFixed(5)).join(',')+');out geom 700;';
-  const response=await fetch('https://overpass.kumi.systems/api/interpreter',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'data='+encodeURIComponent(query),signal:controller.signal});
-  if(!response.ok)throw Error('HTTP '+response.status);
-  const data=await response.json();if(!trailsVisible||token!==trailsRequest||!map)return;
+  const endpoints=['https://overpass.kumi.systems/api/interpreter','https://overpass-api.de/api/interpreter'];
+  let data=null,lastError=null;
+  for(let endpointIndex=0;endpointIndex<endpoints.length;endpointIndex++){
+   if(controller.signal.aborted||token!==trailsRequest)break;
+   try{
+    const response=await fetch(endpoints[endpointIndex],{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'data='+encodeURIComponent(query),signal:controller.signal});
+    if(!response.ok)throw Error('HTTP '+response.status);
+    const result=await response.json();
+    if(!Array.isArray(result.elements))throw Error('잘못된 경로 응답');
+    data=result;break;
+   }catch(e){
+    lastError=e;
+    if(controller.signal.aborted)break;
+    if(endpointIndex===0&&note)note.textContent='🥾 첫 번째 경로 서버 연결 실패 · 예비 서버 조회 중…';
+   }
+  }
+  if(!data)throw lastError||Error('경로 데이터 없음');
+  if(!trailsVisible||token!==trailsRequest||!map)return;
   if(trailsLayer)trailsLayer.remove();trailsLayer=L.layerGroup().addTo(map);
   let count=0;
   for(const way of data.elements||[]){
