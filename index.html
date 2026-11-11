@@ -207,7 +207,7 @@ async function exportHikeResultPng(record){
   const ex={minX:Math.min(...xx),maxX:Math.max(...xx),minY:Math.min(...yy),maxY:Math.max(...yy)};
   if((ex.maxX-ex.minX)*256<W-150&&(ex.maxY-ex.minY)*256<mapHeight-150){zoom=z;projection=p;extent=ex;break}
  }
- if(!projection){projection=pts.map(q=>merc(Number(q.lat),Number(q.lon),zoom));const xx=projection.map(v=>v.x),yy=projection.map(v=>v.y);extent={minX:Math.min(...xx),maxX:Math.max(...xx),minY:Math.min(...yy),maxY:Math.max(...yy)}}
+ if(!projection){zoom=4;projection=pts.map(q=>merc(Number(q.lat),Number(q.lon),zoom));const xx=projection.map(v=>v.x),yy=projection.map(v=>v.y);extent={minX:Math.min(...xx),maxX:Math.max(...xx),minY:Math.min(...yy),maxY:Math.max(...yy)}}
  const centerX=(extent.minX+extent.maxX)/2,centerY=(extent.minY+extent.maxY)/2;
  const originX=centerX-W/512,originY=centerY-mapHeight/512;
  const tileMinX=Math.floor(originX),tileMaxX=Math.ceil(originX+W/256),tileMinY=Math.floor(originY),tileMaxY=Math.ceil(originY+mapHeight/256);
