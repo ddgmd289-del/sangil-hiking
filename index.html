@@ -294,13 +294,24 @@ function renderRecords(){
   const seconds=Math.max(0,(Number(r.accMs)||0)/1000);
   const dist=Number(r.distance)||0;
   const avg=seconds>0?(dist*3600/seconds):null;
-  let maxSpeed=null,minSpeed=null;
-  for(let i=1;i<pts.length;i++){
-   const p=pts[i],prev=pts[i-1],dt=(Number(p.t)-Number(prev.t))/3600000;
-   if(dt<=0||dt>1/12)continue;
-   const v=km(prev,p)/dt;
-   if(Number.isFinite(v)&&v<=30&&v>=0.3){maxSpeed=Math.max(maxSpeed??0,v);minSpeed=Math.min(minSpeed??Infinity,v)}
+  // GPS spikes can imply 20–30 km/h even on a slow walk.
+  // Calculate speed over multi-fix windows and require sufficient displacement.
+  const speeds=[];
+  for(let i=2;i<pts.length;i++){
+   const p=pts[i];let j=i-2;
+   while(j>0&&Number(p.t)-Number(pts[j].t)<15000)j--;
+   const prev=pts[j],dt=(Number(p.t)-Number(prev.t))/3600000;
+   if(dt<15/3600||dt>120/3600)continue;
+   const displacement=km(prev,p);
+   const accuracy=Math.max(Number(p.accuracy)||15,Number(prev.accuracy)||15);
+   if(displacement*1000<Math.max(10,accuracy*.65))continue;
+   const v=displacement/dt;
+   if(Number.isFinite(v)&&v>=0.5&&v<=12)speeds.push(v);
   }
+  // A single sample must never define the maximum speed.
+  speeds.sort((a,b)=>a-b);
+  const maxSpeed=speeds.length>=3?speeds[Math.floor((speeds.length-1)*.9)]:null;
+  const minSpeed=speeds.length>=3?speeds[Math.floor((speeds.length-1)*.1)]:null;
   const date=new Date(r.started).toLocaleDateString('ko-KR');
   const mountain=r.mountain?.name?' · '+r.mountain.name:'';
   const clock=t=>t?new Date(t).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}):'—';
