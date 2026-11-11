@@ -160,7 +160,7 @@ function draw(){
 }
 function geoError(e){$('#gpsStatus').textContent='GPS 연결 안 됨';toast('GPS 확인 실패: '+(e?.message||'위치 권한을 확인하세요.'))}
 window.sangilNativeFix=function(lat,lon,alt,accuracy,t){onFix({coords:{latitude:Number(lat),longitude:Number(lon),altitude:Number(alt),accuracy:Number(accuracy)},timestamp:Number(t)||Date.now()})};
-function onFix(p){const c=p.coords;const cur={lat:c.latitude,lon:c.longitude,alt:c.altitude,accuracy:c.accuracy,t:p.timestamp||Date.now()};if(!Number.isFinite(cur.lat)||!Number.isFinite(cur.lon)||!Number.isFinite(cur.accuracy)||cur.accuracy>150)return;if(position&&cur.t<=position.t)return;position=cur;lastFix=Date.now();$('#coord').textContent=cur.lat.toFixed(4)+', '+cur.lon.toFixed(4);$('#gpsStatus').textContent='GPS 위치 확인 · 오차 약 '+Math.round(cur.accuracy||0)+'m';$('#safetyCoord').textContent=`위도 ${cur.lat.toFixed(6)} / 경도 ${cur.lon.toFixed(6)} / 오차 약 ${Math.round(cur.accuracy||0)}m`;if(trip&&!trip.demo&&cur.accuracy<=70){
+function onFix(p){const c=p.coords;const cur={lat:c.latitude,lon:c.longitude,alt:c.altitude,accuracy:c.accuracy,t:p.timestamp||Date.now()};if(!Number.isFinite(cur.lat)||!Number.isFinite(cur.lon)||!Number.isFinite(cur.accuracy)||cur.accuracy>150)return;if(position&&cur.t<=position.t)return;position=cur;lastFix=Date.now();$('#coord').textContent=cur.lat.toFixed(4)+', '+cur.lon.toFixed(4);$('#gpsStatus').textContent='GPS 위치 확인 · 오차 약 '+Math.round(cur.accuracy||0)+'m';$('#safetyCoord').textContent=`위도 ${cur.lat.toFixed(6)} / 경도 ${cur.lon.toFixed(6)} / 오차 약 ${Math.round(cur.accuracy||0)}m`;if(trip&&!trip.demo&&cur.accuracy<=100){
   if(!trip.startPoint&&trip.state==='running'){trip.startPoint={...cur};persist()}
   const anchor=trip.stationaryAnchor||trip.points.at(-1)||cur;
   const anchorDistance=km(anchor,cur);
@@ -170,10 +170,11 @@ function onFix(p){const c=p.coords;const cur={lat:c.latitude,lon:c.longitude,alt
     const prev=trip.points.at(-1);
     const diff=prev?km(prev,cur):0;
     const dt=prev?(cur.t-prev.t)/1000:0;
-    // Suppress small GPS drift while stationary; keep legitimate walking fixes.
-    const noiseKm=prev?Math.max(.008,Math.min(.030,(cur.accuracy+(prev.accuracy||0))*.30/1000)):0;
-    const plausibleSpeed=dt>0&&diff/dt<=.0085; // 30.6 km/h; reject impossible GPS jumps
-    const usableFix=!prev||(dt>=2&&dt<=300&&plausibleSpeed&&diff>=noiseKm);
+    // Keep ordinary walking fixes: a strict 8–30 m filter hid real movement.
+    // Use a modest noise floor and retain points even at short GPS intervals.
+    const noiseKm=prev?Math.max(.003,Math.min(.008,(cur.accuracy+(prev.accuracy||0))*.08/1000)):0;
+    const plausibleSpeed=dt>0&&diff/dt<=.012; // 43.2 km/h
+    const usableFix=!prev||(dt>0&&dt<=300&&plausibleSpeed&&diff>=noiseKm);
     if(usableFix){
       trip.points.push(cur);trip.distance+=diff;persist();announceDistance();
     }
