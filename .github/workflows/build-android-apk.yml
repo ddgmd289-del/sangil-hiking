@@ -85,6 +85,7 @@ jobs:
               buildTypes { release { isMinifyEnabled = false; signingConfig = signingConfigs.getByName("stableRelease") } }
               compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
               kotlinOptions { jvmTarget = "17" }
+              dependencies { implementation("androidx.core:core:1.15.0") }
           }
           EOF
           cat > app/src/main/AndroidManifest.xml <<'EOF'
@@ -100,8 +101,15 @@ jobs:
                       <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter>
                   </activity>
                   <service android:name=".TrackingService" android:exported="false" android:foregroundServiceType="location"/>
+                  <provider android:name="androidx.core.content.FileProvider" android:authorities="kr.sangil.myhiking.preview.share" android:exported="false" android:grantUriPermissions="true">
+                      <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/share_paths"/>
+                  </provider>
               </application>
           </manifest>
+          EOF
+          mkdir -p app/src/main/res/xml
+          cat > app/src/main/res/xml/share_paths.xml <<'EOF'
+          <paths xmlns:android="http://schemas.android.com/apk/res/android"><cache-path name="shared" path="shared/"/></paths>
           EOF
           cat > app/src/main/java/kr/sangil/myhiking/MainActivity.kt <<'EOF'
           package kr.sangil.myhiking
@@ -117,6 +125,8 @@ jobs:
           import android.webkit.WebViewClient
           import android.widget.Toast
           import android.speech.tts.TextToSpeech
+          import android.util.Base64
+          import androidx.core.content.FileProvider
           import java.util.Locale
           class MainActivity : Activity() {
               private lateinit var web: WebView
@@ -169,6 +179,30 @@ jobs:
                   @JavascriptInterface fun closeApp() { runOnUiThread { finish() } }
                   @JavascriptInterface fun stopTracking() { runOnUiThread { stopService(Intent(this@MainActivity, TrackingService::class.java)) } }
                   @JavascriptInterface fun speak(text: String) { runOnUiThread { speech?.apply { setSpeechRate(0.90f); speak(text, TextToSpeech.QUEUE_FLUSH, null, "sangil") } } }
+                  @JavascriptInterface fun shareText(text: String) { runOnUiThread {
+                      try {
+                          val intent = Intent(Intent.ACTION_SEND).apply { type = "text/plain"; putExtra(Intent.EXTRA_TEXT, text) }
+                          startActivity(Intent.createChooser(intent, "지도 위치 공유"))
+                      } catch (e: Exception) { Toast.makeText(this@MainActivity, "공유 실패: " + e.message, Toast.LENGTH_LONG).show() }
+                  } }
+                  @JavascriptInterface fun shareImage(dataUrl: String) { runOnUiThread {
+                      try {
+                          val encoded = dataUrl.substringAfter("base64,", "")
+                          require(encoded.isNotBlank() && encoded.length < 20000000) { "이미지 데이터 오류" }
+                          val bytes = Base64.decode(encoded, Base64.DEFAULT)
+                          val dir = java.io.File(cacheDir, "shared").apply { mkdirs() }
+                          val file = java.io.File(dir, "sangil_hike.png")
+                          file.writeBytes(bytes)
+                          val uri = FileProvider.getUriForFile(this@MainActivity, "kr.sangil.myhiking.preview.share", file)
+                          val intent = Intent(Intent.ACTION_SEND).apply {
+                              type = "image/png"
+                              putExtra(Intent.EXTRA_STREAM, uri)
+                              addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                              clipData = android.content.ClipData.newRawUri("산행 결과", uri)
+                          }
+                          startActivity(Intent.createChooser(intent, "산행 결과 공유"))
+                      } catch (e: Exception) { Toast.makeText(this@MainActivity, "이미지 공유 실패: " + e.message, Toast.LENGTH_LONG).show() }
+                  } }
                   @JavascriptInterface fun getTrackBackup(): String {
                       val f = java.io.File(filesDir, "tracking_backup.jsonl")
                       return if (f.exists()) f.readText() else ""
