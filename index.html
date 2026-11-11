@@ -399,13 +399,17 @@ async function loadNearbyTrails(forceRefresh=false){
   if(trailsLayer)trailsLayer.remove();trailsLayer=L.layerGroup().addTo(map);
   let count=0;
   for(const way of data.elements||[]){
+   const tags=way.tags||{};
+   if(['no','private'].includes(tags.access)||['no','private'].includes(tags.foot)||tags.footway==='sidewalk'||tags.footway==='crossing')continue;
    const coords=(way.geometry||[]).map(p=>[p.lat,p.lon]);if(coords.length<2)continue;
-   const path=L.polyline(coords,{color:'#a84b17',weight:4,opacity:.95,dashArray:'8,5'}).addTo(trailsLayer);
-   const label=way.tags?.name||'보행 경로 (이름 미등록)';
-   path.bindPopup('<strong>'+clean(label)+'</strong><p>OpenStreetMap 참고 경로입니다. 공식 등산로·통행 가능 여부를 현장에서 확인하세요.</p>');
+   const isNamedTrail=!!(tags.name||tags.route==='hiking'||tags.sac_scale||tags.trail_visibility);
+   const path=L.polyline(coords,{color:isNamedTrail?'#a84b17':'#b88649',weight:isNamedTrail?5:3,opacity:.95,dashArray:isNamedTrail?'8,5':'5,7'}).addTo(trailsLayer);
+   const label=tags.name||'이름 미등록 보행 경로';
+   const details=[tags.highway==='path'?'산길·오솔길':tags.highway==='track'?'임도·작업로':'보행로',tags.sac_scale?'산악 등급(OSM): '+tags.sac_scale:'',tags.surface?'노면: '+tags.surface:'',tags.trail_visibility?'길 표시 상태: '+tags.trail_visibility:''].filter(Boolean);
+   path.bindPopup('<strong>'+clean(label)+'</strong><p>'+details.map(clean).join(' · ')+'</p><p>OSM 사용자 등록 경로입니다. 공식 코스·통행 가능 여부·안전 상태는 확인되지 않았습니다.</p>');
    count++;
   }
-  if(note)note.textContent=count?'🥾 현재 지도에 '+count+'개 보행 경로 표시 (주황색 점선) · 공식 등산로 여부 확인 필요':'🥾 이 지도 범위에 등록된 보행 경로가 없습니다. 산 주변으로 지도를 이동해 보세요.';toast(count?count+'개 보행 경로 표시':'현재 범위에 등록된 보행 경로가 없습니다.');
+  if(note)note.textContent=count?'🥾 현재 지도에 '+count+'개 보행 경로 표시 · 진한 주황=이름·산길 정보 등록 / 연한 주황=일반 보행 경로 · 공식 등산로 여부 확인 필요':'🥾 이 지도 범위에 등록된 보행 경로가 없습니다. 산 주변으로 지도를 이동해 보세요.';toast(count?count+'개 보행 경로 표시':'현재 범위에 등록된 보행 경로가 없습니다.');
  }catch(e){if(token===trailsRequest){trailsVisible=false;if(note)note.textContent=e.name==='AbortError'?'🥾 조회 시간 초과 (12초) · 잠시 후 다시 시도하세요.':'🥾 경로 조회 실패 · 인터넷 또는 지도 데이터 서버 연결을 확인하세요.';toast(e.name==='AbortError'?'등산로 조회 시간 초과':'등산로 조회 실패')}}
  finally{clearTimeout(timeout);if(token===trailsRequest){trailsAbort=null;button.textContent='🥾'}}
 }
