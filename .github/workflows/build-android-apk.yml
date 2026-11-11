@@ -251,16 +251,24 @@ jobs:
             echo "::error::KEYSTORE_OR_PASSWORD_INVALID: Check that Base64 was generated from sangil-myhiking-final.jks and that SANGIL_KEYSTORE_PASSWORD is its password."
             exit 1
           fi
-          if ! keytool -list -keystore app/release-upload.jks -storepass "$SANGIL_KEYSTORE_PASSWORD" -alias "$SANGIL_KEY_ALIAS" >/dev/null 2>&1; then
-            echo "::error::KEY_ALIAS_INVALID: SANGIL_KEY_ALIAS must exactly match the keystore alias (no spaces)."
+          # Resolve the actual private-key alias from the validated keystore.
+          # This avoids an accidental typo in the alias secret without exposing key material.
+          ACTUAL_ALIASES=$(LC_ALL=C keytool -list -keystore app/release-upload.jks -storepass "$SANGIL_KEYSTORE_PASSWORD" 2>/dev/null | awk -F, '/PrivateKeyEntry/{gsub(/^[[:space:]]+|[[:space:]]+$/, "", $1); print $1}')
+          ALIAS_COUNT=$(printf '%s\n' "$ACTUAL_ALIASES" | sed '/^$/d' | wc -l)
+          if [ "$ALIAS_COUNT" -ne 1 ]; then
+            echo "::error::KEY_ALIAS_AMBIGUOUS: Expected exactly one private key entry in the keystore."
             exit 1
           fi
+          ACTUAL_ALIAS=$(printf '%s\n' "$ACTUAL_ALIASES" | head -n 1)
+          if [ "$SANGIL_KEY_ALIAS" != "$ACTUAL_ALIAS" ]; then
+            echo "::warning::Configured key alias differs from the keystore; using the sole private-key alias."
+          fi
+          echo "SANGIL_KEY_ALIAS=$ACTUAL_ALIAS" >> "$GITHUB_ENV"
           echo "enabled=true" >> "$GITHUB_OUTPUT"
       - name: Build signed update APK
         if: steps.signing.outputs.enabled == 'true'
         env:
           SANGIL_KEYSTORE_PASSWORD: ${{ secrets.SANGIL_KEYSTORE_PASSWORD }}
-          SANGIL_KEY_ALIAS: ${{ secrets.SANGIL_KEY_ALIAS }}
           SANGIL_KEY_PASSWORD: ${{ secrets.SANGIL_KEY_PASSWORD }}
         run: gradle --no-daemon :app:assembleRelease
       - name: Verify signed APK and package metadata
