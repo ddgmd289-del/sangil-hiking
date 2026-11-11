@@ -173,7 +173,8 @@ jobs:
               inner class Bridge {
                   @JavascriptInterface fun startTracking() { runOnUiThread {
                       if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                          Toast.makeText(this@MainActivity, "위치 권한을 허용해 주세요", Toast.LENGTH_LONG).show()
+                          Toast.makeText(this@MainActivity, "위치 권한 요청 중 · 허용 후 GPS 기록이 시작됩니다", Toast.LENGTH_LONG).show()
+                          requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), 10)
                           return@runOnUiThread
                       }
                       try { val i = Intent(this@MainActivity, TrackingService::class.java).setAction("START"); startForegroundService(i) }
@@ -212,6 +213,15 @@ jobs:
                   @JavascriptInterface fun getTrackBackup(): String {
                       val f = java.io.File(filesDir, "tracking_backup.jsonl")
                       return if (f.exists()) f.readText() else ""
+                  }
+              }
+              override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+                  super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+                  if (requestCode == 10 && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                      try { startForegroundService(Intent(this, TrackingService::class.java).setAction("START")) }
+                      catch (e: Exception) { Toast.makeText(this, "GPS 시작 실패: " + e.message, Toast.LENGTH_LONG).show() }
+                  } else if (requestCode == 10) {
+                      Toast.makeText(this, "정확한 위치 권한이 필요합니다. 설정에서 위치 권한을 허용해 주세요.", Toast.LENGTH_LONG).show()
                   }
               }
               override fun onStart() { super.onStart(); val filter = android.content.IntentFilter("kr.sangil.myhiking.FIX"); val errors = android.content.IntentFilter("kr.sangil.myhiking.GPS_ERROR"); if (Build.VERSION.SDK_INT >= 33) { registerReceiver(receiver, filter, android.content.Context.RECEIVER_NOT_EXPORTED); registerReceiver(gpsErrorReceiver, errors, android.content.Context.RECEIVER_NOT_EXPORTED) } else { registerReceiver(receiver, filter); registerReceiver(gpsErrorReceiver, errors) } }
