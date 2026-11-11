@@ -38,7 +38,7 @@ body.hike-fullscreen #screen-home #map{height:100%!important;width:100%!importan
 @media(max-width:380px){.hike-hud{padding:8px 6px;gap:3px}.hike-hud .hike-stat strong{font-size:13px}.hike-hud button{padding:7px 4px;font-size:10px}}
 
 #map .leaflet-tile{max-width:none!important;max-height:none!important}#map .leaflet-tile-pane{pointer-events:none}body.hike-fullscreen #map{position:absolute!important;inset:0!important}
-</style>
+.record-card{display:block;padding:15px 12px;margin:0 0 12px;background:#fff;border:1px solid var(--line);border-radius:16px}.record-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:12px}.record-heading strong{font-size:15px}.record-heading small{color:var(--muted);font-size:12px}.record-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.record-metric{min-width:0;background:var(--paper);padding:10px 4px;text-align:center;border-radius:10px}.record-metric span{display:block;color:var(--muted);font-size:10px;white-space:nowrap}.record-metric b{display:block;font-size:12px;margin-top:5px;white-space:nowrap;letter-spacing:-.4px}.record-detail{font-size:11px;color:var(--muted);margin:12px 0}.record-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}.record-actions .tiny-btn{flex:0 0 auto}@media(max-width:380px){.record-metrics{gap:4px}.record-metric b{font-size:10px}.record-metric span{font-size:9px}}</style>
 </head>
 <body><div class="app">
 <header class="hero"><div class="brand"><div><div class="brand-name">⛰ 산길 <small>MY HIKING</small></div></div><div class="avatar">🌿</div></div><p class="tagline">나의 발걸음이 하나의 이야기가 되도록</p><h1>오늘도 안전하게,<br><em>산에서 만나요.</em></h1><span class="status"><span class="dot" id="liveDot"></span><span id="gpsStatus">GPS 위치 확인 전</span></span></header>
@@ -176,7 +176,46 @@ function clearSavedRoute(){
  if(savedRouteLayer){savedRouteLayer.remove();savedRouteLayer=null}
  const note=$('#mapNote');if(note)note.textContent='📍 현재 위치 버튼을 눌러 주변 등산로를 확인하세요.';
 }
-function renderRecords(){const records=loadRecords();$('#recordCount').textContent=records.length+'개 기록';const target=$('#recordList');target.replaceChildren();if(!records.length){target.innerHTML='<div class="empty">저장된 산행 기록이 없습니다.<br>산행을 마치면 이곳에 표시됩니다.</div>';return}for(const r of records){const item=document.createElement('div');item.className='record';const date=new Date(r.started).toLocaleDateString('ko-KR');const startClock=new Date(r.started).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});const endClock=r.ended?new Date(r.ended).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}):'—';item.innerHTML=`<div class="record-icon">${r.activity==='걷기'?'🚶':(r.activity==='달리기'||r.activity==='운동')?'🏃':'🥾'}</div><div class="record-main"><strong>${clean(r.activity||'산행')} · ${clean(r.name)}</strong><small>${date} · 이동 거리 ${(r.distance||0).toFixed(2)} km · 활동 시간 ${fmtTime((r.accMs||0)/1000)} · 휴식 ${fmtTime((r.restMs||0)/1000)}</small><small>시작 ${startClock} · 종료 ${endClock} · 최고 고도 ${r.points?.length?Math.round(Math.max(...r.points.map(p=>Number.isFinite(p.alt)?p.alt:0)))+' m':'—'}</small></div>`;const view=document.createElement('button');view.className='tiny-btn';view.type='button';view.textContent='지도 보기';view.addEventListener('click',()=>showSavedRoute(r));item.append(view);const btn=document.createElement('button');btn.className='tiny-btn';btn.textContent='GPX';btn.addEventListener('click',()=>download('산길_'+new Date(r.started).toISOString().slice(0,10)+'.gpx',gpx(r),'application/gpx+xml'));item.append(btn);const del=document.createElement('button');del.className='tiny-btn';del.type='button';del.textContent='삭제';del.setAttribute('aria-label',clean(r.name)+' 기록 삭제');del.addEventListener('click',()=>{if(!confirm('이 기록을 삭제할까요? 삭제 후 복구할 수 없습니다.'))return;const next=loadRecords().filter(x=>x.id!==r.id);if(saveRecords(next)){renderRecords();toast('선택한 기록을 삭제했습니다.')}});item.append(del);target.append(item)}}
+function renderRecords(){
+ const records=loadRecords();$('#recordCount').textContent=records.length+'개 기록';
+ const target=$('#recordList');target.replaceChildren();
+ if(!records.length){target.innerHTML='<div class="empty">저장된 산행 기록이 없습니다.<br>산행을 마치면 이곳에 표시됩니다.</div>';return}
+ for(const r of records){
+  const item=document.createElement('article');item.className='record record-card';
+  const pts=Array.isArray(r.points)?r.points:[];
+  const alts=pts.map(p=>Number(p.alt)).filter(Number.isFinite);
+  const seconds=Math.max(0,(Number(r.accMs)||0)/1000);
+  const dist=Number(r.distance)||0;
+  const avg=seconds>0?(dist*3600/seconds):null;
+  let maxSpeed=null;
+  for(let i=1;i<pts.length;i++){
+   const p=pts[i],prev=pts[i-1],dt=(Number(p.t)-Number(prev.t))/3600000;
+   if(dt<=0||dt>1/12)continue;
+   const v=km(prev,p)/dt;
+   if(Number.isFinite(v)&&v<=30)maxSpeed=Math.max(maxSpeed??0,v);
+  }
+  const date=new Date(r.started).toLocaleDateString('ko-KR');
+  const clock=t=>t?new Date(t).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}):'—';
+  const metrics=[
+   ['거리',dist.toFixed(2)+' km'],['시간',fmtTime(seconds)],['칼로리','—'],
+   ['평균속도',avg===null?'—':avg.toFixed(1)+' km/h'],
+   ['최고속도',maxSpeed===null?'—':maxSpeed.toFixed(1)+' km/h'],
+   ['최고고도',alts.length?Math.round(Math.max(...alts))+' m':'—'],
+   ['최저속도',maxSpeed===null?'—':'0.0 km/h'],
+   ['최저고도',alts.length?Math.round(Math.min(...alts))+' m':'—']
+  ];
+  const header=document.createElement('div');header.className='record-heading';
+  header.innerHTML='<strong>🥾 '+clean(r.activity||'산행')+' · '+clean(r.name||'오늘의 산행')+'</strong><small>'+date+'</small>';
+  const grid=document.createElement('div');grid.className='record-metrics';
+  for(const [label,value] of metrics){const cell=document.createElement('div');cell.className='record-metric';const l=document.createElement('span');l.textContent=label;const v=document.createElement('b');v.textContent=value;cell.append(l,v);grid.append(cell)}
+  const detail=document.createElement('div');detail.className='record-detail';detail.textContent='시작 '+clock(r.started)+' · 종료 '+clock(r.ended)+' · 휴식 '+fmtTime((r.restMs||0)/1000);
+  const actions=document.createElement('div');actions.className='record-actions';
+  const view=document.createElement('button');view.className='tiny-btn';view.type='button';view.textContent='지도 보기';view.addEventListener('click',()=>showSavedRoute(r));actions.append(view);
+  const btn=document.createElement('button');btn.className='tiny-btn';btn.type='button';btn.textContent='GPX';btn.addEventListener('click',()=>download('산길_'+new Date(r.started).toISOString().slice(0,10)+'.gpx',gpx(r),'application/gpx+xml'));actions.append(btn);
+  const del=document.createElement('button');del.className='tiny-btn';del.type='button';del.textContent='삭제';del.addEventListener('click',()=>{if(!confirm('이 기록을 삭제할까요? 삭제 후 복구할 수 없습니다.'))return;const next=loadRecords().filter(x=>x.id!==r.id);if(saveRecords(next)){renderRecords();toast('선택한 기록을 삭제했습니다.')}});actions.append(del);
+  item.append(header,grid,detail,actions);target.append(item);
+ }
+}
 $('#deleteAllRecords').addEventListener('click',()=>{const records=loadRecords();if(!records.length){toast('삭제할 기록이 없습니다.');return}if(!confirm('저장된 기록 '+records.length+'개를 모두 삭제할까요? 삭제 후 복구할 수 없습니다.'))return;if(!confirm('최종 확인: 모든 산행·걷기·운동 기록을 삭제합니다. 계속할까요?'))return;if(saveRecords([])){renderRecords();toast('모든 기록을 삭제했습니다.')}});
 function initMap(){if(typeof L==='undefined'){$('#gpsStatus').textContent='지도 엔진 로딩 실패';const f=document.querySelector('.map-fallback');if(f){f.style.zIndex='2';f.textContent='지도 엔진을 불러오지 못했습니다. 최신 테스트 앱으로 다시 실행해 주세요.'}return}map=L.map('map',{zoomControl:false,attributionControl:true,zoomAnimation:false,fadeAnimation:false,markerZoomAnimation:false,preferCanvas:true}).setView([35.23,128.88],12);attachTiles();map.on('dragstart',()=>focusNext=false);map.on('click',e=>{const p=e.latlng;const popup=L.popup().setLatLng(p).setContent('<strong>선택한 지도 위치</strong><p>주변 산을 검색하려면 아래 산 정보 메뉴에서 산 이름을 입력하세요.</p>');popup.openOn(map)});map.whenReady(()=>{resizeHikeMap();setTimeout(()=>{if(map){map.invalidateSize({pan:false});if(!document.querySelector('.leaflet-tile-loaded'))showMapDiagnostics()}},3500)});draw();if(viewedRecord)showSavedRoute(viewedRecord)}
 async function searchMountains(q){
