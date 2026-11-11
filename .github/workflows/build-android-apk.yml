@@ -253,6 +253,14 @@ jobs:
           SANGIL_KEY_ALIAS: ${{ secrets.SANGIL_KEY_ALIAS }}
           SANGIL_KEY_PASSWORD: ${{ secrets.SANGIL_KEY_PASSWORD }}
         run: gradle --no-daemon :app:assembleRelease
+      - name: Verify signed APK and package metadata
+        if: steps.signing.outputs.enabled == 'true'
+        run: |
+          APK=app/build/outputs/apk/release/app-release.apk
+          test -s "$APK"
+          APKSIGNER=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -1)
+          "$APKSIGNER" verify --verbose "$APK"
+          echo "Signed update APK verified successfully."
       - uses: actions/upload-artifact@v4
         if: steps.signing.outputs.enabled == 'true'
         with:
