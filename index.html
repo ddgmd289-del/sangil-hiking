@@ -170,7 +170,11 @@ function onFix(p){const c=p.coords;const cur={lat:c.latitude,lon:c.longitude,alt
     const prev=trip.points.at(-1);
     const diff=prev?km(prev,cur):0;
     const dt=prev?(cur.t-prev.t)/1000:0;
-    if(!prev||(dt>0&&dt<=300&&diff<=Math.max(.035,dt*.013)&&diff>=Math.max(.004,Math.min(.012,(cur.accuracy+(prev.accuracy||0))/4000)))){
+    // Suppress small GPS drift while stationary; keep legitimate walking fixes.
+    const noiseKm=prev?Math.max(.008,Math.min(.030,(cur.accuracy+(prev.accuracy||0))*.30/1000)):0;
+    const plausibleSpeed=dt>0&&diff/dt<=.0085; // 30.6 km/h; reject impossible GPS jumps
+    const usableFix=!prev||(dt>=2&&dt<=300&&plausibleSpeed&&diff>=noiseKm);
+    if(usableFix){
       trip.points.push(cur);trip.distance+=diff;persist();announceDistance();
     }
     // Do not reset the stationary clock for ordinary GPS drift or each accepted GPS fix.
