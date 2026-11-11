@@ -180,7 +180,7 @@ async function searchMountains(q){
  if(q.length<2){target.textContent='산 이름을 2글자 이상 입력해 주세요.';return}
  target.textContent='산 정보를 검색하는 중입니다…';
  try{
-  const url='https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=kr&limit=12&addressdetails=1&q='+encodeURIComponent(q+' 산');
+  const url='https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=kr&limit=12&addressdetails=1&q='+encodeURIComponent(/산$/.test(q)?q:q+' 산');
   const res=await fetch(url,{headers:{'Accept':'application/json'}});
   if(!res.ok)throw Error('검색 서버 응답 '+res.status);
   const rows=await res.json();target.replaceChildren();
