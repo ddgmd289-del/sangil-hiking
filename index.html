@@ -193,7 +193,7 @@ function addMark(label){if(!trip||trip.state==='done'){toast('산행을 시작�
 function xml(v){return String(v??'').replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&apos;'}[c]))}
 function download(name,content,mime){const a=document.createElement('a'),url=URL.createObjectURL(new Blob([content],{type:mime}));a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000)}
 function gpx(record){const pts=(record.points||[]).map(p=>`<trkpt lat="${p.lat}" lon="${p.lon}">${Number.isFinite(p.alt)?`<ele>${p.alt}</ele>`:''}<time>${new Date(p.t).toISOString()}</time></trkpt>`).join('');const marks=(record.marks||[]).map(m=>`<wpt lat="${m.lat}" lon="${m.lon}"><name>${xml(m.label)}</name></wpt>`).join('');return `<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1" creator="Sangil" xmlns="http://www.topografix.com/GPX/1/1">${marks}<trk><name>${xml(record.name)}</name><trkseg>${pts}</trkseg></trk></gpx>`}
-async function exportHikeResultPng(record){
+async function exportHikeResultPng(record,share=false){
  const pts=(record.points||[]).filter(p=>Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lon)));
  if(pts.length<2){toast('GPS 경로가 2개 이상 있어야 결과 이미지를 만들 수 있습니다.');return}
  const W=900,H=1200,mapTop=150,mapBottom=960,mapHeight=mapBottom-mapTop;
@@ -235,7 +235,21 @@ async function exportHikeResultPng(record){
  const stats=[['이동시간',fmtTime(seconds)],['거리',distance.toFixed(2)+' km'],['평균속도',seconds?(distance*3600/seconds).toFixed(1)+' km/h':'—']];
  stats.forEach(([label,value],i)=>{const x=40+i*290;ctx.fillStyle='#c9e0d2';ctx.font='25px sans-serif';ctx.fillText(label,x,1025);ctx.fillStyle='#fff';ctx.font='bold 38px sans-serif';ctx.fillText(value,x,1090)});
  ctx.fillStyle='#d6e5db';ctx.font='19px sans-serif';ctx.fillText(loaded?'지도 © OpenStreetMap contributors · GPS 실측 경로':'지도 불러오기 실패 · GPS 경로만 표시',40,1160);
- canvas.toBlob(blob=>{if(!blob){toast('이미지 생성 실패');return}const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='산길_산행결과_'+new Date(record.started).toISOString().slice(0,10)+'.png';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);toast(loaded?'지도 포함 산행 결과 PNG 저장 완료':'지도 없이 GPS 경로 결과 PNG 저장 완료')},'image/png');
+ canvas.toBlob(async blob=>{
+  if(!blob){toast('이미지 생성 실패');return}
+  const filename='산길_산행결과_'+new Date(record.started).toISOString().slice(0,10)+'.png';
+  if(share&&navigator.share&&typeof File!=='undefined'){
+   const file=new File([blob],filename,{type:'image/png'});
+   try{
+    if(!navigator.canShare||navigator.canShare({files:[file]})){
+     await navigator.share({files:[file],title:'산길 MYHIKING 산행 기록'});
+     return;
+    }
+   }catch(e){if(e.name==='AbortError')return}
+  }
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
+  toast(share?'공유가 지원되지 않아 PNG 파일로 저장했습니다.':loaded?'지도 포함 산행 결과 PNG 저장 완료':'지도 없이 GPS 경로 결과 PNG 저장 완료');
+ },'image/png');
 }
 function exportHikeResultImage(record){
  const points=(record.points||[]).filter(p=>Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lon)));
@@ -332,8 +346,8 @@ function renderRecords(){
   if(r.mountain&&pts.length){const goal={lat:Number(r.mountain.lat),lon:Number(r.mountain.lon)};const distances=pts.map(p=>km(p,goal)).filter(Number.isFinite);if(distances.length)detail.textContent+=' · 선택 산 정상 좌표까지 최소 '+Math.min(...distances).toFixed(2)+'km (실제 코스 일치 여부 아님)';}
   const actions=document.createElement('div');actions.className='record-actions';
   const view=document.createElement('button');view.className='tiny-btn';view.type='button';view.textContent='지도 보기';view.addEventListener('click',()=>showSavedRoute(r));actions.append(view);
-  const summary=document.createElement('button');summary.className='tiny-btn';summary.type='button';summary.textContent='경로 전체보기';summary.addEventListener('click',()=>showSavedRoute(r));actions.append(summary);
   const pngBtn=document.createElement('button');pngBtn.className='tiny-btn';pngBtn.type='button';pngBtn.textContent='지도 포함 PNG';pngBtn.addEventListener('click',()=>exportHikeResultPng(r));actions.append(pngBtn);
+  const shareBtn=document.createElement('button');shareBtn.className='tiny-btn';shareBtn.type='button';shareBtn.textContent='산행 이미지 공유';shareBtn.addEventListener('click',()=>exportHikeResultPng(r,true));actions.append(shareBtn);
   const imageBtn=document.createElement('button');imageBtn.className='tiny-btn';imageBtn.type='button';imageBtn.textContent='결과 이미지';imageBtn.addEventListener('click',()=>exportHikeResultImage(r));actions.append(imageBtn);
   const btn=document.createElement('button');btn.className='tiny-btn';btn.type='button';btn.textContent='GPX';btn.addEventListener('click',()=>download('산길_'+new Date(r.started).toISOString().slice(0,10)+'.gpx',gpx(r),'application/gpx+xml'));actions.append(btn);
   const del=document.createElement('button');del.className='tiny-btn';del.type='button';del.textContent='삭제';del.addEventListener('click',()=>{if(!confirm('이 기록을 삭제할까요? 삭제 후 복구할 수 없습니다.'))return;const next=loadRecords().filter(x=>x.id!==r.id);if(saveRecords(next)){renderRecords();toast('선택한 기록을 삭제했습니다.')}});actions.append(del);
