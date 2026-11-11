@@ -238,6 +238,9 @@ async function exportHikeResultPng(record,share=false){
  canvas.toBlob(async blob=>{
   if(!blob){toast('이미지 생성 실패');return}
   const filename='산길_산행결과_'+new Date(record.started).toISOString().slice(0,10)+'.png';
+  if(share&&window.SangilNative?.shareImage){
+   try{window.SangilNative.shareImage(canvas.toDataURL('image/png'));toast('휴대폰 공유 화면을 여는 중입니다.');return}catch(e){console.warn('Android native share failed',e)}
+  }
   if(share&&navigator.share&&typeof File!=='undefined'){
    const file=new File([blob],filename,{type:'image/png'});
    try{
@@ -438,6 +441,7 @@ async function shareCurrentMap(){
  const lat=Number(c.lat).toFixed(6),lon=Number(c.lng).toFixed(6);
  const url='https://www.openstreetmap.org/?mlat='+lat+'&mlon='+lon+'#map='+Math.min(18,Math.max(10,Math.round(map.getZoom())))+'/'+lat+'/'+lon;
  const message='산길 MYHIKING 지도 위치\n'+url;
+ if(window.SangilNative?.shareText){try{window.SangilNative.shareText(message);return}catch(e){console.warn('Android native text share failed',e)}}
  if(navigator.share){try{await navigator.share({title:'산길 MYHIKING 지도 위치',text:message,url});return}catch(e){if(e.name==='AbortError')return}}
  try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(message);toast('지도 공유 링크를 복사했습니다. 메시지에 붙여넣어 보내세요.');return}}catch(e){}
  window.prompt('아래 지도 링크를 복사하여 공유하세요.',url);
