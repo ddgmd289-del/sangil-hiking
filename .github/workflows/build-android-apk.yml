@@ -243,8 +243,18 @@ jobs:
             echo "enabled=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          printf '%s' "$KEYSTORE_B64" | base64 --decode > app/release-upload.jks
-          keytool -list -keystore app/release-upload.jks -storepass "$SANGIL_KEYSTORE_PASSWORD" -alias "$SANGIL_KEY_ALIAS" >/dev/null
+          if ! printf '%s' "$KEYSTORE_B64" | base64 --decode > app/release-upload.jks; then
+            echo "::error::KEYSTORE_BASE64_INVALID: Recheck SANGIL_KEYSTORE_BASE64 contents."
+            exit 1
+          fi
+          if ! keytool -list -keystore app/release-upload.jks -storepass "$SANGIL_KEYSTORE_PASSWORD" >/dev/null 2>&1; then
+            echo "::error::KEYSTORE_OR_PASSWORD_INVALID: Check that Base64 was generated from sangil-myhiking-final.jks and that SANGIL_KEYSTORE_PASSWORD is its password."
+            exit 1
+          fi
+          if ! keytool -list -keystore app/release-upload.jks -storepass "$SANGIL_KEYSTORE_PASSWORD" -alias "$SANGIL_KEY_ALIAS" >/dev/null 2>&1; then
+            echo "::error::KEY_ALIAS_INVALID: SANGIL_KEY_ALIAS must exactly match the keystore alias (no spaces)."
+            exit 1
+          fi
           echo "enabled=true" >> "$GITHUB_OUTPUT"
       - name: Build signed update APK
         if: steps.signing.outputs.enabled == 'true'
