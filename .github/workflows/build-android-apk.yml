@@ -251,9 +251,18 @@ jobs:
                   return START_STICKY
               }
               override fun onLocationChanged(loc: Location) {
-                  val p = JSONObject().put("lat", loc.latitude).put("lng", loc.longitude).put("time", System.currentTimeMillis())
-                  java.io.File(filesDir, "tracking_backup.jsonl").appendText(p.toString() + "\n")
-                  sendBroadcast(Intent("kr.sangil.myhiking.FIX").setPackage(packageName).putExtra("lat",loc.latitude).putExtra("lon",loc.longitude).putExtra("alt",loc.altitude).putExtra("acc",loc.accuracy).putExtra("t",System.currentTimeMillis()))
+                  // Reject cached/stale fixes; never relabel old positions with the current time.
+                  val fixTime = loc.time
+                  val now = System.currentTimeMillis()
+                  if (fixTime <= 0L || fixTime > now + 5000L || now - fixTime > 30000L || !loc.hasAccuracy()) return
+                  val p = JSONObject().put("lat", loc.latitude).put("lng", loc.longitude).put("time", fixTime)
+                      .put("accuracy", loc.accuracy)
+                  try { java.io.File(filesDir, "tracking_backup.jsonl").appendText(p.toString() + "\\n") }
+                  catch (e: Exception) { android.util.Log.w("SANGIL_GPS", "Backup write failed", e) }
+                  sendBroadcast(Intent("kr.sangil.myhiking.FIX").setPackage(packageName)
+                      .putExtra("lat",loc.latitude).putExtra("lon",loc.longitude)
+                      .putExtra("alt",if (loc.hasAltitude()) loc.altitude else 0.0)
+                      .putExtra("acc",loc.accuracy).putExtra("t",fixTime))
               }
               override fun onDestroy() { try { location.removeUpdates(this) } catch (_: Exception) {}; super.onDestroy() }
           }
