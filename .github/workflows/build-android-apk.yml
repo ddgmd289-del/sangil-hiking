@@ -79,7 +79,7 @@ jobs:
                       storeFile = file("release-upload.jks")
                       storePassword = System.getenv("SANGIL_KEYSTORE_PASSWORD") ?: ""
                       keyAlias = System.getenv("SANGIL_KEY_ALIAS") ?: ""
-                      keyPassword = System.getenv("SANGIL_KEY_PASSWORD") ?: ""
+                      keyPassword = System.getenv("SANGIL_KEYSTORE_PASSWORD") ?: "" // PKCS12 key password equals store password
                   }
               }
               buildTypes { release { isMinifyEnabled = false; signingConfig = signingConfigs.getByName("stableRelease") } }
@@ -264,8 +264,8 @@ jobs:
             echo "::warning::Configured key alias differs from the keystore; using the sole private-key alias."
           fi
           # Verify private-key password before running Gradle, without printing secrets.
-          if ! keytool -certreq -alias "$ACTUAL_ALIAS" -keystore app/release-upload.jks -storepass "$SANGIL_KEYSTORE_PASSWORD" -keypass "$SANGIL_KEY_PASSWORD" -file /tmp/sangil-signing-check.csr >/dev/null 2>&1; then
-            echo "::error::KEY_PASSWORD_INVALID: SANGIL_KEY_PASSWORD cannot unlock the private key. Set it to the password entered when the key pair was created (often identical to SANGIL_KEYSTORE_PASSWORD)."
+          if ! keytool -certreq -alias "$ACTUAL_ALIAS" -keystore app/release-upload.jks -storepass "$SANGIL_KEYSTORE_PASSWORD" -keypass "$SANGIL_KEYSTORE_PASSWORD" -file /tmp/sangil-signing-check.csr >/dev/null 2>&1; then
+            echo "::error::KEY_PASSWORD_INVALID: The PKCS12 private key cannot be unlocked using SANGIL_KEYSTORE_PASSWORD."
             exit 1
           fi
           rm -f /tmp/sangil-signing-check.csr
