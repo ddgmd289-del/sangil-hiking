@@ -17,8 +17,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.10.2'
-      # Preview has its own application ID so it never overwrites the user's existing app.
-      # Debug signing is intentionally temporary; never use this package for production.
+      # Preview package stays unchanged. A permanent release signing key is required for in-place updates.
+      # Never store keystores or passwords in the repository.
       - name: Generate Android project
         run: |
           mkdir -p app/src/main/assets app/src/main/java/kr/sangil/myhiking
@@ -73,8 +73,16 @@ jobs:
           android {
               namespace = "kr.sangil.myhiking"
               compileSdk = 35
-              defaultConfig { applicationId = "kr.sangil.myhiking.preview"; minSdk = 26; targetSdk = 35; versionCode = 1; versionName = "1.1.0-preview" }
-              buildTypes { release { isMinifyEnabled = false } }
+              defaultConfig { applicationId = "kr.sangil.myhiking.preview"; minSdk = 26; targetSdk = 35; versionCode = (System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 1); versionName = "1.2.${System.getenv("GITHUB_RUN_NUMBER") ?: "0"}-preview" }
+              signingConfigs {
+                  create("stableRelease") {
+                      storeFile = file("release-upload.jks")
+                      storePassword = System.getenv("SANGIL_KEYSTORE_PASSWORD") ?: ""
+                      keyAlias = System.getenv("SANGIL_KEY_ALIAS") ?: ""
+                      keyPassword = System.getenv("SANGIL_KEY_PASSWORD") ?: ""
+                  }
+              }
+              buildTypes { release { isMinifyEnabled = false; signingConfig = signingConfigs.getByName("stableRelease") } }
               compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
               kotlinOptions { jvmTarget = "17" }
           }
@@ -216,9 +224,37 @@ jobs:
               override fun onDestroy() { try { location.removeUpdates(this) } catch (_: Exception) {}; super.onDestroy() }
           }
           EOF
-      - name: Build debug APK
+      - name: Build debug APK (temporary signing, not upgrade-safe)
         run: gradle --no-daemon :app:assembleDebug
       - uses: actions/upload-artifact@v4
         with:
-          name: SANGIL-MYHIKING-TEST-APK
+          name: SANGIL-MYHIKING-DEBUG-REINSTALL-REQUIRED
           path: app/build/outputs/apk/debug/app-debug.apk
+      - name: Configure permanent signing key
+        id: signing
+        env:
+          KEYSTORE_B64: ${{ secrets.SANGIL_KEYSTORE_BASE64 }}
+          SANGIL_KEYSTORE_PASSWORD: ${{ secrets.SANGIL_KEYSTORE_PASSWORD }}
+          SANGIL_KEY_ALIAS: ${{ secrets.SANGIL_KEY_ALIAS }}
+          SANGIL_KEY_PASSWORD: ${{ secrets.SANGIL_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ] || [ -z "$SANGIL_KEYSTORE_PASSWORD" ] || [ -z "$SANGIL_KEY_ALIAS" ] || [ -z "$SANGIL_KEY_PASSWORD" ]; then
+            echo "Permanent signing secrets not configured; signed upgrade APK skipped."
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          printf '%s' "$KEYSTORE_B64" | base64 --decode > app/release-upload.jks
+          keytool -list -keystore app/release-upload.jks -storepass "$SANGIL_KEYSTORE_PASSWORD" -alias "$SANGIL_KEY_ALIAS" >/dev/null
+          echo "enabled=true" >> "$GITHUB_OUTPUT"
+      - name: Build signed update APK
+        if: steps.signing.outputs.enabled == 'true'
+        env:
+          SANGIL_KEYSTORE_PASSWORD: ${{ secrets.SANGIL_KEYSTORE_PASSWORD }}
+          SANGIL_KEY_ALIAS: ${{ secrets.SANGIL_KEY_ALIAS }}
+          SANGIL_KEY_PASSWORD: ${{ secrets.SANGIL_KEY_PASSWORD }}
+        run: gradle --no-daemon :app:assembleRelease
+      - uses: actions/upload-artifact@v4
+        if: steps.signing.outputs.enabled == 'true'
+        with:
+          name: SANGIL-MYHIKING-SIGNED-UPDATE-APK
+          path: app/build/outputs/apk/release/app-release.apk
