@@ -85,8 +85,8 @@ jobs:
               buildTypes { release { isMinifyEnabled = false; signingConfig = signingConfigs.getByName("stableRelease") } }
               compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
               kotlinOptions { jvmTarget = "17" }
-              dependencies { implementation("androidx.core:core:1.15.0") }
           }
+          dependencies { implementation("androidx.core:core:1.15.0") }
           EOF
           cat > app/src/main/AndroidManifest.xml <<'EOF'
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
