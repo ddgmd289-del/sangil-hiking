@@ -192,6 +192,32 @@ function addMark(label){if(!trip||trip.state==='done'){toast('산행을 시작�
 function xml(v){return String(v??'').replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&apos;'}[c]))}
 function download(name,content,mime){const a=document.createElement('a'),url=URL.createObjectURL(new Blob([content],{type:mime}));a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000)}
 function gpx(record){const pts=(record.points||[]).map(p=>`<trkpt lat="${p.lat}" lon="${p.lon}">${Number.isFinite(p.alt)?`<ele>${p.alt}</ele>`:''}<time>${new Date(p.t).toISOString()}</time></trkpt>`).join('');const marks=(record.marks||[]).map(m=>`<wpt lat="${m.lat}" lon="${m.lon}"><name>${xml(m.label)}</name></wpt>`).join('');return `<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1" creator="Sangil" xmlns="http://www.topografix.com/GPX/1/1">${marks}<trk><name>${xml(record.name)}</name><trkseg>${pts}</trkseg></trk></gpx>`}
+function exportHikeResultImage(record){
+ const points=(record.points||[]).filter(p=>Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lon)));
+ if(points.length<2){toast('결과 이미지를 만들 GPS 경로가 부족합니다.');return}
+ const W=900,H=1200,pad=70,top=190,bottom=940;
+ const lat0=points.reduce((a,p)=>a+Number(p.lat),0)/points.length;
+ const xScale=Math.max(.01,Math.cos(lat0*Math.PI/180));
+ const xs=points.map(p=>Number(p.lon)*xScale),ys=points.map(p=>Number(p.lat));
+ const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
+ const width=Math.max(maxX-minX,.00025),height=Math.max(maxY-minY,.00025);
+ const scale=Math.min((W-2*pad)/width,(bottom-top)/height);
+ const xy=i=>[W/2+(xs[i]-(minX+maxX)/2)*scale,(top+bottom)/2-(ys[i]-(minY+maxY)/2)*scale];
+ const line=points.map((p,i)=>{const [x,y]=xy(i);return (i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1)}).join(' ');
+ const [sx,sy]=xy(0),[ex,ey]=xy(points.length-1);
+ const arrows=[];for(let i=Math.max(1,Math.floor(points.length/9));i<points.length;i+=Math.max(1,Math.floor(points.length/9))){
+  const [x,y]=xy(i),[px,py]=xy(Math.max(0,i-1)),angle=Math.atan2(y-py,x-px)*180/Math.PI;
+  if(Math.hypot(x-px,y-py)>1)arrows.push('<path d="M -8 -7 L 7 0 L -8 7" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" transform="translate('+x.toFixed(1)+' '+y.toFixed(1)+') rotate('+angle.toFixed(1)+')"/>');
+ }
+ const esc=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
+ const sec=Math.max(0,(Number(record.accMs)||0)/1000),dist=Math.max(0,Number(record.distance)||0);
+ const avg=sec>0?(dist*3600/sec).toFixed(1):'—';
+ const date=new Date(record.started).toLocaleDateString('ko-KR');
+ const title=esc((record.mountain?.name||record.name||record.activity||'나의 산행').slice(0,28));
+ const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'"><rect width="900" height="1200" fill="#eef3ef"/><rect width="900" height="160" fill="#174d3c"/><text x="55" y="66" font-family="sans-serif" font-size="36" font-weight="bold" fill="#ffffff">산길 MYHIKING</text><text x="55" y="119" font-family="sans-serif" font-size="27" fill="#e4f4e8">'+title+' · '+esc(date)+'</text><rect x="25" y="170" width="850" height="790" rx="30" fill="#dce9dd"/><path d="'+line+'" fill="none" stroke="#ffffff" stroke-width="22" stroke-linejoin="round" stroke-linecap="round"/><path d="'+line+'" fill="none" stroke="#78c735" stroke-width="14" stroke-linejoin="round" stroke-linecap="round"/>'+arrows.join('')+'<circle cx="'+sx+'" cy="'+sy+'" r="16" fill="#1873cf" stroke="#fff" stroke-width="6"/><circle cx="'+ex+'" cy="'+ey+'" r="16" fill="#ee6133" stroke="#fff" stroke-width="6"/><rect x="40" y="190" width="370" height="62" rx="14" fill="#ffffff" fill-opacity=".9"/><text x="58" y="230" font-family="sans-serif" font-size="25" fill="#174d3c">● 출발   ● 도착</text><rect x="0" y="960" width="900" height="240" fill="#174d3c"/><text x="55" y="1020" font-family="sans-serif" font-size="25" fill="#d9e8dc">이동시간</text><text x="340" y="1020" font-family="sans-serif" font-size="25" fill="#d9e8dc">거리</text><text x="635" y="1020" font-family="sans-serif" font-size="25" fill="#d9e8dc">평균속도</text><text x="55" y="1090" font-family="sans-serif" font-size="44" font-weight="bold" fill="#fff">'+fmtTime(sec)+'</text><text x="340" y="1090" font-family="sans-serif" font-size="44" font-weight="bold" fill="#fff">'+dist.toFixed(2)+' km</text><text x="635" y="1090" font-family="sans-serif" font-size="42" font-weight="bold" fill="#fff">'+avg+' km/h</text><text x="55" y="1160" font-family="sans-serif" font-size="21" fill="#c5d8cc">실제 GPS 경로 기반 · 배경은 지도 타일이 아닌 단순화된 결과 카드</text></svg>';
+ download('산길_산행결과_'+new Date(record.started).toISOString().slice(0,10)+'.svg',svg,'image/svg+xml;charset=utf-8');
+ toast('산행 결과 이미지(SVG)를 저장했습니다.');
+}
 function showSavedRoute(record){
  if(!map){toast('지도가 준비되지 않았습니다.');return}
  viewedRecord=record;
@@ -251,6 +277,7 @@ function renderRecords(){
   const actions=document.createElement('div');actions.className='record-actions';
   const view=document.createElement('button');view.className='tiny-btn';view.type='button';view.textContent='지도 보기';view.addEventListener('click',()=>showSavedRoute(r));actions.append(view);
   const summary=document.createElement('button');summary.className='tiny-btn';summary.type='button';summary.textContent='경로 전체보기';summary.addEventListener('click',()=>showSavedRoute(r));actions.append(summary);
+  const imageBtn=document.createElement('button');imageBtn.className='tiny-btn';imageBtn.type='button';imageBtn.textContent='결과 이미지';imageBtn.addEventListener('click',()=>exportHikeResultImage(r));actions.append(imageBtn);
   const btn=document.createElement('button');btn.className='tiny-btn';btn.type='button';btn.textContent='GPX';btn.addEventListener('click',()=>download('산길_'+new Date(r.started).toISOString().slice(0,10)+'.gpx',gpx(r),'application/gpx+xml'));actions.append(btn);
   const del=document.createElement('button');del.className='tiny-btn';del.type='button';del.textContent='삭제';del.addEventListener('click',()=>{if(!confirm('이 기록을 삭제할까요? 삭제 후 복구할 수 없습니다.'))return;const next=loadRecords().filter(x=>x.id!==r.id);if(saveRecords(next)){renderRecords();toast('선택한 기록을 삭제했습니다.')}});actions.append(del);
   item.append(header,grid,detail,actions);target.append(item);
