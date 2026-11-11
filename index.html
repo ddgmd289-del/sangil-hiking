@@ -405,8 +405,11 @@ async function loadNearbyTrails(forceRefresh=false){
    const isNamedTrail=!!(tags.name||tags.route==='hiking'||tags.sac_scale||tags.trail_visibility);
    const path=L.polyline(coords,{color:isNamedTrail?'#a84b17':'#b88649',weight:isNamedTrail?5:3,opacity:.95,dashArray:isNamedTrail?'8,5':'5,7'}).addTo(trailsLayer);
    const label=tags.name||'이름 미등록 보행 경로';
-   const details=[tags.highway==='path'?'산길·오솔길':tags.highway==='track'?'임도·작업로':'보행로',tags.sac_scale?'산악 등급(OSM): '+tags.sac_scale:'',tags.surface?'노면: '+tags.surface:'',tags.trail_visibility?'길 표시 상태: '+tags.trail_visibility:''].filter(Boolean);
-   path.bindPopup('<strong>'+clean(label)+'</strong><p>'+details.map(clean).join(' · ')+'</p><p>OSM 사용자 등록 경로입니다. 공식 코스·통행 가능 여부·안전 상태는 확인되지 않았습니다.</p>');
+   let segmentMeters=0;
+   for(let i=1;i<coords.length;i++)segmentMeters+=map.distance(coords[i-1],coords[i]);
+   const segmentText=segmentMeters>=1000?(segmentMeters/1000).toFixed(2)+' km':Math.round(segmentMeters)+' m';
+   const details=[tags.highway==='path'?'산길·오솔길':tags.highway==='track'?'임도·작업로':'보행로','표시된 구간 길이 약 '+segmentText,tags.sac_scale?'산악 등급(OSM): '+tags.sac_scale:'',tags.surface?'노면: '+tags.surface:'',tags.trail_visibility?'길 표시 상태: '+tags.trail_visibility:''].filter(Boolean);
+   path.bindPopup('<strong>'+clean(label)+'</strong><p>'+details.map(clean).join(' · ')+'</p><p>표시된 구간 길이는 지도 좌표로 계산한 값이며 전체 등산코스 거리와 다릅니다. 공식 코스·통행 가능 여부·안전 상태는 확인되지 않았습니다.</p>');
    count++;
   }
   if(note)note.textContent=count?'🥾 현재 지도에 '+count+'개 보행 경로 표시 · 진한 주황=이름·산길 정보 등록 / 연한 주황=일반 보행 경로 · 공식 등산로 여부 확인 필요':'🥾 이 지도 범위에 등록된 보행 경로가 없습니다. 산 주변으로 지도를 이동해 보세요.';toast(count?count+'개 보행 경로 표시':'현재 범위에 등록된 보행 경로가 없습니다.');
