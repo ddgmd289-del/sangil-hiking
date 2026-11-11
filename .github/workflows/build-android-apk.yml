@@ -263,6 +263,12 @@ jobs:
           if [ "$SANGIL_KEY_ALIAS" != "$ACTUAL_ALIAS" ]; then
             echo "::warning::Configured key alias differs from the keystore; using the sole private-key alias."
           fi
+          # Verify private-key password before running Gradle, without printing secrets.
+          if ! keytool -certreq -alias "$ACTUAL_ALIAS" -keystore app/release-upload.jks -storepass "$SANGIL_KEYSTORE_PASSWORD" -keypass "$SANGIL_KEY_PASSWORD" -file /tmp/sangil-signing-check.csr >/dev/null 2>&1; then
+            echo "::error::KEY_PASSWORD_INVALID: SANGIL_KEY_PASSWORD cannot unlock the private key. Set it to the password entered when the key pair was created (often identical to SANGIL_KEYSTORE_PASSWORD)."
+            exit 1
+          fi
+          rm -f /tmp/sangil-signing-check.csr
           echo "SANGIL_KEY_ALIAS=$ACTUAL_ALIAS" >> "$GITHUB_ENV"
           echo "enabled=true" >> "$GITHUB_OUTPUT"
       - name: Build signed update APK
