@@ -221,13 +221,13 @@ function refreshGpsDiagnostics(){
  if(!window.SangilNative?.getGpsDiagnostics)return;
  try{
   const d=JSON.parse(window.SangilNative.getGpsDiagnostics());
-  const age=d.lastFix?Math.round((Date.now()-d.lastFix)/1000):null;
+  const age=d.lastFixTime?Math.round((Date.now()-d.lastFixTime)/1000):null;
   const status=$('#gpsStatus');
   if(!status)return;
-  if(!d.permission){status.textContent='GPS 위치 권한 없음 · 앱 설정에서 정확한 위치 허용';return}
+  if(!d.finePermission){status.textContent='GPS 위치 권한 없음 · 앱 설정에서 정확한 위치 허용';return}
   if(!d.gpsEnabled&&!d.networkEnabled){status.textContent='휴대폰 위치 서비스 꺼짐 · 위치 켜기';return}
-  if(d.error){status.textContent='Android GPS 오류 · '+d.error;return}
-  if(age!==null&&age<25){status.textContent='Android GPS 수신 중 · '+age+'초 전 · 오차 '+Math.round(d.accuracy)+'m · '+(d.provider||'위치');return}
+  if(d.serviceError){status.textContent='Android GPS 오류 · '+d.serviceError;return}
+  if(age!==null&&age<25){status.textContent='Android GPS 수신 중 · '+age+'초 전 · 오차 '+Math.round(d.lastAccuracy)+'m · '+(d.lastProvider||'위치');return}
   if(d.serviceStarted&&Date.now()-d.serviceStarted<30000){status.textContent='Android GPS 위성 신호 대기 · 야외에서 확인';return}
   status.textContent=age===null?'Android GPS 위치 수신 대기 · 정확한 위치 확인':'Android GPS 신호 지연 · 마지막 수신 '+age+'초 전';
  }catch(e){console.warn('GPS diagnostics',e)}
