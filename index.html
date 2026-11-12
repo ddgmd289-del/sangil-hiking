@@ -196,7 +196,7 @@ function recoverNativeGps(){
  try{
   const raw=window.SangilNative.getTrackBackup();
   if(!raw)return;
-  for(const line of raw.split(/\\r?\\n/)){
+  for(const line of raw.split(/\r?\n/)){
    if(!line.trim())continue;
    let p;try{p=JSON.parse(line)}catch{continue}
    if(!Number.isFinite(Number(p.lat))||!Number.isFinite(Number(p.lng))||!Number.isFinite(Number(p.time)))continue;
