@@ -210,6 +210,20 @@ jobs:
                           startActivity(Intent.createChooser(intent, "산행 결과 공유"))
                       } catch (e: Exception) { Toast.makeText(this@MainActivity, "이미지 공유 실패: " + e.message, Toast.LENGTH_LONG).show() }
                   } }
+                  @JavascriptInterface fun getGpsDiagnostics(): String {
+                      val prefs = getSharedPreferences("sangil_gps", MODE_PRIVATE)
+                      val o = org.json.JSONObject()
+                      o.put("finePermission", checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+                      o.put("lastFixTime", prefs.getLong("lastFixTime", 0L))
+                      o.put("lastAccuracy", prefs.getFloat("lastAccuracy", -1f).toDouble())
+                      o.put("lastProvider", prefs.getString("lastProvider", ""))
+                      o.put("serviceStarted", prefs.getLong("serviceStarted", 0L))
+                      o.put("serviceError", prefs.getString("serviceError", ""))
+                      val manager = getSystemService(LOCATION_SERVICE) as android.location.LocationManager
+                      o.put("gpsEnabled", manager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER))
+                      o.put("networkEnabled", manager.isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER))
+                      return o.toString()
+                  }
                   @JavascriptInterface fun getTrackBackup(): String {
                       val f = java.io.File(filesDir, "tracking_backup.jsonl")
                       return if (f.exists()) f.readLines().takeLast(250).joinToString(System.lineSeparator()) else ""
@@ -252,6 +266,7 @@ jobs:
                   if (intent?.action == "PAUSE") { try { location.removeUpdates(this) } catch (_: Exception) {}; return START_STICKY }
                   val notification = Notification.Builder(this, "hiking").setContentTitle("산길 MYHIKING").setContentText("산행 위치 기록 중").setSmallIcon(android.R.drawable.ic_menu_mylocation).build()
                   startForeground(101, notification)
+                  getSharedPreferences("sangil_gps", MODE_PRIVATE).edit().putLong("serviceStarted", System.currentTimeMillis()).putString("serviceError", "").apply()
                   if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                       try {
                           location.removeUpdates(this)
@@ -266,9 +281,9 @@ jobs:
                                   }
                               } catch (e: Exception) { android.util.Log.w("SANGIL_GPS", "Provider unavailable: " + provider, e) }
                           }
-                          if (!registered) sendBroadcast(Intent("kr.sangil.myhiking.GPS_ERROR").setPackage(packageName).putExtra("reason","GPS 제공자 사용 불가 · 휴대폰 위치 서비스를 켜 주세요"))
+                          if (!registered) { getSharedPreferences("sangil_gps", MODE_PRIVATE).edit().putString("serviceError","GPS 제공자 사용 불가").apply(); sendBroadcast(Intent("kr.sangil.myhiking.GPS_ERROR").setPackage(packageName).putExtra("reason","GPS 제공자 사용 불가 · 휴대폰 위치 서비스를 켜 주세요")) }
 
-                      } catch (e: Exception) { android.util.Log.e("SANGIL_GPS", "Location registration failed", e) }
+                      } catch (e: Exception) { getSharedPreferences("sangil_gps", MODE_PRIVATE).edit().putString("serviceError",e.message ?: "GPS 등록 오류").apply(); android.util.Log.e("SANGIL_GPS", "Location registration failed", e) }
                   }
                   return START_STICKY
               }
@@ -277,6 +292,9 @@ jobs:
                   val fixTime = loc.time
                   val now = System.currentTimeMillis()
                   if (fixTime <= 0L || fixTime > now + 5000L || now - fixTime > 30000L || !loc.hasAccuracy()) return
+                  getSharedPreferences("sangil_gps", MODE_PRIVATE).edit()
+                      .putLong("lastFixTime", fixTime).putFloat("lastAccuracy", loc.accuracy)
+                      .putString("lastProvider", loc.provider ?: "").apply()
                   val p = JSONObject().put("lat", loc.latitude).put("lng", loc.longitude).put("time", fixTime)
                       .put("accuracy", loc.accuracy)
                   try { java.io.File(filesDir, "tracking_backup.jsonl").appendText(p.toString() + System.lineSeparator()) }
