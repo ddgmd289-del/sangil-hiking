@@ -212,7 +212,7 @@ jobs:
                   } }
                   @JavascriptInterface fun getTrackBackup(): String {
                       val f = java.io.File(filesDir, "tracking_backup.jsonl")
-                      return if (f.exists()) f.readText() else ""
+                      return if (f.exists()) f.readLines().takeLast(250).joinToString("\\n") else ""
                   }
               }
               override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -279,7 +279,7 @@ jobs:
                   if (fixTime <= 0L || fixTime > now + 5000L || now - fixTime > 30000L || !loc.hasAccuracy()) return
                   val p = JSONObject().put("lat", loc.latitude).put("lng", loc.longitude).put("time", fixTime)
                       .put("accuracy", loc.accuracy)
-                  try { java.io.File(filesDir, "tracking_backup.jsonl").appendText(p.toString() + "\\n") }
+                  try { java.io.File(filesDir, "tracking_backup.jsonl").appendText(p.toString() + System.lineSeparator()) }
                   catch (e: Exception) { android.util.Log.w("SANGIL_GPS", "Backup write failed", e) }
                   sendBroadcast(Intent("kr.sangil.myhiking.FIX").setPackage(packageName)
                       .putExtra("lat",loc.latitude).putExtra("lon",loc.longitude)
