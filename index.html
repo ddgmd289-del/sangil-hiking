@@ -118,8 +118,8 @@ function fmtTime(seconds){let s=Math.max(0,Math.floor(seconds)),h=Math.floor(s/3
 function elapsed(){if(!trip)return 0;return Math.max(0,(trip.accMs||0)+(trip.state==='running'?Date.now()-trip.segmentStarted:0))/1000}
 function restSeconds(r=trip){if(!r)return 0;return Math.max(0,((r.restMs||0)+(r.restStarted?Date.now()-r.restStarted:0))/1000)}
 function closeRest(r=trip){if(!r||!r.restStarted)return;r.restMs=(r.restMs||0)+Math.max(0,Date.now()-r.restStarted);r.rests=r.rests||[];r.rests.push({started:r.restStarted,ended:Date.now(),type:r.pauseReason||'manual'});r.restStarted=null;r.pauseReason=null}
-function autoPause(){if(!trip||trip.state!=='running'||trip.demo)return;trip.accMs+=Date.now()-trip.segmentStarted;trip.state='paused';trip.pauseReason='auto';trip.restStarted=Date.now();persist();updateStats();toast('움직임이 없어 자동 일시정지 · 휴식 기록 중');speakHike('이동이 없어 산행 기록을 잠시 멈춥니다.')}
-function autoResume(){if(!trip||trip.state!=='paused'||trip.pauseReason!=='auto')return;closeRest();trip.segmentStarted=Date.now();trip.state='running';trip.stationarySince=null;persist();updateStats();toast('이동 감지 · 산행 자동 재개');speakHike('산행 기록을 다시 시작합니다.')}
+function autoPause(){if(!trip||trip.state!=='running'||trip.demo)return;trip.accMs+=Date.now()-trip.segmentStarted;trip.state='paused';trip.pauseReason='auto';trip.pauseAnchor={...(trip.stationaryAnchor||trip.points.at(-1)||position)};trip.resumeCandidates=0;trip.restStarted=Date.now();persist();updateStats();toast('움직임이 없어 자동 일시정지 · 휴식 기록 중');speakHike('이동이 없어 산행 기록을 잠시 멈춥니다.')}
+function autoResume(){if(!trip||trip.state!=='paused'||trip.pauseReason!=='auto')return;closeRest();trip.segmentStarted=Date.now();trip.state='running';trip.stationarySince=null;trip.pauseAnchor=null;trip.resumeCandidates=0;persist();updateStats();toast('이동 감지 · 산행 자동 재개');speakHike('산행 기록을 다시 시작합니다.')}
 
 // 전체화면 UI는 브라우저 Fullscreen API 대신 고정 화면으로 구현해 WebView에서도 작동합니다.
 let voiceEnabled=true,announcedStep=0;
@@ -165,7 +165,15 @@ function onFix(p){const c=p.coords;const cur={lat:c.latitude,lon:c.longitude,alt
   const anchor=trip.stationaryAnchor||trip.points.at(-1)||cur;
   const anchorDistance=km(anchor,cur);
   const movementThresholdKm=Math.max(.035,((cur.accuracy||0)+(anchor.accuracy||0))*1.5/1000);
-  if(trip.state==='paused'&&trip.pauseReason==='auto'&&anchorDistance>=movementThresholdKm)autoResume();
+  if(trip.state==='paused'&&trip.pauseReason==='auto'){
+    const resumeAnchor=trip.pauseAnchor||trip.stationaryAnchor||trip.points.at(-1);
+    const moved=resumeAnchor?km(resumeAnchor,cur):0;
+    const threshold=Math.max(.018,Math.min(.055,(cur.accuracy||15)*1.2/1000));
+    if(moved>=threshold&&cur.accuracy<=65){
+      trip.resumeCandidates=(trip.resumeCandidates||0)+1;
+      if(trip.resumeCandidates>=2)autoResume();
+    }else trip.resumeCandidates=0;
+  }
   if(trip.state==='running'){
     const prev=trip.points.at(-1);
     const diff=prev?km(prev,cur):0;
@@ -184,7 +192,8 @@ function onFix(p){const c=p.coords;const cur={lat:c.latitude,lon:c.longitude,alt
     else if(anchorDistance>=movementThresholdKm){
       trip.stationarySince=cur.t;trip.stationaryAnchor=cur;persist();
     }
-    // Keep recording until the hiker explicitly pauses; GPS drift must not auto-pause the trip.
+    // Auto-pause only with recent GPS reception; missing GPS must not look like a rest.
+    if(trip.stationarySince&&cur.t-trip.stationarySince>=120000&&cur.accuracy<=65)autoPause();
   }
 }
 updateStats();draw()}
@@ -192,7 +201,7 @@ window.sangilNativeFix=function(lat,lon,alt,accuracy,t){onFix({coords:{latitude:
 // Recover GPS fixes from the Android foreground service even when broadcasts are missed.
 let lastRecoveredFixKey='';
 function recoverNativeGps(){
- if(!trip||trip.demo||trip.state!=='running'||!window.SangilNative?.getTrackBackup)return;
+ if(!trip||trip.demo||!['running','paused'].includes(trip.state)||!window.SangilNative?.getTrackBackup)return;
  try{
   const raw=window.SangilNative.getTrackBackup();
   if(!raw)return;
