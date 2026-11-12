@@ -224,6 +224,20 @@ jobs:
                       o.put("networkEnabled", manager.isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER))
                       return o.toString()
                   }
+                  @JavascriptInterface fun getGpsDiagnostics(): String {
+                      val p = getSharedPreferences("sangil_gps", MODE_PRIVATE)
+                      val o = org.json.JSONObject()
+                      o.put("permission", checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+                      o.put("lastFix", p.getLong("lastFix", 0L))
+                      o.put("accuracy", p.getFloat("accuracy", -1f).toDouble())
+                      o.put("provider", p.getString("provider", ""))
+                      o.put("serviceStarted", p.getLong("serviceStarted", 0L))
+                      o.put("error", p.getString("error", ""))
+                      val m = getSystemService(LOCATION_SERVICE) as android.location.LocationManager
+                      o.put("gpsEnabled", m.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER))
+                      o.put("networkEnabled", m.isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER))
+                      return o.toString()
+                  }
                   @JavascriptInterface fun getTrackBackup(): String {
                       val f = java.io.File(filesDir, "tracking_backup.jsonl")
                       return if (f.exists()) f.readLines().takeLast(250).joinToString(System.lineSeparator()) else ""
@@ -266,6 +280,7 @@ jobs:
                   if (intent?.action == "PAUSE") { try { location.removeUpdates(this) } catch (_: Exception) {}; return START_STICKY }
                   val notification = Notification.Builder(this, "hiking").setContentTitle("산길 MYHIKING").setContentText("산행 위치 기록 중").setSmallIcon(android.R.drawable.ic_menu_mylocation).build()
                   startForeground(101, notification)
+                  getSharedPreferences("sangil_gps", MODE_PRIVATE).edit().putLong("serviceStarted", System.currentTimeMillis()).putString("error", "").apply()
                   getSharedPreferences("sangil_gps", MODE_PRIVATE).edit().putLong("serviceStarted", System.currentTimeMillis()).putString("serviceError", "").apply()
                   if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                       try {
@@ -295,6 +310,7 @@ jobs:
                   getSharedPreferences("sangil_gps", MODE_PRIVATE).edit()
                       .putLong("lastFixTime", fixTime).putFloat("lastAccuracy", loc.accuracy)
                       .putString("lastProvider", loc.provider ?: "").apply()
+                  getSharedPreferences("sangil_gps", MODE_PRIVATE).edit().putLong("lastFix", now).putFloat("accuracy", loc.accuracy).putString("provider", loc.provider ?: "").apply()
                   val p = JSONObject().put("lat", loc.latitude).put("lng", loc.longitude).put("time", fixTime)
                       .put("accuracy", loc.accuracy)
                   try { java.io.File(filesDir, "tracking_backup.jsonl").appendText(p.toString() + System.lineSeparator()) }
