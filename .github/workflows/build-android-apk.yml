@@ -224,21 +224,7 @@ jobs:
                       o.put("networkEnabled", manager.isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER))
                       return o.toString()
                   }
-                  @JavascriptInterface fun getGpsDiagnostics(): String {
-                      val p = getSharedPreferences("sangil_gps", MODE_PRIVATE)
-                      val o = org.json.JSONObject()
-                      o.put("permission", checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-                      o.put("lastFix", p.getLong("lastFix", 0L))
-                      o.put("accuracy", p.getFloat("accuracy", -1f).toDouble())
-                      o.put("provider", p.getString("provider", ""))
-                      o.put("serviceStarted", p.getLong("serviceStarted", 0L))
-                      o.put("error", p.getString("error", ""))
-                      val m = getSystemService(LOCATION_SERVICE) as android.location.LocationManager
-                      o.put("gpsEnabled", m.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER))
-                      o.put("networkEnabled", m.isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER))
-                      return o.toString()
-                  }
-                  @JavascriptInterface fun getTrackBackup(): String {
+                                    @JavascriptInterface fun getTrackBackup(): String {
                       val f = java.io.File(filesDir, "tracking_backup.jsonl")
                       return if (f.exists()) f.readLines().takeLast(250).joinToString(System.lineSeparator()) else ""
                   }
