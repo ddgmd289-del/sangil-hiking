@@ -212,7 +212,7 @@ jobs:
                   } }
                   @JavascriptInterface fun getTrackBackup(): String {
                       val f = java.io.File(filesDir, "tracking_backup.jsonl")
-                      return if (f.exists()) f.readLines().takeLast(250).joinToString("\\n") else ""
+                      return if (f.exists()) f.readLines().takeLast(250).joinToString(System.lineSeparator()) else ""
                   }
               }
               override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
