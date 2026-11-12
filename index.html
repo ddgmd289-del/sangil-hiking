@@ -160,7 +160,7 @@ function draw(){
 }
 function geoError(e){$('#gpsStatus').textContent='GPS 연결 안 됨';toast('GPS 확인 실패: '+(e?.message||'위치 권한을 확인하세요.'))}
 window.sangilNativeFix=function(lat,lon,alt,accuracy,t){onFix({coords:{latitude:Number(lat),longitude:Number(lon),altitude:Number(alt),accuracy:Number(accuracy)},timestamp:Number(t)||Date.now()})};
-function onFix(p){const c=p.coords;const cur={lat:c.latitude,lon:c.longitude,alt:c.altitude,accuracy:c.accuracy,t:p.timestamp||Date.now()};if(!Number.isFinite(cur.lat)||!Number.isFinite(cur.lon)||!Number.isFinite(cur.accuracy)||cur.accuracy>300)return;if(position&&cur.t<position.t)return;position=cur;lastFix=Date.now();$('#coord').textContent=cur.lat.toFixed(4)+', '+cur.lon.toFixed(4);$('#gpsStatus').textContent='GPS 위치 확인 · 오차 약 '+Math.round(cur.accuracy||0)+'m';$('#safetyCoord').textContent=`위도 ${cur.lat.toFixed(6)} / 경도 ${cur.lon.toFixed(6)} / 오차 약 ${Math.round(cur.accuracy||0)}m`;if(trip&&!trip.demo&&cur.accuracy<=200){
+function onFix(p){const c=p.coords;const cur={lat:c.latitude,lon:c.longitude,alt:c.altitude,accuracy:c.accuracy,t:p.timestamp||Date.now()};if(!Number.isFinite(cur.lat)||!Number.isFinite(cur.lon)||!Number.isFinite(cur.accuracy)||cur.accuracy>300)return;if(position&&(cur.t<position.t||(cur.t===position.t&&cur.lat===position.lat&&cur.lon===position.lon)))return;position=cur;lastFix=Date.now();$('#coord').textContent=cur.lat.toFixed(4)+', '+cur.lon.toFixed(4);$('#gpsStatus').textContent='GPS 위치 확인 · 오차 약 '+Math.round(cur.accuracy||0)+'m';$('#safetyCoord').textContent=`위도 ${cur.lat.toFixed(6)} / 경도 ${cur.lon.toFixed(6)} / 오차 약 ${Math.round(cur.accuracy||0)}m`;if(trip&&!trip.demo&&cur.accuracy<=200){
   if(!trip.startPoint&&trip.state==='running'){trip.startPoint={...cur};persist()}
   const anchor=trip.stationaryAnchor||trip.points.at(-1)||cur;
   const anchorDistance=km(anchor,cur);
@@ -189,6 +189,27 @@ function onFix(p){const c=p.coords;const cur={lat:c.latitude,lon:c.longitude,alt
 }
 updateStats();draw()}
 window.sangilNativeFix=function(lat,lon,alt,accuracy,t){onFix({coords:{latitude:Number(lat),longitude:Number(lon),altitude:Number(alt),accuracy:Number(accuracy)},timestamp:Number(t)||Date.now()})};
+// Recover GPS fixes from the Android foreground service even when broadcasts are missed.
+let lastRecoveredFixKey='';
+function recoverNativeGps(){
+ if(!trip||trip.demo||trip.state!=='running'||!window.SangilNative?.getTrackBackup)return;
+ try{
+  const raw=window.SangilNative.getTrackBackup();
+  if(!raw)return;
+  for(const line of raw.split(/\\r?\\n/)){
+   if(!line.trim())continue;
+   let p;try{p=JSON.parse(line)}catch{continue}
+   if(!Number.isFinite(Number(p.lat))||!Number.isFinite(Number(p.lng))||!Number.isFinite(Number(p.time)))continue;
+   if(p.time<trip.started-5000||p.time>Date.now()+5000)continue;
+   const key=p.time+':'+p.lat+':'+p.lng;
+   if(key===lastRecoveredFixKey)continue;
+   lastRecoveredFixKey=key;
+   onFix({coords:{latitude:Number(p.lat),longitude:Number(p.lng),altitude:Number(p.alt||0),accuracy:Number(p.accuracy||20)},timestamp:Number(p.time)});
+  }
+ }catch(e){console.warn('GPS recovery',e)}
+}
+setInterval(recoverNativeGps,3000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)recoverNativeGps()});
 function requestLocation(){if(window.SangilNative){try{window.SangilNative.startTracking();$('#gpsStatus').textContent='Android GPS 수신 대기 · 위치 권한 확인';return}catch(e){toast('Android GPS 연결 실패')}}if(!navigator.geolocation){toast('이 브라우저는 GPS 기능을 지원하지 않습니다.');return}if(!isSecureContext){toast('GPS는 HTTPS 웹사이트에서 사용해야 합니다.');return}navigator.geolocation.getCurrentPosition(onFix,geoError,{enableHighAccuracy:true,timeout:16000,maximumAge:2000});if(watchId===null)watchId=navigator.geolocation.watchPosition(onFix,e=>{$('#gpsStatus').textContent='GPS 연결 불안정';}, {enableHighAccuracy:true,maximumAge:1000,timeout:20000})}
 function start(){if(!window.SangilNative&&(!navigator.geolocation||!isSecureContext)){toast('실제 GPS 기록은 HTTPS 환경에서만 가능합니다. 체험 모드는 사용하실 수 있습니다.');return}trip={id:Date.now(),activity:selectedActivity,name:$('#hikeName').value.trim()||'오늘의 산행',memo:'',started:Date.now(),segmentStarted:Date.now(),accMs:0,restMs:0,rests:[],stationarySince:null,state:'running',distance:0,points:[],marks:[],startPoint:null,endPoint:null,demo:false};focusNext=true;requestLocation();persist();announcedStep=0;updateStats();draw();speakHike(selectedActivity+' 활동을 시작합니다. 안전하게 운동하세요.');toast('산행 기록 시작 · 휴대폰 위치 권한을 허용하고 GPS 수신을 확인해 주세요.');}
 function startDemo(){if(trip){toast('진행 중인 산행을 먼저 종료하세요.');return}demo=true;const t=Date.now(),base={lat:35.259,lon:128.879};const pts=[[0,0],[.001,.001],[.002,.0015],[.003,.0025],[.0038,.003],[.004,.004]].map(([a,b],i)=>({lat:base.lat+a,lon:base.lon+b,accuracy:10,alt:110+i*18,t:t+i*60000}));let d=0;for(let i=1;i<pts.length;i++)d+=km(pts[i-1],pts[i]);trip={id:t,activity:selectedActivity,name:'체험용 가상 '+selectedActivity,started:t,segmentStarted:t,accMs:0,state:'running',distance:d,points:pts,marks:[],demo:true};position=pts.at(-1);focusNext=true;updateStats();draw();toast('체험 모드입니다. 표시된 경로는 실제 산행이 아닙니다.');}
