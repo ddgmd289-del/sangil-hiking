@@ -200,9 +200,9 @@ function onFix(p){const c=p.coords;const cur={lat:c.latitude,lon:c.longitude,alt
     // Keep ordinary walking fixes: a strict 8–30 m filter hid real movement.
     // Use a modest noise floor and retain points even at short GPS intervals.
     const noiseKm=prev?Math.max(.002,Math.min(.005,(cur.accuracy+(prev.accuracy||0))*.04/1000)):0;
-    const plausibleSpeed=dt>=0&&(dt===0?diff<=.03:diff/dt<=.012); // 43.2 km/h, allow same-time small fixes
+    const plausibleSpeed=dt>0&&diff/dt<=.008; // 28.8 km/h ceiling; reject duplicate-time fixes and large GPS jumps
     // Preserve real walking fixes; GPS may report multiple points with equal timestamps.
-    const usableFix=!prev||(dt>=0&&plausibleSpeed&&diff>=noiseKm);
+    const usableFix=cur.accuracy<=65&&(!prev||(plausibleSpeed&&diff>=noiseKm));
     if(usableFix){
       trip.points.push(cur);trip.distance+=diff;persist();announceDistance();
     }
@@ -216,7 +216,7 @@ function onFix(p){const c=p.coords;const cur={lat:c.latitude,lon:c.longitude,alt
   }
 }
 updateStats();draw()}
-window.sangilNativeFix=function(lat,lon,alt,accuracy,t){onFix({coords:{latitude:Number(lat),longitude:Number(lon),altitude:Number(alt),accuracy:Number(accuracy)},timestamp:Number(t)||Date.now()})};
+
 // Recover GPS fixes from the Android foreground service even when broadcasts are missed.
 let lastRecoveredFixKey='';
 function recoverNativeGps(){
