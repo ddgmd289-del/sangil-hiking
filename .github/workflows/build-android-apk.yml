@@ -1,7 +1,7 @@
 name: Build MYHIKING Android APK
 on:
   push:
-    branches: [build/android-apk-20261110, fix/gps-track-stability-20261113]
+    branches: [build/android-apk-20261110, fix/gps-track-stability-20261113, feature/google-play-aab-20261113]
   workflow_dispatch:
 jobs:
   apk:
@@ -383,3 +383,17 @@ jobs:
         with:
           name: SANGIL-MYHIKING-SIGNED-UPDATE-APK
           path: app/build/outputs/apk/release/app-release.apk
+      - name: Build signed Android App Bundle (Play preparation)
+        if: steps.signing.outputs.enabled == 'true'
+        env:
+          SANGIL_KEYSTORE_PASSWORD: ${{ secrets.SANGIL_KEYSTORE_PASSWORD }}
+          SANGIL_KEY_PASSWORD: ${{ secrets.SANGIL_KEY_PASSWORD }}
+        run: gradle --no-daemon :app:bundleRelease
+      - name: Verify release AAB exists
+        if: steps.signing.outputs.enabled == 'true'
+        run: test -s app/build/outputs/bundle/release/app-release.aab
+      - uses: actions/upload-artifact@v4
+        if: steps.signing.outputs.enabled == 'true'
+        with:
+          name: SANGIL-GOOGLE-PLAY-AAB-PREVIEW-NOT-FOR-SUBMISSION
+          path: app/build/outputs/bundle/release/app-release.aab
