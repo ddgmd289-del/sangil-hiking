@@ -24,6 +24,12 @@ jobs:
           mkdir -p app/src/main/assets app/src/main/java/kr/sangil/myhiking
           cp index.html extensions.js auth-config.js manifest.webmanifest service-worker.js app/src/main/assets/
           cp -r icons app/src/main/assets/
+          mkdir -p app/src/main/res/drawable
+          python3 -m pip install --quiet cairosvg
+          python3 - <<'PY'
+          import cairosvg
+          cairosvg.svg2png(url='android-launcher-icon.svg',write_to='app/src/main/res/drawable/sangil_launcher.png',output_width=512,output_height=512)
+          PY
           mkdir -p app/src/main/assets/vendor
           curl --fail --location --retry 3 --retry-all-errors --silent --show-error https://unpkg.com/leaflet@1.9.4/dist/leaflet.js -o app/src/main/assets/vendor/leaflet.js
           curl --fail --location --retry 3 --retry-all-errors --silent --show-error https://unpkg.com/leaflet@1.9.4/dist/leaflet.css -o app/src/main/assets/vendor/leaflet.css
@@ -96,7 +102,7 @@ jobs:
               <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
               <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
               <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-              <application android:label="산길 트레킹" android:usesCleartextTraffic="false" android:theme="@android:style/Theme.Material.Light.NoActionBar">
+              <application android:label="산길 트레킹" android:icon="@drawable/sangil_launcher" android:roundIcon="@drawable/sangil_launcher" android:usesCleartextTraffic="false" android:theme="@android:style/Theme.Material.Light.NoActionBar">
                   <activity android:name=".MainActivity" android:exported="true">
                       <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter>
                   </activity>
