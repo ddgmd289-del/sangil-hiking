@@ -96,7 +96,7 @@ jobs:
               <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
               <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
               <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-              <application android:label="산길 MYHIKING 미리보기" android:usesCleartextTraffic="false" android:theme="@android:style/Theme.Material.Light.NoActionBar">
+              <application android:label="산길 트레킹" android:usesCleartextTraffic="false" android:theme="@android:style/Theme.Material.Light.NoActionBar">
                   <activity android:name=".MainActivity" android:exported="true">
                       <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter>
                   </activity>
@@ -258,13 +258,13 @@ jobs:
               override fun onCreate() {
                   super.onCreate()
                   location = getSystemService(LOCATION_SERVICE) as LocationManager
-                  val channel = NotificationChannel("hiking", "산길 GPS 산행 기록", NotificationManager.IMPORTANCE_LOW)
+                  val channel = NotificationChannel("hiking", "산길 트레킹 GPS 기록", NotificationManager.IMPORTANCE_LOW)
                   (getSystemService(NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(channel)
               }
               override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
                   if (intent?.action == "STOP") { stopSelf(); return START_NOT_STICKY }
                   if (intent?.action == "PAUSE") { try { location.removeUpdates(this) } catch (_: Exception) {}; return START_STICKY }
-                  val notification = Notification.Builder(this, "hiking").setContentTitle("산길 MYHIKING").setContentText("산행 위치 기록 중").setSmallIcon(android.R.drawable.ic_menu_mylocation).build()
+                  val notification = Notification.Builder(this, "hiking").setContentTitle("산길 트레킹").setContentText("산행 위치 기록 중").setSmallIcon(android.R.drawable.ic_menu_mylocation).build()
                   startForeground(101, notification)
                   getSharedPreferences("sangil_gps", MODE_PRIVATE).edit().putLong("serviceStarted", System.currentTimeMillis()).putString("error", "").apply()
                   getSharedPreferences("sangil_gps", MODE_PRIVATE).edit().putLong("serviceStarted", System.currentTimeMillis()).putString("serviceError", "").apply()
