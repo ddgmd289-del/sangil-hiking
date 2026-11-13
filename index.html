@@ -229,7 +229,7 @@ function recoverNativeGps(){
    if(!line.trim())continue;
    let p;try{p=JSON.parse(line)}catch{continue}
    const fix={lat:Number(p.lat),lon:Number(p.lng),alt:Number(p.alt||0),accuracy:Number(p.accuracy),t:Number(p.time)};
-   if(!Number.isFinite(fix.lat)||!Number.isFinite(fix.lon)||!Number.isFinite(fix.t)||!Number.isFinite(fix.accuracy)||fix.accuracy>200)continue;
+   if(!Number.isFinite(fix.lat)||!Number.isFinite(fix.lon)||!Number.isFinite(fix.t)||!Number.isFinite(fix.accuracy)||fix.accuracy>65)continue;
    if(fix.t<trip.started-5000||fix.t>Date.now()+5000)continue;
    const key=fix.t+':'+fix.lat+':'+fix.lon;
    if(existing.has(key))continue;
@@ -242,7 +242,7 @@ function recoverNativeGps(){
    const prev=filtered.at(-1);
    if(!prev){filtered.push(p);continue}
    const dt=(p.t-prev.t)/1000,dist=km(prev,p);
-   if(dt<0||(dt===0&&dist>.03)||(dt>0&&dist/dt>.012)||dist<.002)continue;
+   if(dt<=0||dist/dt>.008||dist<Math.max(.002,Math.min(.005,(p.accuracy+(prev.accuracy||0))*.04/1000)))continue;
    total+=dist;filtered.push(p);
   }
   if(filtered.length>(trip.points||[]).length){
