@@ -1,7 +1,7 @@
 name: Build MYHIKING Android APK
 on:
   push:
-    branches: [build/android-apk-20261110, fix/gps-track-stability-20261113, feature/google-play-aab-20261113]
+    branches: [build/android-apk-20261110, fix/gps-track-stability-20261113, feature/google-play-aab-20261113, fix/gps-route-gaps-20261114]
   workflow_dispatch:
 jobs:
   apk:
