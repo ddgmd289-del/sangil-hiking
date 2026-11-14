@@ -15,4 +15,7 @@ assert.equal(accepted({accuracy:10,dt:5,diff:0.0005}), false, 'Stationary jitter
 assert.equal(accepted({accuracy:10,dt:0,diff:0,first:true}), true, 'First fix');
 assert.match(html, /fix\.accuracy>65\)continue;/, 'Recovered fix accuracy limit');
 assert.match(html, /if\(dt<=0\|\|dist\/dt>\.008\|\|dist<Math\.max/, 'Recovered fix jump/noise filtering');
+assert.match(html, /const routeLines=segments\.map/, 'Track rendered as separated segments');
+assert.match(html, /p\.breakBefore/, 'Disconnected fixes preserve break marker');
+assert.match(html, /if\(!cur\.breakBefore\)trip\.distance\+=diff/, 'No distance counted across a GPS gap');
 console.log('GPS filter static and scenario checks passed');
