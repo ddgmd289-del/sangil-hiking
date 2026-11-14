@@ -163,9 +163,19 @@ function displayRoutePoints(points){
 }
 function draw(){
  if(!map)return;
- const pts=displayRoutePoints(trip?.points||[]).map(p=>[Number(p.lat),Number(p.lon)]);
- if(!trackLine)trackLine=L.polyline(pts,{color:'#1678d4',weight:5,opacity:.95,lineJoin:'round',lineCap:'round'}).addTo(map);
- else trackLine.setLatLngs(pts);
+ const route=displayRoutePoints(trip?.points||[]);
+ const segments=[];let segment=[];
+ for(const p of route){
+  const prev=segment.at(-1);
+  const gap=prev&&(!Number.isFinite(Number(p.t))||!Number.isFinite(Number(prev.t))||Number(p.t)<=Number(prev.t)||Number(p.t)-Number(prev.t)>30000||km(prev,p)>.12);
+  if(gap){if(segment.length)segments.push(segment);segment=[]}
+  segment.push(p);
+ }
+ if(segment.length)segments.push(segment);
+ const pts=segments.flat().map(p=>[Number(p.lat),Number(p.lon)]);
+ const routeLines=segments.map(seg=>seg.map(p=>[Number(p.lat),Number(p.lon)]));
+ if(!trackLine)trackLine=L.polyline(routeLines,{color:'#1678d4',weight:5,opacity:.95,lineJoin:'round',lineCap:'round'}).addTo(map);
+ else trackLine.setLatLngs(routeLines);
  if(!marksLayer)marksLayer=L.layerGroup().addTo(map);
  marksLayer.clearLayers();
  (trip?.marks||[]).forEach(m=>L.marker([m.lat,m.lon]).addTo(marksLayer).bindPopup(clean(m.label)));
