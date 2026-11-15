@@ -6,7 +6,7 @@ assert.equal((html.match(/window\.sangilNativeFix=function/g) || []).length, 1, 
 assert.match(html, /const plausibleSpeed=dt>0&&diff\/dt<=\.0055;/);
 assert.match(html, /const usableFix=cur\.accuracy<=30&&\(!prev\|\|\(plausibleSpeed&&diff>=noiseKm\)\);/);
 const accepted = ({accuracy, dt, diff, noiseKm=0.002, first=false}) =>
-  accuracy <= 65 && (first || (dt > 0 && diff/dt <= 0.0055 && diff >= noiseKm));
+  accuracy <= 30 && (first || (dt > 0 && diff/dt <= 0.0055 && diff >= noiseKm));
 assert.equal(accepted({accuracy:12,dt:5,diff:0.0055}), true, 'Normal walking fix');
 assert.equal(accepted({accuracy:45,dt:5,diff:0.0055}), false, 'Low quality fix');
 assert.equal(accepted({accuracy:10,dt:0,diff:0.01}), false, 'Duplicate-time fix');
