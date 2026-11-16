@@ -238,7 +238,7 @@ function onFix(p){const c=p.coords;const cur={lat:c.latitude,lon:c.longitude,alt
       if(prev&&(reacquired||diff>.12))cur.breakBefore=true;
       if(!trip.startPoint)trip.startPoint={...cur};
       trip.points.push(cur);
-      if(!cur.breakBefore)trip.distance+=diff;
+      if(prev&&!cur.breakBefore)trip.distance+=diff;
       persist();announceDistance();
     }
     // Do not reset the stationary clock for ordinary GPS drift or each accepted GPS fix.
@@ -266,7 +266,7 @@ function recoverNativeGps(){
    let p;try{p=JSON.parse(line)}catch{continue}
    const fix={lat:Number(p.lat),lon:Number(p.lng),alt:Number(p.alt||0),accuracy:Number(p.accuracy),t:Number(p.time)};
    if(!Number.isFinite(fix.lat)||!Number.isFinite(fix.lon)||!Number.isFinite(fix.t)||!Number.isFinite(fix.accuracy)||fix.accuracy>65)continue;
-   if(fix.t<trip.started-5000||fix.t>Date.now()+5000)continue;
+   if(fix.t<trip.started||fix.t>Date.now()+5000)continue;
    // Never recover points recorded during explicit or automatic pauses.
    if((trip.rests||[]).some(r=>fix.t>=r.started&&fix.t<=r.ended)||trip.restStarted&&fix.t>=trip.restStarted)continue;
    const key=fix.t+':'+fix.lat+':'+fix.lon;
@@ -289,6 +289,9 @@ function recoverNativeGps(){
    filtered.push(p);
   }
   if(filtered.length>(trip.points||[]).length){
+   // Never let replay of raw Android fixes overwrite a longer or different live track.
+   // The backup is only safe to use when the web view received no fixes at all.
+   if((trip.points||[]).length>0)return;
    trip.points=filtered;trip.distance=total;
    if(!trip.startPoint&&filtered.length)trip.startPoint={...filtered[0]};
    persist();updateStats();draw();
