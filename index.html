@@ -212,9 +212,12 @@ function onFix(p){const c=p.coords;const cur={lat:c.latitude,lon:c.longitude,alt
     const noiseKm=prev?Math.max(.002,Math.min(.005,(cur.accuracy+(prev.accuracy||0))*.04/1000)):0;
     const plausibleSpeed=dt>0&&diff/dt<=.0055; // 19.8 km/h: walking/running ceiling; reject abrupt jumps
     // Preserve real walking fixes; GPS may report multiple points with equal timestamps.
-    const usableFix=cur.accuracy<=30&&(!prev||(plausibleSpeed&&diff>=noiseKm));
+    // After a GPS outage, restart a new segment instead of rejecting all later fixes
+    // against an old point. Do not count the unknown gap as walking distance.
+    const reacquired=!!prev&&dt>30&&cur.accuracy<=65;
+    const usableFix=cur.accuracy<=65&&(!prev||(reacquired||(plausibleSpeed&&diff>=noiseKm)));
     if(usableFix){
-      if(prev&&(dt>30||diff>.12))cur.breakBefore=true;
+      if(prev&&(reacquired||diff>.12))cur.breakBefore=true;
       trip.points.push(cur);
       if(!cur.breakBefore)trip.distance+=diff;
       persist();announceDistance();
@@ -242,7 +245,7 @@ function recoverNativeGps(){
    if(!line.trim())continue;
    let p;try{p=JSON.parse(line)}catch{continue}
    const fix={lat:Number(p.lat),lon:Number(p.lng),alt:Number(p.alt||0),accuracy:Number(p.accuracy),t:Number(p.time)};
-   if(!Number.isFinite(fix.lat)||!Number.isFinite(fix.lon)||!Number.isFinite(fix.t)||!Number.isFinite(fix.accuracy)||fix.accuracy>30)continue;
+   if(!Number.isFinite(fix.lat)||!Number.isFinite(fix.lon)||!Number.isFinite(fix.t)||!Number.isFinite(fix.accuracy)||fix.accuracy>65)continue;
    if(fix.t<trip.started-5000||fix.t>Date.now()+5000)continue;
    const key=fix.t+':'+fix.lat+':'+fix.lon;
    if(existing.has(key))continue;
@@ -255,8 +258,13 @@ function recoverNativeGps(){
    const prev=filtered.at(-1);
    if(!prev){filtered.push(p);continue}
    const dt=(p.t-prev.t)/1000,dist=km(prev,p);
-   if(dt<=0||dist/dt>.0055||dist<Math.max(.002,Math.min(.005,(p.accuracy+(prev.accuracy||0))*.04/1000)))continue;
-   if(dt>30||dist>.12)p.breakBefore=true;else total+=dist;filtered.push(p);
+   if(dt<=0)continue;
+   const reacquired=dt>30&&p.accuracy<=65;
+   const noise=Math.max(.002,Math.min(.005,(p.accuracy+(prev.accuracy||0))*.04/1000));
+   if(!reacquired&&(dist/dt>.0055||dist<noise))continue;
+   if(reacquired||dist>.12)p.breakBefore=true;
+   else total+=dist;
+   filtered.push(p);
   }
   if(filtered.length>(trip.points||[]).length){
    trip.points=filtered;trip.distance=total;
