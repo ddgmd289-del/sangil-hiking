@@ -1,7 +1,7 @@
 name: Build MYHIKING Android APK
 on:
   push:
-    branches: [build/android-apk-20261110, fix/gps-track-stability-20261113, feature/google-play-aab-20261113, fix/gps-route-gaps-20261114, fix/gps-distance-integrity-20261115, fix/gps-gap-reacquisition-20261116, feature/record-summary-accuracy-20261116, fix/saved-route-gpx-segments-20261116, fix/clear-previous-route-on-new-activity-20261116, fix/walking-time-autopause-accuracy-20261116, fix/gps-track-recovery-consistency-20261116, fix/notification-open-app-20261116]
+    branches: [build/android-apk-20261110, fix/gps-track-stability-20261113, feature/google-play-aab-20261113, fix/gps-route-gaps-20261114, fix/gps-distance-integrity-20261115, fix/gps-gap-reacquisition-20261116, feature/record-summary-accuracy-20261116, fix/saved-route-gpx-segments-20261116, fix/clear-previous-route-on-new-activity-20261116, fix/walking-time-autopause-accuracy-20261116, fix/gps-track-recovery-consistency-20261116, fix/notification-open-app-20261116, feature/tranggle-style-activity-map-20261116]
   workflow_dispatch:
 jobs:
   apk:
@@ -274,7 +274,7 @@ jobs:
                   if (intent?.action == "PAUSE") { try { location.removeUpdates(this) } catch (_: Exception) {}; return START_STICKY }
                   // Tapping the ongoing GPS notification returns to the existing activity.
                   val openApp = Intent(this, MainActivity::class.java).apply {
-                      flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                      addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
                   }
                   val openPendingIntent = PendingIntent.getActivity(this, 0, openApp, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
                   val notification = Notification.Builder(this, "hiking")
