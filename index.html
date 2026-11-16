@@ -519,7 +519,7 @@ $('#restoreRecordsFile').addEventListener('change',async e=>{
   if(saveRecords([...added,...existing])){renderRecords();toast(added.length+'개 기록을 복원했습니다.')}
  }catch(err){toast('올바른 산길 백업 파일인지 확인해 주세요.')}
 });
-$('#deleteAllRecords').addEventListener('click',()=>{const records=loadRecords();if(!records.length){toast('삭제할 기록이 없습니다.');return}if(!confirm('저장된 기록 '+records.length+'개를 모두 삭제할까요? 삭제 후 복구할 수 없습니다.'))return;if(!confirm('최종 확인: 모든 산행·걷기·운동 기록을 삭제합니다. 계속할까요?'))return;if(saveRecords([])){renderRecords();toast('모든 기록을 삭제했습니다.')}});
+$('#deleteAllRecords').addEventListener('click',()=>{const records=loadRecords();if(!records.length){clearSavedRoute();if(!trip&&trackLine)trackLine.setLatLngs([]);draw();toast('저장 기록이 없어 지도에 남은 이전 경로만 정리했습니다.');return}if(!confirm('저장된 기록 '+records.length+'개를 모두 삭제할까요? 삭제 후 복구할 수 없습니다.'))return;if(!confirm('최종 확인: 모든 산행·걷기·운동 기록을 삭제합니다. 계속할까요?'))return;if(saveRecords([])){clearSavedRoute();if(!trip&&trackLine)trackLine.setLatLngs([]);renderRecords();draw();toast('모든 저장 기록과 지도에 표시된 이전 경로를 삭제했습니다.')}});
 let trailsLayer=null,trailsRequest=0,trailsVisible=false,trailsAbort=null;
 async function loadNearbyTrails(forceRefresh=false){
  if(!map)return;
