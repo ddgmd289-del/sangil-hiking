@@ -21,3 +21,11 @@ assert.match(html, /const routeLines=segments\.map/, 'Track rendered as separate
 assert.match(html, /p\.breakBefore/, 'Disconnected fixes preserve break marker');
 assert.match(html, /if\(!cur\.breakBefore\)trip\.distance\+=diff/, 'No distance counted across a GPS gap');
 console.log('GPS filter static and scenario checks passed');
+
+assert.match(html,/function paceSeconds\(r,now=Date\.now\(\)\)/,'Pace time helper');
+assert.match(html,/cur\.accuracy<=20&&anchorDistance<\.020\)autoPause\(\)/,'Auto pause needs high-quality stillness');
+assert.match(html,/const paceDuration=paceSeconds\(r\)/,'Record average pace uses conservative denominator');
+const start=Date.UTC(2026,10,16,9,0,0);
+const elapsed=(r)=>{const manual=(r.rests||[]).filter(x=>x.type==='manual').reduce((n,x)=>n+(x.ended-x.started),0);return (r.ended-r.started-manual)/1000};
+assert.equal(elapsed({started:start,ended:start+180000,rests:[{type:'auto',started:start+30000,ended:start+90000}]}),180,'Auto pause does not inflate pace');
+assert.equal(elapsed({started:start,ended:start+180000,rests:[{type:'manual',started:start+30000,ended:start+90000}]}),120,'Explicit rest is excluded');
