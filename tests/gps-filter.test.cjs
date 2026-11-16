@@ -38,3 +38,6 @@ assert.match(html,/Math\.min\(\.012/,'Walking GPS noise floor');
 assert.match(html,/if\(saveRecords\(\[\]\)\)\{clearSavedRoute\(\)/,'Deleting all records clears map overlay');
 assert.match(html,/if\(!trip\)\{if\(trackLine\)trackLine\.setLatLngs\(\[\]\)/,'Idle map clears old live track');
 assert.match(html,/localStorage\.removeItem\(CURRENT\)\}catch\{\}clearSavedRoute\(\)/,'Finishing clears old map overlays');
+
+assert.match(html,/if\(\(trip\.points\|\|\[\]\)\.length>0\)return;/,'Native backup must not overwrite a live GPS route');
+assert.match(html,/if\(prev&&!cur\.breakBefore\)trip\.distance\+=diff;/,'First GPS fix must not add phantom distance');
