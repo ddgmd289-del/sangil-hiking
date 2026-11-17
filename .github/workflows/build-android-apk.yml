@@ -418,11 +418,11 @@ jobs:
           test -s "$APK"
           APKSIGNER=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -1)
           "$APKSIGNER" verify --verbose "$APK"
-          echo "Signed update APK verified successfully."
+          echo "Signed preview APK signature verified. Compatibility with installed apps NOT verified."
       - uses: actions/upload-artifact@v4
         if: steps.signing.outputs.enabled == 'true'
         with:
-          name: SANGIL-MYHIKING-SIGNED-UPDATE-APK
+          name: SANGIL-MYHIKING-SIGNED-PREVIEW-APK-NOT-VERIFIED-AS-UPDATE
           path: app/build/outputs/apk/release/app-release.apk
       - name: Build signed Android App Bundle (Play preparation)
         if: steps.signing.outputs.enabled == 'true'
