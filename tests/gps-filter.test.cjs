@@ -4,12 +4,14 @@ const fs = require('node:fs');
 const html = fs.readFileSync('index.html', 'utf8');
 assert.equal((html.match(/window\.sangilNativeFix=function/g) || []).length, 1, 'Native GPS callback must be unique');
 assert.match(html, /const plausibleSpeed=dt>0&&diff\/dt<=\(trip.activity==='달리기'\?\.0055:\.0033\);/);
-assert.match(html, /const usableFix=cur\.accuracy<=65&&\(!prev\|\|\(reacquired\|\|\(plausibleSpeed&&diff>=noiseKm\)\)\);/);
+assert.match(html, /const usableFix=cur\.accuracy<=65&&\(!prev\|\|\(dt>0&&\(reacquired\|\|\(plausibleSpeed&&diff>=noiseKm\)\)\)\);/);
 const accepted = ({accuracy, dt, diff, noiseKm=0.002, first=false}) =>
   accuracy <= 65 && (first || (dt > 30 || (dt > 0 && diff/dt <= 0.0055 && diff >= noiseKm)));
 assert.equal(accepted({accuracy:12,dt:5,diff:0.0055}), true, 'Normal walking fix');
 assert.equal(accepted({accuracy:90,dt:5,diff:0.0055}), false, 'Low quality fix');
 assert.equal(accepted({accuracy:10,dt:0,diff:0.01}), false, 'Duplicate-time fix');
+assert.match(html, /if\(!position\|\|cur\.t>=position\.t\)position=cur;/, 'Delayed provider fixes must not rewind map position');
+assert.match(html, /if\(position&&cur\.t===position\.t&&cur\.lat===position\.lat&&cur\.lon===position\.lon\)return;/, 'Duplicate fixes are ignored');
 assert.equal(accepted({accuracy:10,dt:1,diff:0.1}), false, 'GPS teleport');
 assert.equal(accepted({accuracy:10,dt:5,diff:0.0005}), false, 'Stationary jitter');
 assert.equal(accepted({accuracy:10,dt:0,diff:0,first:true}), true, 'First fix');
