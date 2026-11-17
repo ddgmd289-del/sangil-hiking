@@ -10,6 +10,10 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+      - name: Verify source revision and app identity
+        run: |
+          echo "Build source: $GITHUB_SHA ($GITHUB_REF_NAME)"
+          echo 'NOTE: This workflow builds kr.sangil.myhiking.preview; do not label it as an update for a differently identified installed app.'
       - name: Verify GPS regression checks
         run: node tests/gps-filter.test.cjs
       - uses: actions/setup-java@v4
@@ -25,6 +29,8 @@ jobs:
         run: |
           mkdir -p app/src/main/assets app/src/main/java/kr/sangil/myhiking
           cp index.html extensions.js auth-config.js manifest.webmanifest service-worker.js app/src/main/assets/
+          printf 'source_commit=%s\nsource_ref=%s\nbuild_run=%s\n' "$GITHUB_SHA" "$GITHUB_REF_NAME" "$GITHUB_RUN_ID" > app/src/main/assets/build-info.txt
+          cmp -s index.html app/src/main/assets/index.html || { echo 'ERROR: bundled index.html differs from source'; exit 1; }
           cp -r icons app/src/main/assets/
           mkdir -p app/src/main/res/drawable
           python3 -m pip install --quiet cairosvg
