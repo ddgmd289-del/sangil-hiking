@@ -39,8 +39,11 @@ assert.match(html,/if\(saveRecords\(\[\]\)\)\{clearSavedRoute\(\)/,'Deleting all
 assert.match(html,/if\(!trip\)\{if\(trackLine\)trackLine\.setLatLngs\(\[\]\)/,'Idle map clears old live track');
 assert.match(html,/localStorage\.removeItem\(CURRENT\)\}catch\{\}clearSavedRoute\(\)/,'Finishing clears old map overlays');
 
-assert.match(html,/if\(\(trip\.points\|\|\[\]\)\.length>0\)return;/,'Native backup must not overwrite a live GPS route');
+assert.match(html,/if\(total\+0\.001<trip\.distance\)return;/,'Native backup must not reduce recorded distance');
 assert.match(html,/if\(prev&&!cur\.breakBefore\)trip\.distance\+=diff;/,'First GPS fix must not add phantom distance');
 
 assert.match(html,/const rests=\(r\.rests\|\|\[\]\)\.reduce/,'Average speed excludes auto and manual rests');
 assert.match(html,/const openRest=r\.restStarted\?/,'Average speed excludes ongoing rest');
+
+assert.match(html,/window\.SangilNative\.startTracking\(\)/,'Native GPS starts');
+assert.match(html,/navigator\.geolocation\.watchPosition\(onFix/,'Browser GPS fallback starts');
