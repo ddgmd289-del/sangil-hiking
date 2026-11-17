@@ -387,6 +387,27 @@ jobs:
           SANGIL_KEYSTORE_PASSWORD: ${{ secrets.SANGIL_KEYSTORE_PASSWORD }}
           SANGIL_KEY_PASSWORD: ${{ secrets.SANGIL_KEY_PASSWORD }}
         run: gradle --no-daemon :app:assembleRelease
+      - name: Verify Android package identity and version
+        run: |
+          python3 - <<'PY'
+          import os, re, subprocess
+          from pathlib import Path
+          tools=sorted(Path(os.environ['ANDROID_HOME'],'build-tools').glob('*/aapt'),key=lambda p:[int(x) for x in re.findall(r'\\d+',p.parent.name)])
+          if not tools: raise SystemExit('Android aapt not found')
+          for flavor in ('debug','release'):
+              apk=Path(f'app/build/outputs/apk/{flavor}/app-{flavor}.apk')
+              if not apk.exists():
+                  if flavor=='release': continue
+                  raise SystemExit('Missing debug APK')
+              info=subprocess.check_output([str(tools[-1]),'dump','badging',str(apk)],text=True)
+              package=re.search(r"package: name='([^']+)' versionCode='([^']+)' versionName='([^']+)'",info)
+              if not package: raise SystemExit(f'{apk}: cannot read package metadata')
+              app_id,code,name=package.groups()
+              if app_id!='kr.sangil.myhiking.preview':
+                  raise SystemExit(f'{apk}: unexpected package {app_id}')
+              if int(code)<1: raise SystemExit(f'{apk}: invalid versionCode')
+              print(f'{apk}: package={app_id}, versionCode={code}, versionName={name}; preview only, NOT proven compatible with existing app')
+          PY
       - name: Verify packaged web assets and revision
         run: |
           python3 - <<'PY'
