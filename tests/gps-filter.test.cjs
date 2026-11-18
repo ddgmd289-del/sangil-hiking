@@ -94,3 +94,10 @@ assert.match(html,/r\.pauseReason==='manual'\?/,'Open auto-pause stays in pace d
 // Native GPS timestamps must not be replaced by wall-clock time when invalid.
 assert.match(html,/window\.sangilNativeFix=function[\s\S]*?timestamp:Number\(t\)\}\)/,'Native callback passes timestamp through validation');
 assert.doesNotMatch(html,/timestamp:Number\(t\)\|\|Date\.now\(\)/,'Invalid native timestamps cannot masquerade as current fixes');
+
+// Rejected native replay must not mutate saved break markers in memory.
+assert.match(html,/const all=\[\.\.\.\(trip\.points\|\|\[\]\)\.map\(p=>\(\{\.\.\.p\}\)\),\.\.\.recovered\]\.sort/,'Recovery operates on cloned route points before commit');
+const saved=[{t:1,breakBefore:true},{t:2,breakBefore:false}];
+const replay=saved.map(p=>({...p}));
+replay[0].breakBefore=false;
+assert.equal(saved[0].breakBefore,true,'Rejected replay cannot silently alter saved route boundaries');
