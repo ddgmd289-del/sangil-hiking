@@ -58,7 +58,7 @@ jobs:
           from pathlib import Path
           import re
           html=Path('app/src/main/assets/index.html').read_text()
-          scripts=re.findall(r'<script(?:\\s[^>]*)?>(.*?)</script>',html,re.S|re.I)
+          scripts=re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>',html,re.S|re.I)
           for i,script in enumerate(scripts):
               if script.strip():
                   Path(f'/tmp/sangil-inline-{i}.js').write_text(script)
@@ -392,7 +392,7 @@ jobs:
           python3 - <<'PY'
           import os, re, subprocess
           from pathlib import Path
-          tools=sorted(Path(os.environ['ANDROID_HOME'],'build-tools').glob('*/aapt'),key=lambda p:[int(x) for x in re.findall(r'\\d+',p.parent.name)])
+          tools=sorted(Path(os.environ['ANDROID_HOME'],'build-tools').glob('*/aapt'),key=lambda p:[int(x) for x in re.findall(r'\d+',p.parent.name)])
           if not tools: raise SystemExit('Android aapt not found')
           for flavor in ('debug','release'):
               apk=Path(f'app/build/outputs/apk/{flavor}/app-{flavor}.apk')
