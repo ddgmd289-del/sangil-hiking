@@ -30,7 +30,8 @@ assert.match(html, /fix\.lat===0&&fix\.lon===0/, 'Recovered GPS rejects null-isl
 assert.match(html, /fix\.accuracy<0/, 'Recovered GPS rejects negative accuracy');
 assert.match(html, /if\(!reacquired&&\(dist\/dt>\(trip.activity==='달리기'\?\.0055:\.0033\)\|\|dist<noise\)\)continue;/, 'Recovered fix jump/noise filtering');
 assert.match(html, /const reacquired=dt>30&&p\.accuracy<=65;/, 'Recovery resumes after signal outage');
-assert.match(html, /if\(reacquired\|\|dist>\.12\|\|p\.breakBefore\)p\.breakBefore=true;/, 'Native recovery preserves existing GPS segment boundaries');
+assert.match(html, /const safeBridge=reacquired&&dist<=\.12&&dist\/dt<=/, 'Only plausible short outages may reconnect');
+assert.match(html, /if\(dist>\.12\|\|\(reacquired&&!safeBridge\)\|\|p\.breakBefore\)p\.breakBefore=true;/, 'Native recovery preserves unsafe and existing segment boundaries');
 assert.equal(accepted({accuracy:25,dt:90,diff:0.4}), true, 'GPS reconnect after long gap');
 assert.match(html, /const routeLines=segments\.map/, 'Track rendered as separated segments');
 assert.match(html, /p\.breakBefore/, 'Disconnected fixes preserve break marker');
@@ -62,3 +63,5 @@ assert.match(html,/const openRest=r\.restStarted\?/,'Average speed excludes ongo
 
 assert.match(html,/window\.SangilNative\.startTracking\(\)/,'Native GPS starts');
 assert.match(html,/navigator\.geolocation\.watchPosition\(onFix/,'Browser GPS fallback starts');
+
+assert.match(html, /reacquired&&\!\(plausibleSpeed&&cur\.accuracy<=35&&prev\.accuracy<=35\)/, 'Live GPS bridges only short accurate plausible gaps');
