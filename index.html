@@ -240,8 +240,29 @@ function onFix(p){const c=p.coords;const cur={lat:c.latitude,lon:c.longitude,alt
       // The first post-rest fix starts a new segment; never count the rest displacement.
       trip.resumeBreakPending=false;
       if(!trip.startPoint)trip.startPoint={...cur};
-      trip.points.push(cur);
-      if(prev&&!cur.breakBefore)trip.distance+=diff;
+      // Remove a single GPS spike only when the next fix returns near the earlier
+      // position. Recalculate both affected legs so a false detour adds no distance.
+      const beforePrev=trip.points.length>=2?trip.points[trip.points.length-2]:null;
+      const legIn=beforePrev&&prev?km(beforePrev,prev):0;
+      const direct=beforePrev?km(beforePrev,cur):0;
+      const detour=beforePrev?legIn+diff-direct:0;
+      const spike=!!(beforePrev&&prev&&!prev.breakBefore&&!cur.breakBefore&&
+        cur.t>prev.t&&prev.t>beforePrev.t&&
+        cur.t-beforePrev.t<=90000&&legIn>=.015&&diff>=.015&&
+        direct<=Math.max(.025,Math.min(.060,(Number(prev.accuracy)||20)*1.5/1000))&&
+        detour>=.035&&detour>=direct*1.5);
+      if(spike){
+        trip.points.pop();
+        trip.distance=Math.max(0,trip.distance-legIn);
+        // The new fix is kept: it connects directly to the last reliable point.
+        if(direct>=.003&&direct/(Math.max(1,(cur.t-beforePrev.t)/1000))<=(trip.activity==='달리기'?.0055:.0033)){
+          trip.points.push(cur);
+          trip.distance+=direct;
+        }
+      }else{
+        trip.points.push(cur);
+        if(prev&&!cur.breakBefore)trip.distance+=diff;
+      }
       persist();announceDistance();
     }
     // A GPS outage is not evidence of continuous stillness: restart the stationary timer.
