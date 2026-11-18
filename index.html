@@ -244,6 +244,9 @@ function onFix(p){const c=p.coords;const cur={lat:c.latitude,lon:c.longitude,alt
       if(prev&&!cur.breakBefore)trip.distance+=diff;
       persist();announceDistance();
     }
+    // A GPS outage is not evidence of continuous stillness: restart the stationary timer.
+    if(trip.stationaryLastFixT&&cur.t-trip.stationaryLastFixT>30000){trip.stationarySince=null;trip.stationaryAnchor=null;}
+    trip.stationaryLastFixT=cur.t;
     // Do not reset the stationary clock for ordinary GPS drift or each accepted GPS fix.
     if(!trip.stationarySince){trip.stationarySince=cur.t;trip.stationaryAnchor=cur}
     else if(cur.accuracy<=20&&anchor.accuracy<=20&&anchorDistance>=movementThresholdKm){
