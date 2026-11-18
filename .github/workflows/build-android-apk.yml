@@ -317,7 +317,7 @@ jobs:
                   // Reject cached/stale fixes; never relabel old positions with the current time.
                   val fixTime = loc.time
                   val now = System.currentTimeMillis()
-                  if (fixTime <= 0L || fixTime > now + 5000L || now - fixTime > 30000L || !loc.hasAccuracy()) return
+                  if (fixTime <= 0L || fixTime > now + 5000L || now - fixTime > 30000L || !loc.hasAccuracy() || !loc.accuracy.isFinite() || loc.accuracy < 0f || loc.accuracy > 300f || !loc.latitude.isFinite() || !loc.longitude.isFinite() || kotlin.math.abs(loc.latitude) > 90.0 || kotlin.math.abs(loc.longitude) > 180.0 || (loc.latitude == 0.0 && loc.longitude == 0.0)) return
                   getSharedPreferences("sangil_gps", MODE_PRIVATE).edit()
                       .putLong("lastFixTime", fixTime).putFloat("lastAccuracy", loc.accuracy)
                       .putString("lastProvider", loc.provider ?: "").apply()
