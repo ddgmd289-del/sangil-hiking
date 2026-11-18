@@ -218,7 +218,7 @@ function onFix(p){const c=p.coords;const cur={lat:c.latitude,lon:c.longitude,alt
     const threshold=Math.max(.018,Math.min(.055,(cur.accuracy||15)*1.2/1000));
     if(moved>=threshold&&cur.accuracy<=65){
       trip.resumeCandidates=(trip.resumeCandidates||0)+1;
-      if(trip.resumeCandidates>=2)autoResume();
+      if(trip.resumeCandidates>=2||(moved>=.08&&cur.accuracy<=20))autoResume();
     }else trip.resumeCandidates=0;
   }
   if(trip.state==='running'){
