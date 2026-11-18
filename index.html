@@ -244,7 +244,7 @@ function onFix(p){const c=p.coords;const cur={lat:c.latitude,lon:c.longitude,alt
     }
     // Do not reset the stationary clock for ordinary GPS drift or each accepted GPS fix.
     if(!trip.stationarySince){trip.stationarySince=cur.t;trip.stationaryAnchor=cur}
-    else if(anchorDistance>=movementThresholdKm){
+    else if(cur.accuracy<=20&&anchor.accuracy<=20&&anchorDistance>=movementThresholdKm){
       trip.stationarySince=cur.t;trip.stationaryAnchor=cur;persist();
     }
     // Auto-pause only with recent GPS reception; missing GPS must not look like a rest.
