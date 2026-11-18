@@ -323,7 +323,7 @@ jobs:
                       .putString("lastProvider", loc.provider ?: "").apply()
                   getSharedPreferences("sangil_gps", MODE_PRIVATE).edit().putLong("lastFix", now).putFloat("accuracy", loc.accuracy).putString("provider", loc.provider ?: "").apply()
                   val p = JSONObject().put("lat", loc.latitude).put("lng", loc.longitude).put("time", fixTime)
-                      .put("accuracy", loc.accuracy)
+                      .put("accuracy", loc.accuracy).put("alt", if (loc.hasAltitude()) loc.altitude else 0.0)
                   try { java.io.File(filesDir, "tracking_backup.jsonl").appendText(p.toString() + System.lineSeparator()) }
                   catch (e: Exception) { android.util.Log.w("SANGIL_GPS", "Backup write failed", e) }
                   sendBroadcast(Intent("kr.sangil.myhiking.FIX").setPackage(packageName)
