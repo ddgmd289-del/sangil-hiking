@@ -129,8 +129,8 @@ function fmtTime(seconds){let s=Math.max(0,Math.floor(seconds)),h=Math.floor(s/3
 function paceSeconds(r,now=Date.now()){
  if(!r||!Number.isFinite(Number(r.started)))return 0;
  const end=Number(r.ended)||now;
- const rests=(r.rests||[]).reduce((n,x)=>n+Math.max(0,Number(x.ended)-Number(x.started)),0);
- const openRest=r.restStarted?Math.max(0,end-Number(r.restStarted)):0;
+ const rests=(r.rests||[]).filter(x=>x.type==='manual').reduce((n,x)=>n+Math.max(0,Number(x.ended)-Number(x.started)),0);
+ const openRest=r.restStarted&&r.pauseReason==='manual'?Math.max(0,end-Number(r.restStarted)):0;
  return Math.max(0,(end-Number(r.started)-rests-openRest)/1000);
 }
 function elapsed(){if(!trip)return 0;return Math.max(0,(trip.accMs||0)+(trip.state==='running'?Date.now()-trip.segmentStarted:0))/1000}
