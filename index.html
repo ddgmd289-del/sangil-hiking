@@ -279,7 +279,7 @@ function recoverNativeGps(){
   // Re-evaluate stale gap markers even when native backup contains no new fixes.
   // A prior interrupted merge may have left a false break on already saved points.
   if(!recovered.length&&!(trip.points||[]).some(p=>p.breakBefore))return;
-  const all=[...(trip.points||[]),...recovered].sort((a,b)=>a.t-b.t);
+  const all=[...(trip.points||[]).map(p=>({...p})),...recovered].sort((a,b)=>a.t-b.t);
   const filtered=[];let total=0;
   for(const p of all){
    const prev=filtered.at(-1);
