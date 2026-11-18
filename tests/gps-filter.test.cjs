@@ -78,3 +78,8 @@ assert.match(html,/cur\.accuracy<=20&&anchor\.accuracy<=20&&anchorDistance>=move
 // Same-count backup replay may repair lost segment boundaries without shortening tracks.
 assert.match(html,/filtered\.length===\(trip\.points\|\|\[\]\)\.length&&total>trip\.distance\+0\.001/,'Same-count backup repairs missing distance');
 assert.match(html,/if\(filtered\.length<\(trip\.points\|\|\[\]\)\.length\)return;/,'Native replay never reduces point count');
+
+// Auto-resume must start a new segment instead of adding distance traveled while paused.
+assert.match(html,/trip\.resumeBreakPending=true/,'Auto-resume marks next accepted GPS fix as new segment');
+assert.match(html,/trip\.resumeBreakPending\|\|diff>\.12/,'First resumed fix cannot bridge the rest');
+assert.match(html,/trip\.resumeBreakPending=false/,'Segment boundary flag clears after accepted fix');
