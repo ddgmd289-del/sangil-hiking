@@ -50,7 +50,7 @@ const elapsed=(r)=>{const manual=(r.rests||[]).filter(x=>x.type==='manual').redu
 assert.equal(elapsed({started:start,ended:start+180000,rests:[{type:'auto',started:start+30000,ended:start+90000}]}),180,'Auto pause does not inflate pace');
 assert.equal(elapsed({started:start,ended:start+180000,rests:[{type:'manual',started:start+30000,ended:start+90000}]}),120,'Explicit rest is excluded');
 
-assert.match(html,/trip\.state!=='running'\|\|!window\.SangilNative/,'Recovery skips paused state');
+assert.match(html,/trip\.state==='done'\|\|!window\.SangilNative\?\.getTrackBackup/,'Recovery remains available during pause and skips finished trips');
 assert.match(html,/trip\.rests\|\|\[\]/,'Recovery excludes rest windows');
 assert.match(html,/Math\.min\(\.012/,'Walking GPS noise floor');
 
