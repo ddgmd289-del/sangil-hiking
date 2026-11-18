@@ -19,6 +19,12 @@ const paceSeconds=vm.runInContext('paceSeconds',ctx);
 const a={lat:35,lon:128},b={lat:35.009,lon:128};
 assert.ok(km(a,b)>0.99&&km(a,b)<1.02,'1km northbound track segment');
 assert.equal(km(a,a),0,'Identical fixes add zero distance');
+const synthetic=[{lat:35,lon:128},{lat:35.01,lon:128},{lat:35.02,lon:128},{lat:35.0279,lon:128}];
+const cumulative=synthetic.slice(1).reduce((total,p,i)=>total+km(synthetic[i],p),0);
+assert.ok(cumulative>3.08&&cumulative<3.13,'Continuous 3.1km track retains all consecutive segments');
+const partial=km(synthetic[0],synthetic[1]);
+assert.ok(cumulative>partial*2.7,'A single retained segment cannot stand in for the full track');
+
 assert.ok(Math.abs(km(a,b)-km(b,a))<1e-9,'Distance is symmetric');
 const start=Date.UTC(2026,10,18,1);
 const record=(type)=>({started:start,ended:start+180000,rests:[{type,started:start+30000,ended:start+90000}]});
