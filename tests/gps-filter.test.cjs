@@ -74,3 +74,7 @@ assert.match(html, /const bridgeGap=prev&&dt>0&&dt<=180&&diff<=\.5&&plausibleSpe
 
 // Weak GPS drift must not indefinitely postpone a real stationary auto-pause.
 assert.match(html,/cur\.accuracy<=20&&anchor\.accuracy<=20&&anchorDistance>=movementThresholdKm/,'Stationary timer only resets on high-confidence displacement');
+
+// Same-count backup replay may repair lost segment boundaries without shortening tracks.
+assert.match(html,/filtered\.length===\(trip\.points\|\|\[\]\)\.length&&total>trip\.distance\+0\.001/,'Same-count backup repairs missing distance');
+assert.match(html,/if\(filtered\.length<\(trip\.points\|\|\[\]\)\.length\)return;/,'Native replay never reduces point count');
