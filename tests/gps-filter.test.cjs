@@ -20,6 +20,8 @@ assert.match(html, /fix\.accuracy>65\)continue;/, 'Recovered fix accuracy limit'
 assert.match(html, /Math\.abs\(cur\.lat\)>90\|\|Math\.abs\(cur\.lon\)>180/, 'Live GPS coordinate bounds');
 assert.match(html, /Math\.abs\(fix\.lat\)>90\|\|Math\.abs\(fix\.lon\)>180/, 'Recovered GPS coordinate bounds');
 assert.match(html, /cur\.accuracy<0/, 'Live GPS rejects negative accuracy');
+assert.match(html, /cur\.lat===0&&cur\.lon===0/, 'Live GPS rejects null-island location');
+assert.match(html, /fix\.lat===0&&fix\.lon===0/, 'Recovered GPS rejects null-island location');
 assert.match(html, /fix\.accuracy<0/, 'Recovered GPS rejects negative accuracy');
 assert.match(html, /if\(!reacquired&&\(dist\/dt>\(trip.activity==='달리기'\?\.0055:\.0033\)\|\|dist<noise\)\)continue;/, 'Recovered fix jump/noise filtering');
 assert.match(html, /const reacquired=dt>30&&p\.accuracy<=65;/, 'Recovery resumes after signal outage');
