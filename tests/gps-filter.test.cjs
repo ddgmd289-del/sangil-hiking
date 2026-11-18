@@ -2,6 +2,7 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const html = fs.readFileSync('index.html', 'utf8');
+assert.match(html, /p\.breakBefore=!!\(crossesRest\|\|\(dist>\.12&&!safeBridge\)\|\|\(reacquired&&!safeBridge\)\)/, 'Replayed native fixes recompute stale segment breaks without bridging rests');
 assert.match(html, /trip\.state==='done'\|\|!window\.SangilNative\?\.getTrackBackup/, 'Native GPS recovery remains available during pause while excluding pause-time fixes');
 assert.match(html, /moved>=\.08&&cur\.accuracy<=20/, 'Auto-paused hike resumes on one high-confidence movement fix');
 const workflow = fs.readFileSync('.github/workflows/build-android-apk.yml', 'utf8');
