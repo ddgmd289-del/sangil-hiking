@@ -302,7 +302,7 @@ function recoverNativeGps(){
    if((trip.points||[]).length>0){
      // Merge missed native fixes instead of discarding the whole backup.
      // Never replace the route with fewer points or a shorter distance.
-     if(filtered.length<=(trip.points||[]).length)return;
+     if(filtered.length<(trip.points||[]).length)return;
      if(total+0.001<trip.distance)return;
    }
    trip.points=filtered;trip.distance=total;
