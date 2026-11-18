@@ -71,3 +71,6 @@ assert.match(html,/window\.SangilNative\.startTracking\(\)/,'Native GPS starts')
 assert.match(html,/navigator\.geolocation\.watchPosition\(onFix/,'Browser GPS fallback starts');
 
 assert.match(html, /const bridgeGap=prev&&dt>0&&dt<=180&&diff<=\.5&&plausibleSpeed/, 'Live GPS bridges bounded accurate plausible gaps');
+
+// Weak GPS drift must not indefinitely postpone a real stationary auto-pause.
+assert.match(html,/cur\.accuracy<=20&&anchor\.accuracy<=20&&anchorDistance>=movementThresholdKm/,'Stationary timer only resets on high-confidence displacement');
