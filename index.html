@@ -293,7 +293,10 @@ function recoverNativeGps(){
    if(!p.breakBefore)total+=dist;
    filtered.push(p);
   }
-  if(filtered.length>(trip.points||[]).length){
+  // A recovered route can have the same point count but repaired segment boundaries.
+  // Apply that repair only if the recalculated distance increases; never shorten an
+  // existing route or erase previously recorded distance.
+  if(filtered.length>(trip.points||[]).length||(filtered.length===(trip.points||[]).length&&total>trip.distance+0.001)){
    // Never let replay of raw Android fixes overwrite a longer or different live track.
    // The backup is only safe to use when the web view received no fixes at all.
    if((trip.points||[]).length>0){
