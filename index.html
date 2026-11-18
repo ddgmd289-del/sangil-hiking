@@ -257,7 +257,7 @@ updateStats();draw()}
 // Recover GPS fixes from the Android foreground service even when broadcasts are missed.
 let lastRecoveredFixKey='';
 function recoverNativeGps(){
- if(!trip||trip.demo||trip.state!=='running'||!window.SangilNative?.getTrackBackup)return;
+ if(!trip||trip.demo||trip.state==='done'||!window.SangilNative?.getTrackBackup)return;
  try{
   const raw=window.SangilNative.getTrackBackup();if(!raw)return;
   const existing=new Set((trip.points||[]).map(p=>p.t+':'+p.lat+':'+p.lon));
