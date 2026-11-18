@@ -90,3 +90,7 @@ assert.match(html,/if\(!recovered\.length&&\!\(trip\.points\|\|\[\]\)\.some\(p=>
 // Auto-pause is provisional: never report an artificially fast pace after GPS drift.
 assert.match(html,/filter\(x=>x\.type==='manual'\)/,'Pace excludes only confirmed manual rest');
 assert.match(html,/r\.pauseReason==='manual'\?/,'Open auto-pause stays in pace denominator');
+
+// Native GPS timestamps must not be replaced by wall-clock time when invalid.
+assert.match(html,/window\.sangilNativeFix=function[\s\S]*?timestamp:Number\(t\)\}\)/,'Native callback passes timestamp through validation');
+assert.doesNotMatch(html,/timestamp:Number\(t\)\|\|Date\.now\(\)/,'Invalid native timestamps cannot masquerade as current fixes');
