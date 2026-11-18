@@ -22,6 +22,7 @@ assert.match(html, /Math\.abs\(fix\.lat\)>90\|\|Math\.abs\(fix\.lon\)>180/, 'Rec
 assert.match(html, /cur\.accuracy<0/, 'Live GPS rejects negative accuracy');
 assert.match(html, /cur\.lat===0&&cur\.lon===0/, 'Live GPS rejects null-island location');
 assert.match(html, /trip\.points\?\.length&&cur\.t<=trip\.points\.at\(-1\)\.t\)return;/, 'Older live GPS fixes cannot change tracking or auto pause');
+assert.match(html, /trip\.state==='paused'&&position&&cur\.t<position\.t\)return;/, 'Paused trip cannot resume from stale cross-provider fix');
 assert.match(html, /fix\.lat===0&&fix\.lon===0/, 'Recovered GPS rejects null-island location');
 assert.match(html, /fix\.accuracy<0/, 'Recovered GPS rejects negative accuracy');
 assert.match(html, /if\(!reacquired&&\(dist\/dt>\(trip.activity==='달리기'\?\.0055:\.0033\)\|\|dist<noise\)\)continue;/, 'Recovered fix jump/noise filtering');
