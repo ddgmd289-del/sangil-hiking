@@ -30,6 +30,7 @@ assert.match(html, /fix\.lat===0&&fix\.lon===0/, 'Recovered GPS rejects null-isl
 assert.match(html, /fix\.accuracy<0/, 'Recovered GPS rejects negative accuracy');
 assert.match(html, /if\(!reacquired&&\(dist\/dt>\(trip.activity==='달리기'\?\.0055:\.0033\)\|\|dist<noise\)\)continue;/, 'Recovered fix jump/noise filtering');
 assert.match(html, /const reacquired=dt>30&&p\.accuracy<=65;/, 'Recovery resumes after signal outage');
+assert.match(html, /if\(reacquired\|\|dist>\.12\|\|p\.breakBefore\)p\.breakBefore=true;/, 'Native recovery preserves existing GPS segment boundaries');
 assert.equal(accepted({accuracy:25,dt:90,diff:0.4}), true, 'GPS reconnect after long gap');
 assert.match(html, /const routeLines=segments\.map/, 'Track rendered as separated segments');
 assert.match(html, /p\.breakBefore/, 'Disconnected fixes preserve break marker');
