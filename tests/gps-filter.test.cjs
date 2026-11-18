@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const html = fs.readFileSync('index.html', 'utf8');
 assert.equal((html.match(/window\.sangilNativeFix=function/g) || []).length, 1, 'Native GPS callback must be unique');
 assert.match(html, /const plausibleSpeed=dt>0&&diff\/dt<=\(trip.activity==='달리기'\?\.0055:\.0033\);/);
+assert.match(html, /cur\.t<Date\.now\(\)-86400000\|\|cur\.t>Date\.now\(\)\+60000/, 'Reject stale or future GPS timestamps');
 assert.match(html, /const usableFix=cur\.accuracy<=65&&\(!prev\|\|\(dt>0&&\(reacquired\|\|\(plausibleSpeed&&diff>=noiseKm\)\)\)\);/);
 const accepted = ({accuracy, dt, diff, noiseKm=0.002, first=false}) =>
   accuracy <= 65 && (first || (dt > 30 || (dt > 0 && diff/dt <= 0.0055 && diff >= noiseKm)));
