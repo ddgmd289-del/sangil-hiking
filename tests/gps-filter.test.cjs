@@ -11,7 +11,7 @@ const accepted = ({accuracy, dt, diff, noiseKm=0.002, first=false}) =>
 assert.equal(accepted({accuracy:12,dt:5,diff:0.0055}), true, 'Normal walking fix');
 assert.equal(accepted({accuracy:90,dt:5,diff:0.0055}), false, 'Low quality fix');
 assert.equal(accepted({accuracy:10,dt:0,diff:0.01}), false, 'Duplicate-time fix');
-assert.match(html, /if\(!position\|\|cur\.t>=position\.t\)position=cur;/, 'Delayed provider fixes must not rewind map position');
+assert.match(html, /if\(!position\|\|cur\.t>=position\.t\)\{position=cur;lastFix=Date\.now\(\);/, 'Delayed provider fixes must not rewind map or live GPS freshness');
 assert.match(html, /if\(position&&cur\.t===position\.t&&cur\.lat===position\.lat&&cur\.lon===position\.lon\)return;/, 'Duplicate fixes are ignored');
 assert.equal(accepted({accuracy:10,dt:1,diff:0.1}), false, 'GPS teleport');
 assert.equal(accepted({accuracy:10,dt:5,diff:0.0005}), false, 'Stationary jitter');
