@@ -26,6 +26,14 @@ const partial=km(synthetic[0],synthetic[1]);
 assert.ok(cumulative>partial*2.7,'A single retained segment cannot stand in for the full track');
 
 assert.ok(Math.abs(km(a,b)-km(b,a))<1e-9,'Distance is symmetric');
+// Reversing a continuous track must preserve cumulative distance, not silently discard segments.
+const reverse=[...synthetic].reverse();
+const reversedDistance=reverse.slice(1).reduce((total,p,i)=>total+km(reverse[i],p),0);
+assert.ok(Math.abs(cumulative-reversedDistance)<1e-8,'Reverse track retains the same 3.1km distance');
+// Subdividing each GPS leg must not change the distance along a straight northbound route.
+const subdivided=synthetic.flatMap((p,i)=>i===synthetic.length-1?[p]:[p,{lat:(p.lat+synthetic[i+1].lat)/2,lon:p.lon}]);
+const subdividedDistance=subdivided.slice(1).reduce((total,p,i)=>total+km(subdivided[i],p),0);
+assert.ok(Math.abs(cumulative-subdividedDistance)<1e-8,'Higher GPS sampling density retains the same distance');
 const start=Date.UTC(2026,10,18,1);
 const record=(type)=>({started:start,ended:start+180000,rests:[{type,started:start+30000,ended:start+90000}]});
 assert.equal(paceSeconds(record('auto')),180,'Auto-pause cannot inflate speed by excluding uncertain time');
