@@ -284,7 +284,7 @@ function recoverNativeGps(){
    const reacquired=dt>30&&p.accuracy<=65;
    const noise=Math.max(.003,Math.min(.012,(p.accuracy+(prev.accuracy||0))*.18/1000));
    if(!reacquired&&(dist/dt>(trip.activity==='달리기'?.0055:.0033)||dist<noise))continue;
-   if(reacquired||dist>.12)p.breakBefore=true;
+   if(reacquired||dist>.12||p.breakBefore)p.breakBefore=true;
    else total+=dist;
    filtered.push(p);
   }
