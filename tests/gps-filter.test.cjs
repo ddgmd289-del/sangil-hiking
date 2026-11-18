@@ -101,3 +101,11 @@ const saved=[{t:1,breakBefore:true},{t:2,breakBefore:false}];
 const replay=saved.map(p=>({...p}));
 replay[0].breakBefore=false;
 assert.equal(saved[0].breakBefore,true,'Rejected replay cannot silently alter saved route boundaries');
+
+// A GPS reception outage must not be mistaken for 3 minutes of confirmed stillness.
+assert.match(html,/trip\.stationaryLastFixT&&cur\.t-trip\.stationaryLastFixT>30000/,'Stationary timer detects GPS reception gaps');
+assert.match(html,/trip\.stationarySince=null;trip\.stationaryAnchor=null;/,'GPS gap clears unverified stillness');
+assert.match(html,/trip\.stationaryLastFixT=cur\.t/,'Stationary timer remembers latest reception timestamp');
+const stationaryAfterGap=(last,current,since)=>current-last>30000?null:since;
+assert.equal(stationaryAfterGap(1000,32000,1000),null,'31-second outage resets stationary timer');
+assert.equal(stationaryAfterGap(1000,30000,1000),1000,'29-second normal GPS cadence preserves timer');
