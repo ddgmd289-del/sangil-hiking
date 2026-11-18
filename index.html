@@ -235,7 +235,7 @@ function onFix(p){const c=p.coords;const cur={lat:c.latitude,lon:c.longitude,alt
     const reacquired=!!prev&&dt>30&&cur.accuracy<=65;
     const usableFix=cur.accuracy<=65&&(!prev||(dt>0&&(reacquired||(plausibleSpeed&&diff>=noiseKm))));
     if(usableFix){
-      if(prev&&(reacquired||diff>.12))cur.breakBefore=true;
+      if(prev&&(diff>.12||(reacquired&&!(plausibleSpeed&&cur.accuracy<=35&&prev.accuracy<=35))))cur.breakBefore=true;
       if(!trip.startPoint)trip.startPoint={...cur};
       trip.points.push(cur);
       if(prev&&!cur.breakBefore)trip.distance+=diff;
@@ -284,7 +284,8 @@ function recoverNativeGps(){
    const reacquired=dt>30&&p.accuracy<=65;
    const noise=Math.max(.003,Math.min(.012,(p.accuracy+(prev.accuracy||0))*.18/1000));
    if(!reacquired&&(dist/dt>(trip.activity==='달리기'?.0055:.0033)||dist<noise))continue;
-   if(reacquired||dist>.12||p.breakBefore)p.breakBefore=true;
+   const safeBridge=reacquired&&dist<=.12&&dist/dt<=(trip.activity==='달리기'?.0055:.0033)&&p.accuracy<=35&&(prev.accuracy||300)<=35;
+   if(dist>.12||(reacquired&&!safeBridge)||p.breakBefore)p.breakBefore=true;
    else total+=dist;
    filtered.push(p);
   }
