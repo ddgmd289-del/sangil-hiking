@@ -15,7 +15,9 @@ jobs:
           echo "Build source: $GITHUB_SHA ($GITHUB_REF_NAME)"
           echo 'NOTE: This workflow builds kr.sangil.myhiking.preview; do not label it as an update for a differently identified installed app.'
       - name: Verify GPS regression checks
-        run: node tests/gps-filter.test.cjs
+        run: |
+          node tests/gps-filter.test.cjs
+          node tests/gps-runtime-scenarios.test.cjs
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
