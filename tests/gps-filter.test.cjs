@@ -83,3 +83,6 @@ assert.match(html,/if\(filtered\.length<\(trip\.points\|\|\[\]\)\.length\)return
 assert.match(html,/trip\.resumeBreakPending=true/,'Auto-resume marks next accepted GPS fix as new segment');
 assert.match(html,/trip\.resumeBreakPending\|\|diff>\.12/,'First resumed fix cannot bridge the rest');
 assert.match(html,/trip\.resumeBreakPending=false/,'Segment boundary flag clears after accepted fix');
+
+// A stale segment break can be recalculated even without newly recovered native coordinates.
+assert.match(html,/if\(!recovered\.length&&\!\(trip\.points\|\|\[\]\)\.some\(p=>p\.breakBefore\)\)return;/,'Recheck existing route breaks when native backup has no additional fixes');
