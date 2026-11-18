@@ -64,8 +64,8 @@ assert.match(html,/localStorage\.removeItem\(CURRENT\)\}catch\{\}clearSavedRoute
 assert.match(html,/if\(total\+0\.001<trip\.distance\)return;/,'Native backup must not reduce recorded distance');
 assert.match(html,/if\(prev&&!cur\.breakBefore\)trip\.distance\+=diff;/,'First GPS fix must not add phantom distance');
 
-assert.match(html,/const rests=\(r\.rests\|\|\[\]\)\.reduce/,'Average speed excludes auto and manual rests');
-assert.match(html,/const openRest=r\.restStarted\?/,'Average speed excludes ongoing rest');
+assert.match(html,/const rests=\(r\.rests\|\|\[\]\)\.filter\(x=>x\.type==='manual'\)\.reduce/,'Unverified auto pauses remain in pace denominator');
+assert.match(html,/const openRest=r\.restStarted&&r\.pauseReason==='manual'\?/,'Only ongoing manual rest excluded from pace');
 
 assert.match(html,/window\.SangilNative\.startTracking\(\)/,'Native GPS starts');
 assert.match(html,/navigator\.geolocation\.watchPosition\(onFix/,'Browser GPS fallback starts');
@@ -86,3 +86,7 @@ assert.match(html,/trip\.resumeBreakPending=false/,'Segment boundary flag clears
 
 // A stale segment break can be recalculated even without newly recovered native coordinates.
 assert.match(html,/if\(!recovered\.length&&\!\(trip\.points\|\|\[\]\)\.some\(p=>p\.breakBefore\)\)return;/,'Recheck existing route breaks when native backup has no additional fixes');
+
+// Auto-pause is provisional: never report an artificially fast pace after GPS drift.
+assert.match(html,/filter\(x=>x\.type==='manual'\)/,'Pace excludes only confirmed manual rest');
+assert.match(html,/r\.pauseReason==='manual'\?/,'Open auto-pause stays in pace denominator');
