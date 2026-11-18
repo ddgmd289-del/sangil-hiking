@@ -2,6 +2,8 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const html = fs.readFileSync('index.html', 'utf8');
+const workflow = fs.readFileSync('.github/workflows/build-android-apk.yml', 'utf8');
+assert.match(workflow, /put\("alt", if \(loc\.hasAltitude\(\)\) loc\.altitude else 0\.0\)/, 'Native backup preserves altitude during screen-off tracking');
 assert.equal((html.match(/window\.sangilNativeFix=function/g) || []).length, 1, 'Native GPS callback must be unique');
 assert.match(html, /const plausibleSpeed=dt>0&&diff\/dt<=\(trip.activity==='달리기'\?\.0055:\.0033\);/);
 assert.match(html, /cur\.t<Date\.now\(\)-86400000\|\|cur\.t>Date\.now\(\)\+60000/, 'Reject stale or future GPS timestamps');
