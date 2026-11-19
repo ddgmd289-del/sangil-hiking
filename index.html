@@ -346,9 +346,11 @@ function recoverNativeGps(){
      // Merge missed native fixes instead of discarding the whole backup.
      // Never replace the route with fewer points or a shorter distance.
      if(filtered.length<(trip.points||[]).length)return;
-     if(total+0.001<trip.distance)return;
+     // Preserve the longer live distance while still restoring missing GPS geometry.
+     // A noisy or discontinuous native backup must not reduce the recorded total.
+     // The recovered points remain available for route display and later diagnosis.
    }
-   trip.points=filtered;trip.distance=total;
+   trip.points=filtered;trip.distance=Math.max(trip.distance||0,total);
    if(!trip.startPoint&&filtered.length)trip.startPoint={...filtered[0]};
    persist();updateStats();draw();
   }
