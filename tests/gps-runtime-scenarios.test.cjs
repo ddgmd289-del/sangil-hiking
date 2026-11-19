@@ -42,6 +42,16 @@ assert.ok(Math.abs(cumulative-duplicateDistance)<1e-8,'Repeated identical GPS fi
 // A short east-west leg must be counted as well as north-south legs.
 const eastStart={lat:35,lon:128},eastEnd={lat:35,lon:128.011};
 assert.ok(km(eastStart,eastEnd)>0.99&&km(eastStart,eastEnd)<1.02,'East-west GPS movement contributes to distance');
+// A GPS outage does not justify connecting a distant reacquisition fix as a walked segment.
+// The geometry helper reports displacement; the runtime must decide whether to accept it.
+const lastBeforeOutage={lat:35,lon:128};
+const firstAfterOutage={lat:35.02,lon:128};
+assert.ok(km(lastBeforeOutage,firstAfterOutage)>2.2,
+  'A 2.2km reacquisition jump requires runtime GPS gap filtering, not blind accumulation');
+// Short movement around the same location should remain numerically stable.
+const tinyStep={lat:35.00001,lon:128};
+assert.ok(km(lastBeforeOutage,tinyStep)>0&&km(lastBeforeOutage,tinyStep)<0.002,
+  'Small GPS steps are measured in meters, not kilometers');
 const start=Date.UTC(2026,10,18,1);
 const record=(type)=>({started:start,ended:start+180000,rests:[{type,started:start+30000,ended:start+90000}]});
 assert.equal(paceSeconds(record('auto')),180,'Auto-pause cannot inflate speed by excluding uncertain time');
