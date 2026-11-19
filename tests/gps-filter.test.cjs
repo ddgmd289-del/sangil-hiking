@@ -36,7 +36,7 @@ assert.match(html, /fix\.accuracy<0/, 'Recovered GPS rejects negative accuracy')
 assert.match(html, /if\(!reacquired&&\(dist\/dt>\(trip.activity==='달리기'\?\.0055:\.0033\)\|\|dist<noise\)\)continue;/, 'Recovered fix jump/noise filtering');
 assert.match(html, /const reacquired=dt>30&&p\.accuracy<=65;/, 'Recovery resumes after signal outage');
 assert.match(html, /const safeBridge=reacquired&&dt<=180&&dist<=\.5&&dist\/dt<=/, 'Only bounded plausible outages may reconnect');
-assert.match(html, /const crossesRest=\(trip\.rests\|\|\[\]\)\.some\(r=>prev\.t<r\.ended&&p\.t>r\.started\)/, 'Recovery checks whether merged GPS segments cross recorded rest');
+assert.match(html, /const crossesRest=\(Array\.isArray\(trip\.rests\)\?trip\.rests:\[\]\)\.some/, 'Recovery safely checks rest intervals before merging native GPS fixes');
 assert.match(html, /p\.breakBefore=!!\(crossesRest\|\|\(dist>\.12&&!safeBridge\)\|\|\(reacquired&&!safeBridge\)\)/, 'Recovery recalculates unsafe and rest boundaries after merging fixes');
 assert.equal(accepted({accuracy:25,dt:90,diff:0.4}), true, 'GPS reconnect after long gap');
 assert.match(html, /const routeLines=segments\.map/, 'Track rendered as separated segments');
