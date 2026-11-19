@@ -199,7 +199,7 @@ function draw(){
  const segments=[];let segment=[];
  for(const p of route){
   const prev=segment.at(-1);
-  const gap=prev&&(!Number.isFinite(Number(p.t))||!Number.isFinite(Number(prev.t))||Number(p.t)<=Number(prev.t)||Number(p.t)-Number(prev.t)>30000||km(prev,p)>.12||p.breakBefore);
+  const gap=prev&&(!Number.isFinite(Number(p.t))||!Number.isFinite(Number(prev.t))||Number(p.t)<=Number(prev.t)||Number(p.t)-Number(prev.t)>180000||km(prev,p)>.5||p.breakBefore);
   if(gap){if(segment.length)segments.push(segment);segment=[]}
   segment.push(p);
  }
