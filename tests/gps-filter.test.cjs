@@ -53,7 +53,7 @@ assert.equal(elapsed({started:start,ended:start+180000,rests:[{type:'auto',start
 assert.equal(elapsed({started:start,ended:start+180000,rests:[{type:'manual',started:start+30000,ended:start+90000}]}),120,'Explicit rest is excluded');
 
 assert.match(html,/trip\.state==='done'\|\|!window\.SangilNative\?\.getTrackBackup/,'Recovery remains available during pause and skips finished trips');
-assert.match(html,/trip\.rests\|\|\[\]/,'Recovery excludes rest windows');
+assert.match(html,/Array\.isArray\(trip\.rests\)\?trip\.rests:\[\]/,'Recovery excludes rest windows with guarded array handling');
 assert.match(html,/Math\.min\(\.012/,'Walking GPS noise floor');
 
 // Saved-route lifecycle regressions: deleting records or ending a session must not leave stale map layers.
