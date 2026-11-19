@@ -128,7 +128,8 @@ function fmtTime(seconds){let s=Math.max(0,Math.floor(seconds)),h=Math.floor(s/3
 // Exclude only explicit manual pauses, so false auto-pause cannot inflate walking pace.
 function paceSeconds(r,now=Date.now()){
  if(!r||!Number.isFinite(Number(r.started)))return 0;
- const end=Number(r.ended)||now;
+ const ended=Number(r.ended);
+ const end=r.ended!=null&&Number.isFinite(ended)&&ended>0?ended:now;
  // Clamp and merge manual rest intervals: duplicated or overlapping restores must not
  // subtract the same elapsed time twice or push moving time below its true value.
  const start=Number(r.started);
