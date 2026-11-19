@@ -41,4 +41,16 @@ assert.equal(paceSeconds(record('manual')),120,'Manual rest excluded from moving
 assert.equal(paceSeconds({started:start,ended:start+180000,rests:[]}),180);
 assert.equal(paceSeconds({started:start,ended:start+180000,restStarted:start+120000,pauseReason:'auto'}),180);
 assert.equal(paceSeconds({started:start,ended:start+180000,restStarted:start+120000,pauseReason:'manual'}),120);
+// Rest intervals restored twice or overlapping must only be subtracted once.
+assert.equal(paceSeconds({started:start,ended:start+180000,rests:[
+ {type:'manual',started:start+30000,ended:start+90000},
+ {type:'manual',started:start+60000,ended:start+120000}
+]}),90,'Overlapping manual rests are merged');
+assert.equal(paceSeconds({started:start,ended:start+180000,rests:[
+ {type:'manual',started:start-60000,ended:start+30000},
+ {type:'manual',started:start+150000,ended:start+240000}
+]}),120,'Manual rests are clamped to trip boundaries');
+assert.equal(paceSeconds({started:start,ended:start+180000,rests:[
+ {type:'manual',started:start+30000,ended:start+90000}
+],restStarted:start+60000,pauseReason:'manual'}),30,'Open manual pause overlapping saved rest is not double counted');
 console.log('Actual GPS distance and pace helper scenarios passed');
