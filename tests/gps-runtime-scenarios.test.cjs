@@ -71,4 +71,8 @@ assert.equal(paceSeconds({started:start,ended:start+180000,rests:[
 assert.equal(paceSeconds({started:start,ended:start+180000,rests:[
  {type:'manual',started:start+30000,ended:start+90000}
 ],restStarted:start+60000,pauseReason:'manual'}),30,'Open manual pause overlapping saved rest is not double counted');
+// Corrupt or partially migrated rest records must not crash the activity summary.
+assert.equal(paceSeconds({started:start,ended:start+180000,rests:null}),180);
+assert.equal(paceSeconds({started:start,ended:start+180000,rests:{unexpected:true}}),180);
+assert.equal(paceSeconds({started:start,ended:start+180000,rests:[null,{type:'manual',started:start+30000,ended:start+90000}]}),120);
 console.log('Actual GPS distance and pace helper scenarios passed');
