@@ -8,7 +8,8 @@ const start = html.indexOf('function recoverNativeGps(){');
 const end = html.indexOf('function refreshGpsDiagnostics(){', start);
 assert.ok(start >= 0 && end > start, 'recovery implementation must be present');
 const source = html.slice(start, end);
-const base = Date.now() - 120000;
+// Keep the full 301-point, 50-minute replay in the past; future fixes are correctly rejected.
+const base = Date.now() - 3600000;
 function point(n, t, extra={}) {
   return {lat:37, lon:127+n*.0001, accuracy:5, t:base+t*1000, ...extra};
 }
