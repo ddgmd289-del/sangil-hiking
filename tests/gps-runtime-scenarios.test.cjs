@@ -87,4 +87,16 @@ assert.equal(inBackupPause({legacy:true},null,start+60000),false,'Object migrate
 assert.equal(inBackupPause([null,{started:start+30000,ended:start+90000}],null,start+60000),true,'Valid pause excludes native backup fix even with null entry');
 assert.equal(inBackupPause([{started:start+30000,ended:start+90000}],null,start+120000),false,'Fix after rest is recoverable');
 
+// Run the actual gap-reconstruction rest guard against malformed restored records.
+const gapLine=html.split('\n').find(line=>line.includes('const crossesRest='));
+assert.ok(gapLine,'Native GPS reconstruction rest guard must exist');
+const gapExpression=gapLine.trim().replace(/^const crossesRest=/,'').replace(/;$/,'');
+const gapCrosses=(rests,restStarted,from,to)=>vm.runInNewContext(
+ 'Boolean('+gapExpression+')',{trip:{rests,restStarted},prev:{t:from},p:{t:to},Number,Array});
+assert.equal(gapCrosses(null,null,start,start+60000),false,'Null rests cannot abort native route reconstruction');
+assert.equal(gapCrosses({legacy:true},null,start,start+60000),false,'Object rests cannot abort native route reconstruction');
+assert.equal(gapCrosses([null,{started:start+30000,ended:start+90000}],null,start,start+60000),true,'Valid rest still breaks the segment with a null entry');
+assert.equal(gapCrosses([{started:'bad',ended:start+90000}],null,start,start+60000),false,'Invalid rest timestamps do not create false gaps');
+assert.equal(gapCrosses([],start+30000,start,start+60000),true,'Open pause still breaks route segments');
+
 console.log('Actual GPS distance and pace helper scenarios passed');
