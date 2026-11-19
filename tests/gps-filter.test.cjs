@@ -61,7 +61,7 @@ assert.match(html,/if\(saveRecords\(\[\]\)\)\{clearSavedRoute\(\)/,'Deleting all
 assert.match(html,/if\(!trip\)\{if\(trackLine\)trackLine\.setLatLngs\(\[\]\)/,'Idle map clears old live track');
 assert.match(html,/localStorage\.removeItem\(CURRENT\)\}catch\{\}clearSavedRoute\(\)/,'Finishing clears old map overlays');
 
-assert.match(html,/if\(total\+0\.001<trip\.distance\)return;/,'Native backup must not reduce recorded distance');
+assert.match(html,/trip\.distance=Math\.max\(trip\.distance\|\|0,total\)/,'Native backup must not reduce recorded distance');
 assert.match(html,/if\(prev&&!cur\.breakBefore\)trip\.distance\+=diff;/,'First GPS fix must not add phantom distance');
 
 assert.match(html,/filter\(x=>x&&x\.type==='manual'\)/,'Only manual pauses excluded from pace denominator');
