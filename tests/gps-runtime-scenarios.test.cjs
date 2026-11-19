@@ -99,4 +99,17 @@ assert.equal(gapCrosses([null,{started:start+30000,ended:start+90000}],null,star
 assert.equal(gapCrosses([{started:'bad',ended:start+90000}],null,start,start+60000),false,'Invalid rest timestamps do not create false gaps');
 assert.equal(gapCrosses([],start+30000,start,start+60000),true,'Open pause still breaks route segments');
 
+
+// Restored records may carry legacy non-array rests. Closing a pause must not throw.
+const closeRestSource=extract('function closeRest(r=trip){','function autoPause(){');
+const pauseContext=vm.createContext({Date:{now:()=>start+180000},Array,Math});
+vm.runInContext(closeRestSource,pauseContext,{timeout:1000});
+for(const malformed of [null,{legacy:true},'bad']){
+ const restored={restStarted:start+120000,pauseReason:'auto',rests:malformed,restMs:0};
+ vm.runInContext('closeRest',pauseContext)(restored);
+ assert.equal(restored.rests.length,1,'Closing restored pause creates a valid rests array');
+ assert.equal(restored.rests[0].type,'auto');
+ assert.equal(restored.restStarted,null);
+}
+
 console.log('Actual GPS distance and pace helper scenarios passed');
