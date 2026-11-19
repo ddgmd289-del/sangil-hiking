@@ -113,3 +113,5 @@ assert.equal(stationaryAfterGap(1000,30000,1000),1000,'29-second normal GPS cade
 assert.match(html,/const spike=!!\(beforePrev&&prev/, 'Live GPS spike detection exists');
 assert.match(html,/trip\.distance=Math\.max\(0,trip\.distance-legIn\)/, 'False detour distance is rolled back');
 assert.match(html,/trip\.points\.pop\(\)/, 'Spike waypoint is removed');
+
+assert.match(html,/function elapsed\(\)\{return trip\?paceSeconds\(trip\):0\}/,'Live timer and saved average pace use consistent duration');
