@@ -34,6 +34,14 @@ assert.ok(Math.abs(cumulative-reversedDistance)<1e-8,'Reverse track retains the 
 const subdivided=synthetic.flatMap((p,i)=>i===synthetic.length-1?[p]:[p,{lat:(p.lat+synthetic[i+1].lat)/2,lon:p.lon}]);
 const subdividedDistance=subdivided.slice(1).reduce((total,p,i)=>total+km(subdivided[i],p),0);
 assert.ok(Math.abs(cumulative-subdividedDistance)<1e-8,'Higher GPS sampling density retains the same distance');
+
+// GPS may emit repeated fixes while the device is stationary; they must not add distance.
+const withDuplicates=[synthetic[0],synthetic[0],synthetic[1],synthetic[1],synthetic[2],synthetic[3],synthetic[3]];
+const duplicateDistance=withDuplicates.slice(1).reduce((total,p,i)=>total+km(withDuplicates[i],p),0);
+assert.ok(Math.abs(cumulative-duplicateDistance)<1e-8,'Repeated identical GPS fixes do not inflate or erase the full track');
+// A short east-west leg must be counted as well as north-south legs.
+const eastStart={lat:35,lon:128},eastEnd={lat:35,lon:128.011};
+assert.ok(km(eastStart,eastEnd)>0.99&&km(eastStart,eastEnd)<1.02,'East-west GPS movement contributes to distance');
 const start=Date.UTC(2026,10,18,1);
 const record=(type)=>({started:start,ended:start+180000,rests:[{type,started:start+30000,ended:start+90000}]});
 assert.equal(paceSeconds(record('auto')),180,'Auto-pause cannot inflate speed by excluding uncertain time');
