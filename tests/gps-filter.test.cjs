@@ -66,7 +66,7 @@ assert.match(html,/if\(prev&&!cur\.breakBefore\)trip\.distance\+=diff;/,'First G
 
 assert.match(html,/filter\(x=>x&&x\.type==='manual'\)/,'Only manual pauses excluded from pace denominator');
 assert.match(html,/Math\.max\(a,restEnd\)/,'Overlapping manual pauses merged before subtracting elapsed time');
-assert.match(html,/const openRest=r\.restStarted&&r\.pauseReason==='manual'\?/,'Only ongoing manual rest excluded from pace');
+assert.match(html,/if\(r\.restStarted&&r\.pauseReason==='manual'\)intervals\.push/, 'Open manual rest included in pace denominator');
 
 assert.match(html,/window\.SangilNative\.startTracking\(\)/,'Native GPS starts');
 assert.match(html,/navigator\.geolocation\.watchPosition\(onFix/,'Browser GPS fallback starts');
