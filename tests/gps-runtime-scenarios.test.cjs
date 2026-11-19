@@ -75,4 +75,16 @@ assert.equal(paceSeconds({started:start,ended:start+180000,rests:[
 assert.equal(paceSeconds({started:start,ended:start+180000,rests:null}),180);
 assert.equal(paceSeconds({started:start,ended:start+180000,rests:{unexpected:true}}),180);
 assert.equal(paceSeconds({started:start,ended:start+180000,rests:[null,{type:'manual',started:start+30000,ended:start+90000}]}),120);
+
+// Execute the actual native-backup pause exclusion predicate with migrated rest data.
+const backupPauseLine=html.split('\n').find(line=>line.includes('Array.isArray(trip.rests)?trip.rests:[]')&&line.includes('fix.t>='));
+assert.ok(backupPauseLine,'Native backup pause guard must exist');
+const pausePredicate=backupPauseLine.trim().replace(/^if\(/,'').replace(/\)continue;$/,'');
+const inBackupPause=(rests,restStarted,time)=>vm.runInNewContext(
+  'Boolean('+pausePredicate+')',{trip:{rests,restStarted},fix:{t:time},Number,Array});
+assert.equal(inBackupPause(null,null,start+60000),false,'Null migrated rests cannot crash GPS recovery');
+assert.equal(inBackupPause({legacy:true},null,start+60000),false,'Object migrated rests cannot crash GPS recovery');
+assert.equal(inBackupPause([null,{started:start+30000,ended:start+90000}],null,start+60000),true,'Valid pause excludes native backup fix even with null entry');
+assert.equal(inBackupPause([{started:start+30000,ended:start+90000}],null,start+120000),false,'Fix after rest is recoverable');
+
 console.log('Actual GPS distance and pace helper scenarios passed');
