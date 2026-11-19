@@ -141,7 +141,7 @@ function paceSeconds(r,now=Date.now()){
  for(const [a,b] of valid){restMs+=Math.max(0,b-Math.max(a,restEnd));restEnd=Math.max(restEnd,b);}
  return Math.max(0,(end-start-restMs)/1000);
 }
-function elapsed(){if(!trip)return 0;return Math.max(0,(trip.accMs||0)+(trip.state==='running'?Date.now()-trip.segmentStarted:0))/1000}
+function elapsed(){return trip?paceSeconds(trip):0}
 function restSeconds(r=trip){if(!r)return 0;return Math.max(0,((r.restMs||0)+(r.restStarted?Date.now()-r.restStarted:0))/1000)}
 function closeRest(r=trip){if(!r||!r.restStarted)return;r.restMs=(r.restMs||0)+Math.max(0,Date.now()-r.restStarted);r.rests=Array.isArray(r.rests)?r.rests:[];r.rests.push({started:r.restStarted,ended:Date.now(),type:r.pauseReason||'manual'});r.restStarted=null;r.pauseReason=null}
 function autoPause(){if(!trip||trip.state!=='running'||trip.demo)return;trip.accMs+=Date.now()-trip.segmentStarted;trip.state='paused';trip.pauseReason='auto';trip.pauseAnchor={...(trip.stationaryAnchor||trip.points.at(-1)||position)};trip.resumeCandidates=0;trip.restStarted=Date.now();persist();updateStats();toast('움직임이 없어 자동 일시정지 · 휴식 기록 중');speakHike('이동이 없어 산행 기록을 잠시 멈춥니다.')}
