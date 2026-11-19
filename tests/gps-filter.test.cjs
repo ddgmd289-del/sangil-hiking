@@ -64,7 +64,8 @@ assert.match(html,/localStorage\.removeItem\(CURRENT\)\}catch\{\}clearSavedRoute
 assert.match(html,/if\(total\+0\.001<trip\.distance\)return;/,'Native backup must not reduce recorded distance');
 assert.match(html,/if\(prev&&!cur\.breakBefore\)trip\.distance\+=diff;/,'First GPS fix must not add phantom distance');
 
-assert.match(html,/const rests=\(r\.rests\|\|\[\]\)\.filter\(x=>x\.type==='manual'\)\.reduce/,'Unverified auto pauses remain in pace denominator');
+assert.match(html,/filter\(x=>x&&x\.type==='manual'\)/,'Only manual pauses excluded from pace denominator');
+assert.match(html,/Math\.max\(a,restEnd\)/,'Overlapping manual pauses merged before subtracting elapsed time');
 assert.match(html,/const openRest=r\.restStarted&&r\.pauseReason==='manual'\?/,'Only ongoing manual rest excluded from pace');
 
 assert.match(html,/window\.SangilNative\.startTracking\(\)/,'Native GPS starts');
