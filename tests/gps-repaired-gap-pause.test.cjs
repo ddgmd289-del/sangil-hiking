@@ -19,12 +19,12 @@ function run(points,backup,rest=[]){
  return {trip,saved};
 }
 // Live webview missed the middle point, but native recorder retained it.
-// Without that point, the 0.1776 km jump is marked as a break.
+// Without that point, the 0.01776 km jump is marked as a break.
 const a=point(0,0),b=point(1,20),c=point(2,40);
 let result=run([a,{...c,breakBefore:true}],[a,b,c].map(encode).join('\n'));
 assert.equal(result.trip.points.length,3,'missing native fix must be merged');
 assert.equal(result.trip.points[2].breakBefore,false,'reliable intermediate fix must repair the gap');
-assert.ok(result.trip.distance>0.17,'repaired route must count both short segments');
+assert.ok(result.trip.distance>0.017 && result.trip.distance<0.019,'repaired route must count both ~8.88m segments without a tenfold unit error');
 const original=result.trip.distance;
 result=run(result.trip.points,[a,b,c].map(encode).join('\n'));
 assert.equal(result.trip.points.length,3,'backup replay must be idempotent');
