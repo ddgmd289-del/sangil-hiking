@@ -35,4 +35,17 @@ result=run({live:[a],backup:[b],rests:[{started:base+5000,ended:base+15000}]});
 assert.equal(result.points.length,1,'explicitly paused fix must not be recovered');
 result=run({live:[a],backup:[{...b,lat:91}]});
 assert.equal(result.points.length,1,'invalid latitude must be rejected');
+// A backup longer than the historical 250-fix limit must be fully replayed.
+const longTrack=Array.from({length:301},(_,i)=>point(i,i*10));
+result=run({backup:longTrack});
+assert.equal(result.points.length,301,'all 301 native fixes must be restored');
+assert.ok(result.distance>2.5,'long recovered track must contribute distance');
+// A native intermediate fix must repair a stale gap without shrinking the live total.
+result=run({live:[{...a},{...c,breakBefore:true}],backup:[b],distance:.001});
+assert.equal(result.points.length,3,'intermediate native fix must be merged');
+assert.equal(result.points[2].breakBefore,false,'reliable intermediate fix should bridge stale gap');
+assert.ok(result.distance>.001,'bridged segments must restore measured distance');
+// Reject future timestamps, preserving only the valid live route.
+result=run({live:[a],backup:[{...b,t:Date.now()+60000}]});
+assert.equal(result.points.length,1,'future native fixes must be rejected');
 console.log('Native GPS recovery executable regression: PASS');
