@@ -112,4 +112,16 @@ for(const malformed of [null,{legacy:true},'bad']){
  assert.equal(restored.restStarted,null);
 }
 
+
+// Guard against silently truncating the Android foreground-service backup.
+// A long hike can produce far more than 250 fixes; dropping the oldest fixes
+// permanently loses distance when the WebView was suspended.
+const workflow=fs.readFileSync('.github/workflows/build-android-apk.yml','utf8');
+assert.match(workflow,/getTrackBackup\(\): String \{[\s\S]*?f\.readText\(Charsets\.UTF_8\)/,
+  'Native backup must expose the complete track rather than takeLast(250)');
+assert.doesNotMatch(workflow,/getTrackBackup\(\): String \{[\s\S]{0,300}takeLast\(/,
+  'Native backup must not truncate older GPS fixes');
+assert.match(workflow,/source_commit=%s/,
+  'APK assets must include a traceable source revision');
+
 console.log('Actual GPS distance and pace helper scenarios passed');
