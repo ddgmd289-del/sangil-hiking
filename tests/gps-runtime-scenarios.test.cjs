@@ -57,6 +57,9 @@ const record=(type)=>({started:start,ended:start+180000,rests:[{type,started:sta
 assert.equal(paceSeconds(record('auto')),180,'Auto-pause cannot inflate speed by excluding uncertain time');
 assert.equal(paceSeconds(record('manual')),120,'Manual rest excluded from moving time');
 assert.equal(paceSeconds({started:start,ended:start+180000,rests:[]}),180);
+assert.equal(paceSeconds({started:start,ended:0,rests:[]},start+180000),180,'Zero end timestamp means active trip, not completed trip');
+assert.equal(paceSeconds({started:start,ended:'invalid',rests:[]},start+180000),180,'Corrupt end timestamp falls back to supplied current time');
+assert.equal(paceSeconds({started:start,ended:start-1000,rests:[]},start+180000),0,'End before start never produces negative moving time');
 assert.equal(paceSeconds({started:start,ended:start+180000,restStarted:start+120000,pauseReason:'auto'}),180);
 assert.equal(paceSeconds({started:start,ended:start+180000,restStarted:start+120000,pauseReason:'manual'}),120);
 // Rest intervals restored twice or overlapping must only be subtracted once.
