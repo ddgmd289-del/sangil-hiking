@@ -180,7 +180,14 @@ function displayRoutePoints(points){
   const excess=d1+d2-direct;
   // Only remove isolated, low-confidence small GPS detours; never erase large real turns.
   const noisy=accuracy>=20&&accuracy>=Math.max(prevAccuracy,nextAccuracy)*1.25;
-  if(noisy&&d1<45&&d2<45&&direct<55&&excess>Math.max(10,accuracy*.5))continue;
+  // Short out-and-back wiggles also occur with optimistic accuracy readings.
+  // Remove only near-return spikes; keep genuine corners and segment boundaries.
+  const nearReturn=d1>=12&&d2>=12&&direct<=Math.min(22,Math.max(8,accuracy*1.2))&&
+    excess>=Math.max(18,direct*1.8)&&
+    !cur.breakBefore&&!next.breakBefore&&
+    Number(next.t)>Number(cur.t)&&Number(cur.t)>Number(prev.t)&&
+    Number(next.t)-Number(prev.t)<=90000;
+  if(nearReturn||(noisy&&d1<45&&d2<45&&direct<55&&excess>Math.max(10,accuracy*.5)))continue;
   out.push(cur);
  }
  out.push(a[a.length-1]);
