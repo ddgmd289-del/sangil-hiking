@@ -129,9 +129,16 @@ function fmtTime(seconds){let s=Math.max(0,Math.floor(seconds)),h=Math.floor(s/3
 function paceSeconds(r,now=Date.now()){
  if(!r||!Number.isFinite(Number(r.started)))return 0;
  const end=Number(r.ended)||now;
- const rests=(r.rests||[]).filter(x=>x.type==='manual').reduce((n,x)=>n+Math.max(0,Number(x.ended)-Number(x.started)),0);
- const openRest=r.restStarted&&r.pauseReason==='manual'?Math.max(0,end-Number(r.restStarted)):0;
- return Math.max(0,(end-Number(r.started)-rests-openRest)/1000);
+ // Clamp and merge manual rest intervals: duplicated or overlapping restores must not
+ // subtract the same elapsed time twice or push moving time below its true value.
+ const start=Number(r.started);
+ const intervals=(r.rests||[]).filter(x=>x.type==='manual').map(x=>[Number(x.started),Number(x.ended)]);
+ if(r.restStarted&&r.pauseReason==='manual')intervals.push([Number(r.restStarted),end]);
+ const valid=intervals.filter(([a,b])=>Number.isFinite(a)&&Number.isFinite(b)&&b>a)
+  .map(([a,b])=>[Math.max(start,a),Math.min(end,b)]).filter(([a,b])=>b>a).sort((a,b)=>a[0]-b[0]);
+ let restMs=0,restEnd=start;
+ for(const [a,b] of valid){restMs+=Math.max(0,b-Math.max(a,restEnd));restEnd=Math.max(restEnd,b);}
+ return Math.max(0,(end-start-restMs)/1000);
 }
 function elapsed(){if(!trip)return 0;return Math.max(0,(trip.accMs||0)+(trip.state==='running'?Date.now()-trip.segmentStarted:0))/1000}
 function restSeconds(r=trip){if(!r)return 0;return Math.max(0,((r.restMs||0)+(r.restStarted?Date.now()-r.restStarted:0))/1000)}
