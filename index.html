@@ -764,6 +764,8 @@ document.addEventListener('DOMContentLoaded',()=>{
    const u=new URL(base);
    const type=button.getAttribute('data-exam-type');
    u.searchParams.set('type',type);
+   // Return destination for the athlete exam. Native Android return requires app-link handling.
+   u.searchParams.set('return',window.location.origin+window.location.pathname+'#contest');
    status.textContent=type+'형 선수 시험을 엽니다.';
    window.location.assign(u.href);
  }));
