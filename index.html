@@ -188,7 +188,7 @@ function displayRoutePoints(points){
     !cur.breakBefore&&!next.breakBefore&&
     Number(next.t)>Number(cur.t)&&Number(cur.t)>Number(prev.t)&&
     Number(next.t)-Number(prev.t)<=90000;
-  if(nearReturn||(noisy&&d1<45&&d2<45&&direct<55&&excess>Math.max(10,accuracy*.5)))continue;
+  if(!cur.breakBefore&&!next.breakBefore&&(nearReturn||(noisy&&d1<45&&d2<45&&direct<55&&excess>Math.max(10,accuracy*.5))))continue;
   out.push(cur);
  }
  out.push(a[a.length-1]);
