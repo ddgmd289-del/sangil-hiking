@@ -33,4 +33,14 @@ assert.equal(result.trip.distance,original,'backup replay must not double count 
 const pause={type:'manual',started:base+15000,ended:base+25000};
 result=run([a],[a,b,c].map(encode).join('\n'),[pause]);
 assert.equal(result.trip.points.some(p=>p.t===b.t),false,'manual rest fixes must remain excluded');
+// An automatic pause is inferred from GPS inactivity and must not suppress
+// reliable native backup fixes if the user actually kept walking.
+const autoPause={type:'auto',started:base+15000,ended:base+25000};
+result=run([a,{...c,breakBefore:true}],[a,b,c].map(encode).join('\n'),[autoPause]);
+assert.equal(result.trip.points.length,3,'automatic pause must not discard missing native walking fixes');
+assert.equal(result.trip.points[2].breakBefore,false,'automatic pause backup must repair a stale route gap');
+assert.ok(result.trip.distance>0.017&&result.trip.distance<0.019,'automatic pause recovery must restore actual walked distance');
+// An explicit manual pause must still win over any automatic recovery.
+result=run([a,{...c,breakBefore:true}],[a,b,c].map(encode).join('\n'),[pause]);
+assert.equal(result.trip.points.some(p=>p.t===b.t),false,'manual pause must not be bypassed by gap repair');
 console.log('GPS repaired-gap and pause-boundary regression: PASS');
