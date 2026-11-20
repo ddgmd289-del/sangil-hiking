@@ -31,6 +31,22 @@ jobs:
         run: |
           mkdir -p app/src/main/assets app/src/main/java/kr/sangil/myhiking
           cp index.html extensions.js auth-config.js manifest.webmanifest service-worker.js app/src/main/assets/
+          # Embed the exact source revision and Actions run in the packaged WebView.
+          # This identifies a stale APK without clearing any user activity data.
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          p = Path('app/src/main/assets/index.html')
+          html = p.read_text(encoding='utf-8')
+          revision = os.environ.get('GITHUB_SHA', 'unknown')[:8]
+          run = os.environ.get('GITHUB_RUN_NUMBER', 'local')
+          marker = '<div id="sangil-build-id" style="position:relative;text-align:center;padding:6px 10px;font-size:11px;opacity:.65" aria-label="앱 빌드 식별자">앱 빌드 '+run+' · '+revision+'</div>'
+          if '</body>' not in html:
+              raise SystemExit('Missing HTML body; cannot stamp build')
+          html = html.replace('</body>', marker+'\\n</body>', 1)
+          p.write_text(html, encoding='utf-8')
+          print('Embedded build marker:', run, revision)
+          PY
           printf 'source_commit=%s\nsource_ref=%s\nbuild_run=%s\n' "$GITHUB_SHA" "$GITHUB_REF_NAME" "$GITHUB_RUN_ID" > app/src/main/assets/build-info.txt
           cmp -s index.html app/src/main/assets/index.html || { echo 'ERROR: bundled index.html differs from source'; exit 1; }
           cp -r icons app/src/main/assets/
