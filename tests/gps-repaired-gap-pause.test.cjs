@@ -11,8 +11,8 @@ const source=html.slice(start,end);
 const base=Date.now()-180000;
 const point=(n,s)=>({lat:37,lon:127+n*.0001,accuracy:5,t:base+s*1000});
 const encode=p=>JSON.stringify({lat:p.lat,lng:p.lon,accuracy:p.accuracy,time:p.t});
-function run(points,backup,rest=[]){
- const trip={started:base,state:'active',activity:'걷기',points,distance:0,rests:rest,restStarted:0};
+function run(points,backup,rest=[],distance=0){
+ const trip={started:base,state:'active',activity:'걷기',points,distance,rests:rest,restStarted:0};
  let saved=0;
  const ctx={trip,window:{SangilNative:{getTrackBackup:()=>backup}},km:(a,b)=>Math.abs(a.lon-b.lon)*88.8,persist(){saved++},updateStats(){},draw(){},console,Date,Number,Math,Set,JSON,Array};
  vm.runInNewContext(source+'\nrecoverNativeGps();',ctx);
@@ -26,7 +26,7 @@ assert.equal(result.trip.points.length,3,'missing native fix must be merged');
 assert.equal(result.trip.points[2].breakBefore,false,'reliable intermediate fix must repair the gap');
 assert.ok(result.trip.distance>0.017 && result.trip.distance<0.019,'repaired route must count both ~8.88m segments without a tenfold unit error');
 const original=result.trip.distance;
-result=run(result.trip.points,[a,b,c].map(encode).join('\n'));
+result=run(result.trip.points,[a,b,c].map(encode).join('\n'),[],original);
 assert.equal(result.trip.points.length,3,'backup replay must be idempotent');
 assert.equal(result.trip.distance,original,'backup replay must not double count distance');
 // Explicitly paused points must not silently become traveled distance.
