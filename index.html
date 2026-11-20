@@ -770,7 +770,11 @@ document.addEventListener('DOMContentLoaded',()=>{
    // Return destination for the athlete exam. Native Android return requires app-link handling.
    u.searchParams.set('return',window.location.origin+window.location.pathname+'#contest');
    status.textContent=type+'형 선수 시험을 엽니다.';
-   window.location.assign(u.href);
+   if(window.SangilAndroid && typeof window.SangilAndroid.openExam==='function'){
+     window.SangilAndroid.openExam(u.href);
+   }else{
+     window.location.assign(u.href);
+   }
  }));
 })();
 </script>
