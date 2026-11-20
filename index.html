@@ -333,7 +333,8 @@ function recoverNativeGps(){
    if(dt<=0)continue;
    const reacquired=dt>30&&p.accuracy<=65;
    const noise=Math.max(.003,Math.min(.012,(p.accuracy+(prev.accuracy||0))*.18/1000));
-   if(!reacquired&&(dist/dt>(trip.activity==='달리기'?.0055:.0033)||dist<noise))continue;
+   // Keep already recorded live fixes during backup merge; filtering them can erase route geometry.
+   if(!reacquired&&(dist/dt>(trip.activity==='달리기'?.0055:.0033)||dist<noise)&&!existing.has(p.t+':'+p.lat+':'+p.lon))continue;
    const safeBridge=reacquired&&dt<=180&&dist<=.5&&dist/dt<=(trip.activity==='달리기'?.0055:.0033)&&p.accuracy<=35&&(prev.accuracy||300)<=35;
    const crossesRest=(Array.isArray(trip.rests)?trip.rests:[]).some(r=>r&&r.type==='manual'&&Number.isFinite(Number(r.started))&&Number.isFinite(Number(r.ended))&&prev.t<Number(r.ended)&&p.t>Number(r.started))||(trip.pauseReason==='manual'&&Number.isFinite(Number(trip.restStarted))&&Number(trip.restStarted)>0&&prev.t<Number(trip.restStarted)&&p.t>=Number(trip.restStarted));
    // Recompute segment breaks after inserting missing native fixes: an old gap marker
