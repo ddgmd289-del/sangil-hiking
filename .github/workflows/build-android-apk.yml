@@ -211,6 +211,20 @@ jobs:
                   }
               }
               inner class Bridge {
+                  @JavascriptInterface fun openExam(url: String) { runOnUiThread {
+                      try {
+                          val uri = android.net.Uri.parse(url)
+                          if (uri.scheme != "https" || uri.host != "script.google.com" ||
+                              !uri.path.orEmpty().startsWith("/macros/s/") ||
+                              !uri.path.orEmpty().endsWith("/exec")) {
+                              Toast.makeText(this@MainActivity, "시험 주소가 올바르지 않습니다.", Toast.LENGTH_LONG).show()
+                              return@runOnUiThread
+                          }
+                          startActivity(Intent(Intent.ACTION_VIEW, uri).addCategory(Intent.CATEGORY_BROWSABLE))
+                      } catch (e: Exception) {
+                          Toast.makeText(this@MainActivity, "시험 화면을 열지 못했습니다.", Toast.LENGTH_LONG).show()
+                      }
+                  } }
                   @JavascriptInterface fun startTracking() { runOnUiThread {
                       if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                           Toast.makeText(this@MainActivity, "위치 권한 요청 중 · 허용 후 GPS 기록이 시작됩니다", Toast.LENGTH_LONG).show()
