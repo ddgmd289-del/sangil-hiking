@@ -115,6 +115,7 @@ jobs:
               <application android:label="산길 트레킹" android:icon="@drawable/sangil_launcher" android:roundIcon="@drawable/sangil_launcher" android:usesCleartextTraffic="false" android:theme="@android:style/Theme.Material.Light.NoActionBar">
                   <activity android:name=".MainActivity" android:exported="true">
                       <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter>
+                      <intent-filter><action android:name="android.intent.action.VIEW"/><category android:name="android.intent.category.DEFAULT"/><category android:name="android.intent.category.BROWSABLE"/><data android:scheme="sangil" android:host="home"/></intent-filter>
                   </activity>
                   <service android:name=".TrackingService" android:exported="false" android:foregroundServiceType="location"/>
                   <provider android:name="androidx.core.content.FileProvider" android:authorities="kr.sangil.myhiking.preview.share" android:exported="false" android:grantUriPermissions="true">
@@ -185,6 +186,13 @@ jobs:
                   web.loadUrl("file:///android_asset/index.html")
                   if (Build.VERSION.SDK_INT >= 33) requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.POST_NOTIFICATIONS), 10)
                   else requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), 10)
+              }
+              override fun onNewIntent(intent: Intent) {
+                  super.onNewIntent(intent)
+                  setIntent(intent)
+                  if (intent.action == Intent.ACTION_VIEW && intent.data?.scheme == "sangil" && intent.data?.host == "home") {
+                      web.loadUrl("file:///android_asset/index.html")
+                  }
               }
               inner class Bridge {
                   @JavascriptInterface fun startTracking() { runOnUiThread {
