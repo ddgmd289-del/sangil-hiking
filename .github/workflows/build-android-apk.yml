@@ -31,6 +31,7 @@ jobs:
         run: |
           mkdir -p app/src/main/assets app/src/main/java/kr/sangil/myhiking
           cp index.html extensions.js auth-config.js manifest.webmanifest service-worker.js app/src/main/assets/
+          cmp -s index.html app/src/main/assets/index.html || { echo 'ERROR: bundled index.html differs from source'; exit 1; }
           # Embed the exact source revision and Actions run in the packaged WebView.
           # This identifies a stale APK without clearing any user activity data.
           python3 - <<'PY'
@@ -48,7 +49,6 @@ jobs:
           print('Embedded build marker:', run, revision)
           PY
           printf 'source_commit=%s\nsource_ref=%s\nbuild_run=%s\n' "$GITHUB_SHA" "$GITHUB_REF_NAME" "$GITHUB_RUN_ID" > app/src/main/assets/build-info.txt
-          cmp -s index.html app/src/main/assets/index.html || { echo 'ERROR: bundled index.html differs from source'; exit 1; }
           cp -r icons app/src/main/assets/
           mkdir -p app/src/main/res/drawable
           python3 -m pip install --quiet cairosvg
