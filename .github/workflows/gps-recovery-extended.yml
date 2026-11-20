@@ -32,6 +32,7 @@ jobs:
             tests/gps-recovery-executable.test.cjs \
             tests/gps-recovery-gap-replay.test.cjs \
             tests/gps-repaired-gap-pause.test.cjs \
+            tests/gps-recovery-distance-preservation.test.cjs \
             tests/gps-3km-native-recovery.test.cjs \
             tests/gps-long-outage-no-phantom-distance.test.cjs; do
             echo "::group::$file"
