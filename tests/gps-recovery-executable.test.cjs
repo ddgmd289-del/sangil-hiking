@@ -32,8 +32,8 @@ assert.ok(result.distance>=.05,'recovery must not reduce recorded distance');
 result=run({live:[a],backup:[a,b],distance:3.1});
 assert.equal(result.points.length,2);
 assert.equal(result.distance,3.1,'longer live distance must survive backup');
-result=run({live:[a],backup:[b],rests:[{started:base+5000,ended:base+15000}]});
-assert.equal(result.points.length,1,'explicitly paused fix must not be recovered');
+result=run({live:[a],backup:[b],rests:[{type:'manual',started:base+5000,ended:base+15000}]});
+assert.equal(result.points.length,1,'manually paused fix must not be recovered');
 result=run({live:[a],backup:[{...b,lat:91}]});
 assert.equal(result.points.length,1,'invalid latitude must be rejected');
 // A backup longer than the historical 250-fix limit must be fully replayed.
