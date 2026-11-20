@@ -36,4 +36,22 @@ vm.runInNewContext(source+'\nrecoverNativeGps();',sandbox,{timeout:5000});
 assert.equal(trip.points.length,count,'replaying native backup does not duplicate fixes');
 assert.equal(trip.distance,before,'replaying native backup does not inflate distance');
 assert.deepEqual(Array.from(trip.points,p=>p.t),fixes.map(p=>p.t),'second replay must not reorder the original GPS fixes');
+// Regression: an incorrectly inferred automatic pause must not erase the
+// native walking fixes or leave the route at the partial 1.33 km reading.
+const autoTrip={
+ started:start,state:'paused',pauseReason:'auto',activity:'걷기',
+ points:partial.map(p=>({...p})),distance:partialDistance,
+ rests:[{type:'auto',started:start+1400000,ended:start+1700000}],
+ restStarted:0
+};
+const autoSandbox={trip:autoTrip,window:{SangilNative:{getTrackBackup:()=>backup}},
+ km,persist(){},updateStats(){},draw(){},console,Date,Number,Math,Set,JSON,Array};
+vm.runInNewContext(source+'\\nrecoverNativeGps();',autoSandbox,{timeout:5000});
+assert.equal(autoTrip.points.length,count,'auto-pause recovery retains all native walking fixes');
+assert.ok(Math.abs(autoTrip.distance-expected)<0.03,'auto-pause recovery restores approximately 3.1 km');
+assert.ok(autoTrip.points.every(p=>!p.breakBefore),'automatic pause does not create a false GPS segment break');
+const autoDistance=autoTrip.distance;
+vm.runInNewContext(source+'\\nrecoverNativeGps();',autoSandbox,{timeout:5000});
+assert.equal(autoTrip.distance,autoDistance,'auto-pause recovery replay cannot inflate distance');
+
 console.log('Native GPS 3.1 km synthetic recovery: PASS');
