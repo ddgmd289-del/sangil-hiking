@@ -748,7 +748,7 @@ document.addEventListener('DOMContentLoaded',()=>{
    try{
      const u=new URL(value);
      return u.protocol==='https:' && u.hostname==='script.google.com' &&
-       /^\\/macros\\/s\\/[^/]+\\/exec\\/?$/.test(u.pathname) &&
+       u.pathname.startsWith('/macros/s/') && u.pathname.endsWith('/exec') &&
        !['judge','admin'].includes((u.searchParams.get('role')||'').toLowerCase()) ? u.href : '';
    }catch{return ''}
  }
