@@ -752,7 +752,10 @@ document.addEventListener('DOMContentLoaded',()=>{
        !['judge','admin'].includes((u.searchParams.get('role')||'').toLowerCase()) ? u.href : '';
    }catch{return ''}
  }
- const saved=valid(localStorage.getItem(key)||'');if(saved)field.value=saved;
+ const currentDeployment='https://script.google.com/macros/s/AKfycbziD0WYBAERgauwiyEKWlC_UUmSnflg7nuqWU29J1N1XDGnvt0Ijp5Wfw419g-EaO04Gg/exec';
+ const saved=valid(localStorage.getItem(key)||'');
+ field.value=currentDeployment;
+ if(saved!==currentDeployment)localStorage.setItem(key,currentDeployment);
  document.getElementById('contestExamSave').addEventListener('click',()=>{
    const url=valid(field.value.trim());
    if(!url){status.textContent='올바른 선수용 Apps Script 실행 주소를 입력하세요. 관리자·심판 주소는 저장할 수 없습니다.';return}
