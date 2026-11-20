@@ -46,12 +46,12 @@ const autoTrip={
 };
 const autoSandbox={trip:autoTrip,window:{SangilNative:{getTrackBackup:()=>backup}},
  km,persist(){},updateStats(){},draw(){},console,Date,Number,Math,Set,JSON,Array};
-vm.runInNewContext(source+'\\nrecoverNativeGps();',autoSandbox,{timeout:5000});
+vm.runInNewContext(source+'\nrecoverNativeGps();',autoSandbox,{timeout:5000});
 assert.equal(autoTrip.points.length,count,'auto-pause recovery retains all native walking fixes');
 assert.ok(Math.abs(autoTrip.distance-expected)<0.03,'auto-pause recovery restores approximately 3.1 km');
 assert.ok(autoTrip.points.every(p=>!p.breakBefore),'automatic pause does not create a false GPS segment break');
 const autoDistance=autoTrip.distance;
-vm.runInNewContext(source+'\\nrecoverNativeGps();',autoSandbox,{timeout:5000});
+vm.runInNewContext(source+'\nrecoverNativeGps();',autoSandbox,{timeout:5000});
 assert.equal(autoTrip.distance,autoDistance,'auto-pause recovery replay cannot inflate distance');
 
 console.log('Native GPS 3.1 km synthetic recovery: PASS');
