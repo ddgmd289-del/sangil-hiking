@@ -30,7 +30,7 @@ result=run(result.trip.points,[a,b,c].map(encode).join('\n'),[],original);
 assert.equal(result.trip.points.length,3,'backup replay must be idempotent');
 assert.equal(result.trip.distance,original,'backup replay must not double count distance');
 // Explicitly paused points must not silently become traveled distance.
-const pause={started:base+15000,ended:base+25000};
+const pause={type:'manual',started:base+15000,ended:base+25000};
 result=run([a],[a,b,c].map(encode).join('\n'),[pause]);
-assert.equal(result.trip.points.some(p=>p.t===b.t),false,'explicit rest fixes must remain excluded');
+assert.equal(result.trip.points.some(p=>p.t===b.t),false,'manual rest fixes must remain excluded');
 console.log('GPS repaired-gap and pause-boundary regression: PASS');
