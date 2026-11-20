@@ -270,8 +270,11 @@ function onFix(p){const c=p.coords;const cur={lat:c.latitude,lon:c.longitude,alt
         trip.points.pop();
         trip.distance=Math.max(0,trip.distance-legIn);
         // The new fix is kept: it connects directly to the last reliable point.
+        // Retain the newest reliable fix even when the return is under 3 m.
+        // Otherwise the next fix is measured against an older location and time,
+        // which can create an artificial gap or miss the next real movement.
+        trip.points.push(cur);
         if(direct>=.003&&direct/(Math.max(1,(cur.t-beforePrev.t)/1000))<=(trip.activity==='달리기'?.0055:.0033)){
-          trip.points.push(cur);
           trip.distance+=direct;
         }
       }else{
