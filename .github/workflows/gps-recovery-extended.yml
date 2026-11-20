@@ -31,7 +31,8 @@ jobs:
             tests/gps-runtime-scenarios.test.cjs \
             tests/gps-recovery-executable.test.cjs \
             tests/gps-recovery-gap-replay.test.cjs \
-            tests/gps-repaired-gap-pause.test.cjs; do
+            tests/gps-repaired-gap-pause.test.cjs \
+            tests/gps-3km-native-recovery.test.cjs; do
             echo "::group::$file"
             node "$file"
             echo "::endgroup::"
