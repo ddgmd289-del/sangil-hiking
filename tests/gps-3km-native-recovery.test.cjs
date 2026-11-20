@@ -22,14 +22,12 @@ const partialDistance=partial.slice(1).reduce((sum,p,i)=>sum+km(partial[i],p),0)
 assert.ok(partialDistance>1.30&&partialDistance<1.36,'partial track resembles reported 1.33 km');
 const trip={started:start,state:'active',activity:'걷기',points:partial,distance:partialDistance,rests:[],restStarted:0};
 const sandbox={trip,window:{SangilNative:{getTrackBackup:()=>backup}},km,persist(){},updateStats(){},draw(){},console,Date,Number,Math,Set,JSON,Array};
-vm.runInNewContext(source+'
-recoverNativeGps();',sandbox,{timeout:5000});
+vm.runInNewContext(source+'\nrecoverNativeGps();',sandbox,{timeout:5000});
 assert.equal(trip.points.length,count,'recover all 311 native fixes, not only the latest 250');
 assert.ok(Math.abs(trip.distance-expected)<0.03,'recover approximately 3.1 km rather than a partial track');
 assert.ok(trip.distance>partialDistance+1.7,'restore more than 1.7 km omitted from the live track');
 const before=trip.distance;
-vm.runInNewContext(source+'
-recoverNativeGps();',sandbox,{timeout:5000});
+vm.runInNewContext(source+'\nrecoverNativeGps();',sandbox,{timeout:5000});
 assert.equal(trip.points.length,count,'replaying native backup does not duplicate fixes');
 assert.equal(trip.distance,before,'replaying native backup does not inflate distance');
 console.log('Native GPS 3.1 km synthetic recovery: PASS');
