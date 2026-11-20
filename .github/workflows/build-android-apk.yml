@@ -457,6 +457,21 @@ jobs:
               if int(code)<1: raise SystemExit(f'{apk}: invalid versionCode')
               print(f'{apk}: package={app_id}, versionCode={code}, versionName={name}; preview only, NOT proven compatible with existing app')
           PY
+      - name: Verify every APK signature and report signer fingerprints
+        run: |
+          set -euo pipefail
+          APKSIGNER=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -1)
+          test -n "$APKSIGNER"
+          for flavor in debug release; do
+            APK="app/build/outputs/apk/$flavor/app-$flavor.apk"
+            if [ ! -f "$APK" ]; then
+              if [ "$flavor" = debug ]; then echo "::error::Missing debug APK"; exit 1; fi
+              echo "Release APK not built; permanent signing configuration may be absent."
+              continue
+            fi
+            "$APKSIGNER" verify --verbose --print-certs "$APK" | grep -E 'Verified|Signer #1 certificate SHA-256 digest'
+            echo "Signature verified for $flavor. Compare the SHA-256 signer digest with the currently installed APK before any in-place update."
+          done
       - name: Verify packaged web assets and revision
         run: |
           python3 - <<'PY'
