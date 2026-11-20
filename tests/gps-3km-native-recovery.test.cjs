@@ -24,6 +24,8 @@ const trip={started:start,state:'active',activity:'걷기',points:partial,distan
 const sandbox={trip,window:{SangilNative:{getTrackBackup:()=>backup}},km,persist(){},updateStats(){},draw(){},console,Date,Number,Math,Set,JSON,Array};
 vm.runInNewContext(source+'\nrecoverNativeGps();',sandbox,{timeout:5000});
 assert.equal(trip.points.length,count,'recover all 311 native fixes, not only the latest 250');
+assert.deepEqual(Array.from(trip.points,p=>p.t),fixes.map(p=>p.t),'recovery must retain every original timestamp in order');
+assert.deepEqual(Array.from(trip.points,p=>p.lat),fixes.map(p=>p.lat),'recovery must preserve the complete GPS route geometry');
 assert.ok(Math.abs(trip.distance-expected)<0.03,'recover approximately 3.1 km rather than a partial track');
 assert.ok(trip.distance>partialDistance+1.7,'restore more than 1.7 km omitted from the live track');
 const before=trip.distance;
