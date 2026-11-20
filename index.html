@@ -71,7 +71,7 @@ body.hike-fullscreen .map-wrap #map{width:100%;height:100%}
 
 <section class="screen" id="screen-event"><main class="body"><div class="section-head"><h2>🏁 등산대회</h2><span class="sub">접수·출석·기록</span></div>
 <div class="ext-danger">운영 시제품: 접수·QR·출석·점수 데이터는 이 기기에만 저장됩니다. 여러 심판 휴대폰의 실시간 승인, A/B/C 이론시험 자동채점, 중앙 PC 집계는 아직 기존 대회 서버와 연결되지 않았습니다.</div>
-<div class="note-card" id="contestExamBridge" style="margin:12px 0"><h3 class="ext-head">📋 기존 QR 이론시험 연결</h3><p class="sub">기존 Google Apps Script 시험을 엽니다. 선수 명단·채점·점수는 기존 시험 시스템에서 관리하며 산길 앱의 로컬 대회 기록과 자동 동기화되지 않습니다.</p><label class="ext-label" for="contestExamUrl">선수 시험 주소 (관리자가 1회 설정)</label><input class="ext-field" id="contestExamUrl" type="url" inputmode="url" placeholder="https://script.google.com/macros/s/.../exec"><button type="button" class="ext-action-primary" id="contestExamSave">선수 시험 주소 저장</button><button type="button" class="ext-action-primary" id="contestExamOpen">선수 시험 열기</button><p class="sub" id="contestExamStatus" aria-live="polite">선수용 주소만 입력하세요. 심판 주소(role=judge)는 선수에게 공유하지 마세요.</p></div>
+<div class="note-card" id="contestExamBridge" style="margin:12px 0"><h3 class="ext-head">📋 기존 QR 이론시험 연결</h3><p class="sub">기존 Google Apps Script 시험을 엽니다. 선수 명단·채점·점수는 기존 시험 시스템에서 관리하며 산길 앱의 로컬 대회 기록과 자동 동기화되지 않습니다.</p><label class="ext-label" for="contestExamUrl">선수 시험 주소 (관리자가 1회 설정)</label><input class="ext-field" id="contestExamUrl" type="url" inputmode="url" placeholder="https://script.google.com/macros/s/.../exec"><button type="button" class="ext-action-primary" id="contestExamSave">선수 시험 주소 저장</button><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button type="button" class="ext-action-primary" data-exam-type="A">A형 시험 열기</button><button type="button" class="ext-action-primary" data-exam-type="B">B형 시험 열기</button><button type="button" class="ext-action-primary" data-exam-type="C">C형 시험 열기</button></div><p class="sub" id="contestExamStatus" aria-live="polite">선수용 주소만 입력하세요. 심판 주소(role=judge)는 선수에게 공유하지 마세요.</p></div>
 <div class="ext-tabs" id="eventTabs"><button class="active" data-sub="overview">대회</button><button data-sub="teams">선수·3인조</button><button data-sub="judge">현장 확인</button><button data-sub="results">결과</button></div>
 <div id="event-overview" class="ext-panel active"><div class="note-card" style="margin-top:0"><h3 class="ext-head">대회 개설</h3><form id="eventForm" class="ext-stack"><label class="ext-label">대회명</label><input class="ext-field" id="eventName" required maxlength="90" placeholder="예: 경남 등산대회"><label class="ext-label">대회일</label><input class="ext-field" id="eventDate" required type="date"><label class="ext-label">장소</label><input class="ext-field" id="eventPlace" maxlength="100" placeholder="대회 장소"><button class="ext-action-primary" type="submit">+ 대회 만들기</button></form></div><div id="eventList"></div></div>
 <div id="event-teams" class="ext-panel"><div class="note-card" style="margin-top:0"><h3 class="ext-head">선수 등록 (A·B·C형)</h3><form id="athleteForm" class="ext-stack"><label class="ext-label">대회 선택</label><select class="ext-field" id="athleteEvent" required></select><label class="ext-label">조 번호</label><input class="ext-field" id="athleteTeam" required maxlength="30" placeholder="예: 101"><label class="ext-label">배번호</label><input class="ext-field" id="athleteBib" required maxlength="40" placeholder="예: 101A"><label class="ext-label">이름</label><input class="ext-field" id="athleteName" required maxlength="50"><label class="ext-label">시험 유형</label><select class="ext-field" id="athleteType"><option>A</option><option>B</option><option>C</option></select><button class="ext-action-primary" type="submit">+ 선수 등록</button></form><p class="ext-hint">같은 조에서 A/B/C 유형이 각각 한 명씩 등록되도록 중복을 제한합니다.</p></div><div id="athleteList"></div></div>
@@ -758,11 +758,15 @@ document.addEventListener('DOMContentLoaded',()=>{
    if(!url){status.textContent='올바른 선수용 Apps Script 실행 주소를 입력하세요. 관리자·심판 주소는 저장할 수 없습니다.';return}
    localStorage.setItem(key,url);status.textContent='이 휴대전화에 선수 시험 주소를 저장했습니다. 다른 휴대전화에는 별도 설정이 필요합니다.';
  });
- document.getElementById('contestExamOpen').addEventListener('click',()=>{
-   const url=valid(field.value.trim())||valid(localStorage.getItem(key)||'');
-   if(!url){status.textContent='먼저 선수 시험 주소를 입력하고 저장하세요.';return}
-   window.location.assign(url);
- });
+ document.querySelectorAll('[data-exam-type]').forEach(button=>button.addEventListener('click',()=>{
+   const base=valid(field.value.trim())||valid(localStorage.getItem(key)||'');
+   if(!base){status.textContent='먼저 기존 시험 주소를 입력하고 저장하세요.';return}
+   const u=new URL(base);
+   const type=button.getAttribute('data-exam-type');
+   u.searchParams.set('type',type);
+   status.textContent=type+'형 선수 시험을 엽니다.';
+   window.location.assign(u.href);
+ }));
 })();
 </script>
 </body></html>
