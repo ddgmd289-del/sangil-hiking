@@ -12,8 +12,7 @@ const count=311;
 const fixes=Array.from({length:count},(_,i)=>({
  lat:35+i*0.00009,lon:128,accuracy:5,t:start+i*10000
 }));
-const backup=fixes.map(p=>JSON.stringify({lat:p.lat,lng:p.lon,accuracy:p.accuracy,time:p.t})).join('
-');
+const backup=fixes.map(p=>JSON.stringify({lat:p.lat,lng:p.lon,accuracy:p.accuracy,time:p.t})).join('\n');
 const km=(a,b)=>{const rad=Math.PI/180;const dLat=(b.lat-a.lat)*rad;const dLon=(b.lon-a.lon)*rad;const x=Math.sin(dLat/2)**2+Math.cos(a.lat*rad)*Math.cos(b.lat*rad)*Math.sin(dLon/2)**2;return 6371*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));};
 const expected=fixes.slice(1).reduce((sum,p,i)=>sum+km(fixes[i],p),0);
 assert.ok(expected>3.08&&expected<3.13,'synthetic trail represents 3.1 km');
