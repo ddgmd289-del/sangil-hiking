@@ -115,3 +115,5 @@ assert.match(html,/trip\.distance=Math\.max\(0,trip\.distance-legIn\)/, 'False d
 assert.match(html,/trip\.points\.pop\(\)/, 'Spike waypoint is removed');
 
 assert.match(html,/function elapsed\(\)\{return trip\?paceSeconds\(trip\):0\}/,'Live timer and saved average pace use consistent duration');
+
+assert.match(html,/if\(!cur\.breakBefore&&!next\.breakBefore&&\(nearReturn\|\|\(noisy&&/, 'Route smoothing must preserve GPS segment boundaries');
