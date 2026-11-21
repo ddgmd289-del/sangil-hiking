@@ -29,6 +29,24 @@ jobs:
             tests/gps-backup-noise-regression.test.cjs; do
             node "$file"
           done
+      - name: Verify permission grant never starts an unrequested trip
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          src = Path('.github/workflows/build-android-apk.yml').read_text()
+          assert 'private var startAfterPermission = false' in src
+          assert 'startAfterPermission = true' in src
+          assert 'val shouldStart = startAfterPermission' in src
+          assert 'startAfterPermission = false' in src
+          assert 'if (shouldStart && checkSelfPermission' in src
+          # The initial onCreate permission request must not set the start flag.
+          on_create = src.split('override fun onCreate(savedInstanceState:', 1)[1].split('override fun onNewIntent', 1)[0]
+          assert 'startAfterPermission = true' not in on_create
+          # A permission request from the settings/diagnostics bridge must not start tracking.
+          request = src.split('@JavascriptInterface fun requestPermission()', 1)[1].split('@JavascriptInterface fun closeApp()', 1)[0]
+          assert 'startAfterPermission = true' not in request
+          print('Permission/start regression checks passed')
+          PY
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -175,6 +193,7 @@ jobs:
           class MainActivity : Activity() {
               private lateinit var web: WebView
               private var speech: TextToSpeech? = null
+              private var startAfterPermission = false
               private val gpsErrorReceiver = object : android.content.BroadcastReceiver() {
                   override fun onReceive(context: android.content.Context?, intent: Intent?) {
                       val reason = intent?.getStringExtra("reason") ?: return
@@ -239,6 +258,7 @@ jobs:
                   @JavascriptInterface fun startTracking() { runOnUiThread {
                       if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                           Toast.makeText(this@MainActivity, "위치 권한 요청 중 · 허용 후 GPS 기록이 시작됩니다", Toast.LENGTH_LONG).show()
+                          startAfterPermission = true
                           requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), 10)
                           return@runOnUiThread
                       }
@@ -296,10 +316,13 @@ jobs:
               }
               override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
                   super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-                  if (requestCode == 10 && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                  if (requestCode != 10) return
+                  val shouldStart = startAfterPermission
+                  startAfterPermission = false
+                  if (shouldStart && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                       try { startForegroundService(Intent(this, TrackingService::class.java).setAction("START")) }
                       catch (e: Exception) { Toast.makeText(this, "GPS 시작 실패: " + e.message, Toast.LENGTH_LONG).show() }
-                  } else if (requestCode == 10) {
+                  } else if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                       Toast.makeText(this, "정확한 위치 권한이 필요합니다. 설정에서 위치 권한을 허용해 주세요.", Toast.LENGTH_LONG).show()
                   }
               }
