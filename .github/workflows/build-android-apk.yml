@@ -497,6 +497,24 @@ jobs:
             "$APKSIGNER" verify --verbose --print-certs "$APK" | grep -E 'Verified|Signer #1 certificate SHA-256 digest'
             echo "Signature verified for $flavor. Compare the SHA-256 signer digest with the currently installed APK before any in-place update."
           done
+      - name: Publish APK provenance and signing fingerprints
+        run: |
+          set -euo pipefail
+          mkdir -p apk-verification
+          APKSIGNER=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -1)
+          printf 'source_commit=%s\nsource_ref=%s\nworkflow_run=%s\npackage_id=kr.sangil.myhiking.preview\n' "$GITHUB_SHA" "$GITHUB_REF_NAME" "$GITHUB_RUN_ID" > apk-verification/verification.txt
+          for flavor in debug release; do
+            APK="app/build/outputs/apk/$flavor/app-$flavor.apk"
+            [ -f "$APK" ] || continue
+            echo "artifact=$flavor" >> apk-verification/verification.txt
+            sha256sum "$APK" >> apk-verification/verification.txt
+            "$APKSIGNER" verify --print-certs "$APK" | grep 'Signer #1 certificate SHA-256 digest:' >> apk-verification/verification.txt
+          done
+          echo 'WARNING: This report does not prove installed-app signing compatibility or data preservation.' >> apk-verification/verification.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SANGIL-APK-IDENTITY-AND-SIGNING-REPORT
+          path: apk-verification/verification.txt
       - name: Verify packaged web assets and revision
         run: |
           python3 - <<'PY'
