@@ -510,13 +510,13 @@ jobs:
             [ -f "$APK" ] || continue
             echo "artifact=$flavor" >> apk-verification/verification.txt
             sha256sum "$APK" >> apk-verification/verification.txt
-            # apksigner prints certificate details only with --verbose on some build-tools versions.
-          # Capture the output before filtering so a changed label cannot silently fail CI.
-          CERTS=$("$APKSIGNER" verify --print-certs "$APK")
-          printf '%s\n' "$CERTS" >> apk-verification/verification.txt
-          if ! printf '%s\n' "$CERTS" | grep -Eiq '(SHA-256|SHA256).*([[:xdigit:]]{2}:){10}|(SHA-256|SHA256).*([[:xdigit:]]{32})'; then
-            echo "::warning::Signer fingerprint format not recognized; raw apksigner output preserved in verification report."
-          fi
+            # Capture the verified signer details separately for each APK.
+            CERTS=$("$APKSIGNER" verify --verbose --print-certs "$APK")
+            printf '%s\n' "$CERTS" >> apk-verification/verification.txt
+            if ! printf '%s\n' "$CERTS" | grep -Eiq 'Signer #1 certificate SHA-256 digest:'; then
+              echo "::error::Missing signer SHA-256 digest for $flavor; do not treat this APK as verified."
+              exit 1
+            fi
           done
           echo 'WARNING: This report does not prove installed-app signing compatibility or data preservation.' >> apk-verification/verification.txt
       - uses: actions/upload-artifact@v4
