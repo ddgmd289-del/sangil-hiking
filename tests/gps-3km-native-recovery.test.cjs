@@ -64,8 +64,8 @@ const chunkSandbox={trip:chunkTrip,window:{SangilNative:{getTrackBackup:()=>avai
  km,persist(){},updateStats(){},draw(){},console,Date,Number,Math,Set,JSON,Array};
 let previousDistance=chunkTrip.distance;
 for(const length of [160,220,280,count]){
- availableBackup=fixes.slice(0,length).map(p=>JSON.stringify({lat:p.lat,lng:p.lon,accuracy:p.accuracy,time:p.t})).join('\\n');
- vm.runInNewContext(source+'\\nrecoverNativeGps();',chunkSandbox,{timeout:5000});
+ availableBackup=fixes.slice(0,length).map(p=>JSON.stringify({lat:p.lat,lng:p.lon,accuracy:p.accuracy,time:p.t})).join('\n');
+ vm.runInNewContext(source+'\nrecoverNativeGps();',chunkSandbox,{timeout:5000});
  assert.equal(chunkTrip.points.length,length,'incremental backup restores all available fixes');
  assert.ok(chunkTrip.distance>=previousDistance,'incremental recovery never loses distance');
  previousDistance=chunkTrip.distance;
