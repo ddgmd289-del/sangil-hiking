@@ -48,8 +48,8 @@ assert.match(html,/function paceSeconds\(r,now=Date\.now\(\)\)/,'Pace time helpe
 assert.match(html,/cur\.accuracy<=20&&anchorDistance<\.020\)autoPause\(\)/,'Auto pause needs high-quality stillness');
 assert.match(html,/const paceDuration=paceSeconds\(r\)/,'Record average pace uses conservative denominator');
 const start=Date.UTC(2026,10,16,9,0,0);
-const elapsed=(r)=>{const manual=(r.rests||[]).filter(x=>x.type==='manual').reduce((n,x)=>n+(x.ended-x.started),0);return (r.ended-r.started-manual)/1000};
-assert.equal(elapsed({started:start,ended:start+180000,rests:[{type:'auto',started:start+30000,ended:start+90000}]}),180,'Auto pause does not inflate pace');
+const elapsed=(r)=>{const rests=(r.rests||[]).filter(x=>x.type==='manual'||x.type==='auto').reduce((n,x)=>n+(x.ended-x.started),0);return (r.ended-r.started-rests)/1000};
+assert.equal(elapsed({started:start,ended:start+180000,rests:[{type:'auto',started:start+30000,ended:start+90000}]}),120,'Automatic rest is excluded from moving time');
 assert.equal(elapsed({started:start,ended:start+180000,rests:[{type:'manual',started:start+30000,ended:start+90000}]}),120,'Explicit rest is excluded');
 
 assert.match(html,/trip\.state==='done'\|\|!window\.SangilNative\?\.getTrackBackup/,'Recovery remains available during pause and skips finished trips');
