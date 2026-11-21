@@ -119,3 +119,9 @@ assert.match(html,/function elapsed\(\)\{return trip\?paceSeconds\(trip\):0\}/,'
 assert.match(html,/if\(!cur\.breakBefore&&!next\.breakBefore&&\(nearReturn\|\|\(noisy&&/, 'Route smoothing must preserve GPS segment boundaries');
 
 assert.match(html,/trip\.points\.push\(cur\);\s*if\(direct>=\.003&&direct\//, 'After GPS spike removal keep the latest return fix even for sub-3m movement');
+
+// Manual pause must also split the GPS track on resume, preventing phantom distance.
+const resumeSource=html.match(/function resume\(\)\{[^\n]+/);
+assert.ok(resumeSource,'Manual resume handler exists');
+assert.match(resumeSource[0],/trip\.resumeBreakPending=true/,'Manual resume must split the next GPS segment');
+assert.match(html,/trip\.resumeBreakPending\|\|diff>\.12/,'First fix after manual resume must not bridge the pause');
