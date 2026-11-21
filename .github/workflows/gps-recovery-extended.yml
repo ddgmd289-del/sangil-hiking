@@ -1,0 +1,42 @@
+name: GPS recovery extended regression
+on:
+  push:
+    branches:
+      - fix/gps-integrated-stability-20261117
+    paths:
+      - 'index.html'
+      - 'tests/**'
+      - '.github/workflows/gps-recovery-extended.yml'
+  pull_request:
+    branches:
+      - fix/gps-reception-diagnostics-20261117
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  gps-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run all GPS recovery and tracking regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in \
+            tests/gps-filter.test.cjs \
+            tests/gps-runtime-scenarios.test.cjs \
+            tests/gps-recovery-executable.test.cjs \
+            tests/gps-recovery-gap-replay.test.cjs \
+            tests/gps-repaired-gap-pause.test.cjs \
+            tests/gps-recovery-distance-preservation.test.cjs \
+            tests/gps-3km-native-recovery.test.cjs \
+            tests/gps-long-outage-no-phantom-distance.test.cjs \
+            tests/gps-backup-noise-regression.test.cjs; do
+            echo "::group::$file"
+            node "$file"
+            echo "::endgroup::"
+          done

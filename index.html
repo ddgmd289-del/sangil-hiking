@@ -51,7 +51,7 @@ body.hike-fullscreen .map-wrap #map{width:100%;height:100%}
 </head>
 <body><div class="app">
 <header class="hero"><div class="brand"><div><div class="brand-name">⛰ 산길 <small>트레킹</small></div></div><div class="avatar">🌿</div></div><p class="tagline">나의 발걸음이 하나의 이야기가 되도록</p><h1>오늘도 안전하게,<br><em>산에서 만나요.</em></h1><span class="status"><span class="dot" id="liveDot"></span><span id="gpsStatus">GPS 위치 확인 전</span></span></header>
-<section class="screen active" id="screen-home"><main class="body"><div class="section-head"><h2>나의 산행 지도</h2><span class="sub" id="coord">위치 정보 없음</span></div><div class="map-wrap"><div class="map-fallback">지도를 불러오는 중입니다.<br>인터넷 연결이 필요합니다.</div><div id="map"></div><div class="float-controls"><button class="square" id="mapCheck" aria-label="지도 상태 점검">ⓘ</button><button class="square" id="zoomIn" aria-label="지도 확대">＋</button><button class="square" id="zoomOut" aria-label="지도 축소">－</button><button class="square" id="trailToggle" aria-label="주변 등산로 보기" title="주변 등산로">🥾</button><button class="square" id="shareMap" aria-label="현재 지도 또는 산행 경로 공유" title="지도 공유">↗</button><button class="square" id="locate" aria-label="현재 위치 확인">⌖</button><button class="square" id="fit" aria-label="전체 경로 보기">▧</button></div><div class="map-note" id="mapNote">📍 현재 위치 버튼을 눌러 주변 등산로를 확인하세요.</div></div><div class="metrics"><div class="metric"><small>이동 거리</small><strong id="distance">0.00</strong><span>km</span></div><div class="metric"><small>산행 시간</small><strong id="duration">00:00</strong><span>시:분</span></div><div class="metric"><small>현재 고도</small><strong id="altitude">—</strong><span>m</span></div></div><div class="note-card" style="margin:10px 0"><strong>활동 선택</strong><div class="ext-actions" id="activityModes"><button type="button" class="btn secondary" data-activity="산행">🥾 산행</button><button type="button" class="btn secondary" data-activity="걷기">🚶 걷기</button><button type="button" class="btn secondary" data-activity="달리기">🏃 달리기</button></div><p class="details" id="activityStatus">현재 활동: 산행</p></div><div class="actionbar" id="actions"><button class="btn primary" id="start">▶ 산행 시작</button><button class="btn secondary" id="demo">체험 모드</button></div><div class="note-card"><h3>📌 산행 중 위치 표시</h3><p>휴식 장소나 위험 구간을 기록해 산행 경로에 남겨두세요. GPS 산행을 시작한 후 사용할 수 있습니다.</p><div class="waypoints"><button class="chip" data-mark="휴식">☕ 휴식</button><button class="chip" data-mark="전망">🌄 전망</button><button class="chip" data-mark="위험">⚠️ 위험</button><button class="chip" data-mark="기타">📍 기타</button></div></div><div class="notice">안전 안내 · 이 앱은 구조 요청을 자동 전송하지 않습니다. 위험 시 119에 직접 신고하고 위치 좌표를 전달하세요. GPS 정확도는 환경과 기기에 따라 달라집니다.</div></main></section>
+<section class="screen active" id="screen-home"><main class="body"><div class="section-head"><h2>나의 산행 지도</h2><span class="sub" id="coord">위치 정보 없음</span></div><div class="map-wrap"><div class="map-fallback">지도를 불러오는 중입니다.<br>인터넷 연결이 필요합니다.</div><div id="map"></div><div class="float-controls"><button class="square" id="mapCheck" aria-label="지도 상태 점검">ⓘ</button><button class="square" id="zoomIn" aria-label="지도 확대">＋</button><button class="square" id="zoomOut" aria-label="지도 축소">－</button><button class="square" id="trailToggle" aria-label="주변 등산로 보기" title="주변 등산로">🥾</button><button class="square" id="shareMap" aria-label="현재 지도 또는 산행 경로 공유" title="지도 공유">↗</button><button class="square" id="locate" aria-label="현재 위치 확인">⌖</button><button class="square" id="fit" aria-label="전체 경로 보기">▧</button></div><div class="map-note" id="mapNote">📍 현재 위치 버튼을 눌러 주변 등산로를 확인하세요.</div></div><div class="metrics"><div class="metric"><small>이동 거리</small><strong id="distance">0.00</strong><span>km</span></div><div class="metric"><small>산행 시간</small><strong id="duration">00:00</strong><span>시:분</span></div><div class="metric"><small>현재 고도</small><strong id="altitude">—</strong><span>m</span></div></div><div class="note-card" style="margin:10px 0"><strong>활동 선택</strong><div class="ext-actions" id="activityModes"><button type="button" class="btn secondary" data-activity="산행">🥾 산행</button><button type="button" class="btn secondary" data-activity="걷기">🚶 걷기</button><button type="button" class="btn secondary" data-activity="달리기">🏃 달리기</button></div><p class="details" id="activityStatus">현재 활동: 산행</p></div><div class="actionbar" id="actions"><button class="btn primary" id="start">▶ 운동 시작</button><button class="btn secondary" id="demo">체험 모드</button></div><div class="note-card"><h3>📌 산행 중 위치 표시</h3><p>휴식 장소나 위험 구간을 기록해 산행 경로에 남겨두세요. GPS 산행을 시작한 후 사용할 수 있습니다.</p><div class="waypoints"><button class="chip" data-mark="휴식">☕ 휴식</button><button class="chip" data-mark="전망">🌄 전망</button><button class="chip" data-mark="위험">⚠️ 위험</button><button class="chip" data-mark="기타">📍 기타</button></div></div><div class="notice">안전 안내 · 이 앱은 구조 요청을 자동 전송하지 않습니다. 위험 시 119에 직접 신고하고 위치 좌표를 전달하세요. GPS 정확도는 환경과 기기에 따라 달라집니다.</div></main></section>
 <section class="screen" id="screen-records"><main class="body"><div class="section-head"><h2>산행 기록</h2><span class="sub" id="recordCount">0개 기록</span></div><div class="ext-actions" style="margin:0 0 12px"><button class="btn secondary" type="button" id="backupRecords">기록 전체 백업</button><button class="btn secondary" type="button" id="exportRecordsCsv">통계 CSV</button><button class="btn secondary" type="button" id="restoreRecords">백업 불러오기</button><input type="file" id="restoreRecordsFile" accept=".json,application/json" hidden><button class="btn secondary" type="button" id="deleteAllRecords">전체 기록 삭제</button></div><div class="note-card" style="margin-top:0" id="recordList"><div class="empty">저장된 산행 기록이 없습니다.</div></div><p class="foot">저장 기록은 현재 브라우저 기기에 보관됩니다.<br>브라우저 데이터를 삭제하면 사라질 수 있습니다.</p></main></section>
 
 <section class="screen" id="screen-mountains"><main class="body">
@@ -71,6 +71,7 @@ body.hike-fullscreen .map-wrap #map{width:100%;height:100%}
 
 <section class="screen" id="screen-event"><main class="body"><div class="section-head"><h2>🏁 등산대회</h2><span class="sub">접수·출석·기록</span></div>
 <div class="ext-danger">운영 시제품: 접수·QR·출석·점수 데이터는 이 기기에만 저장됩니다. 여러 심판 휴대폰의 실시간 승인, A/B/C 이론시험 자동채점, 중앙 PC 집계는 아직 기존 대회 서버와 연결되지 않았습니다.</div>
+<div class="note-card" id="contestExamBridge" style="margin:12px 0"><h3 class="ext-head">📋 기존 QR 이론시험 연결</h3><p class="sub">기존 Google Apps Script 시험을 엽니다. 선수 명단·채점·점수는 기존 시험 시스템에서 관리하며 산길 앱의 로컬 대회 기록과 자동 동기화되지 않습니다.</p><label class="ext-label" for="contestExamUrl">선수 시험 주소 (관리자가 1회 설정)</label><input class="ext-field" id="contestExamUrl" type="url" inputmode="url" placeholder="https://script.google.com/macros/s/.../exec"><button type="button" class="ext-action-primary" id="contestExamSave">선수 시험 주소 저장</button><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button type="button" class="ext-action-primary" data-exam-type="A">A형 시험 열기</button><button type="button" class="ext-action-primary" data-exam-type="B">B형 시험 열기</button><button type="button" class="ext-action-primary" data-exam-type="C">C형 시험 열기</button></div><p class="sub" id="contestExamStatus" aria-live="polite">선수용 주소만 입력하세요. 심판 주소(role=judge)는 선수에게 공유하지 마세요.</p></div>
 <div class="ext-tabs" id="eventTabs"><button class="active" data-sub="overview">대회</button><button data-sub="teams">선수·3인조</button><button data-sub="judge">현장 확인</button><button data-sub="results">결과</button></div>
 <div id="event-overview" class="ext-panel active"><div class="note-card" style="margin-top:0"><h3 class="ext-head">대회 개설</h3><form id="eventForm" class="ext-stack"><label class="ext-label">대회명</label><input class="ext-field" id="eventName" required maxlength="90" placeholder="예: 경남 등산대회"><label class="ext-label">대회일</label><input class="ext-field" id="eventDate" required type="date"><label class="ext-label">장소</label><input class="ext-field" id="eventPlace" maxlength="100" placeholder="대회 장소"><button class="ext-action-primary" type="submit">+ 대회 만들기</button></form></div><div id="eventList"></div></div>
 <div id="event-teams" class="ext-panel"><div class="note-card" style="margin-top:0"><h3 class="ext-head">선수 등록 (A·B·C형)</h3><form id="athleteForm" class="ext-stack"><label class="ext-label">대회 선택</label><select class="ext-field" id="athleteEvent" required></select><label class="ext-label">조 번호</label><input class="ext-field" id="athleteTeam" required maxlength="30" placeholder="예: 101"><label class="ext-label">배번호</label><input class="ext-field" id="athleteBib" required maxlength="40" placeholder="예: 101A"><label class="ext-label">이름</label><input class="ext-field" id="athleteName" required maxlength="50"><label class="ext-label">시험 유형</label><select class="ext-field" id="athleteType"><option>A</option><option>B</option><option>C</option></select><button class="ext-action-primary" type="submit">+ 선수 등록</button></form><p class="ext-hint">같은 조에서 A/B/C 유형이 각각 한 명씩 등록되도록 중복을 제한합니다.</p></div><div id="athleteList"></div></div>
@@ -128,16 +129,24 @@ function fmtTime(seconds){let s=Math.max(0,Math.floor(seconds)),h=Math.floor(s/3
 // Exclude only explicit manual pauses, so false auto-pause cannot inflate walking pace.
 function paceSeconds(r,now=Date.now()){
  if(!r||!Number.isFinite(Number(r.started)))return 0;
- const end=Number(r.ended)||now;
- const rests=(r.rests||[]).reduce((n,x)=>n+Math.max(0,Number(x.ended)-Number(x.started)),0);
- const openRest=r.restStarted?Math.max(0,end-Number(r.restStarted)):0;
- return Math.max(0,(end-Number(r.started)-rests-openRest)/1000);
+ const ended=Number(r.ended);
+ const end=r.ended!=null&&Number.isFinite(ended)&&ended>0?ended:now;
+ // Clamp and merge manual rest intervals: duplicated or overlapping restores must not
+ // subtract the same elapsed time twice or push moving time below its true value.
+ const start=Number(r.started);
+ const intervals=(Array.isArray(r.rests)?r.rests:[]).filter(x=>x&&x.type==='manual').map(x=>[Number(x.started),Number(x.ended)]);
+ if(r.restStarted&&r.pauseReason==='manual')intervals.push([Number(r.restStarted),end]);
+ const valid=intervals.filter(([a,b])=>Number.isFinite(a)&&Number.isFinite(b)&&b>a)
+  .map(([a,b])=>[Math.max(start,a),Math.min(end,b)]).filter(([a,b])=>b>a).sort((a,b)=>a[0]-b[0]);
+ let restMs=0,restEnd=start;
+ for(const [a,b] of valid){restMs+=Math.max(0,b-Math.max(a,restEnd));restEnd=Math.max(restEnd,b);}
+ return Math.max(0,(end-start-restMs)/1000);
 }
-function elapsed(){if(!trip)return 0;return Math.max(0,(trip.accMs||0)+(trip.state==='running'?Date.now()-trip.segmentStarted:0))/1000}
+function elapsed(){return trip?paceSeconds(trip):0}
 function restSeconds(r=trip){if(!r)return 0;return Math.max(0,((r.restMs||0)+(r.restStarted?Date.now()-r.restStarted:0))/1000)}
-function closeRest(r=trip){if(!r||!r.restStarted)return;r.restMs=(r.restMs||0)+Math.max(0,Date.now()-r.restStarted);r.rests=r.rests||[];r.rests.push({started:r.restStarted,ended:Date.now(),type:r.pauseReason||'manual'});r.restStarted=null;r.pauseReason=null}
+function closeRest(r=trip){if(!r||!r.restStarted)return;r.restMs=(r.restMs||0)+Math.max(0,Date.now()-r.restStarted);r.rests=Array.isArray(r.rests)?r.rests:[];r.rests.push({started:r.restStarted,ended:Date.now(),type:r.pauseReason||'manual'});r.restStarted=null;r.pauseReason=null}
 function autoPause(){if(!trip||trip.state!=='running'||trip.demo)return;trip.accMs+=Date.now()-trip.segmentStarted;trip.state='paused';trip.pauseReason='auto';trip.pauseAnchor={...(trip.stationaryAnchor||trip.points.at(-1)||position)};trip.resumeCandidates=0;trip.restStarted=Date.now();persist();updateStats();toast('움직임이 없어 자동 일시정지 · 휴식 기록 중');speakHike('이동이 없어 산행 기록을 잠시 멈춥니다.')}
-function autoResume(){if(!trip||trip.state!=='paused'||trip.pauseReason!=='auto')return;closeRest();trip.segmentStarted=Date.now();trip.state='running';trip.stationarySince=null;trip.pauseAnchor=null;trip.resumeCandidates=0;persist();updateStats();toast('이동 감지 · 산행 자동 재개');speakHike('산행 기록을 다시 시작합니다.')}
+function autoResume(){if(!trip||trip.state!=='paused'||trip.pauseReason!=='auto')return;closeRest();trip.segmentStarted=Date.now();trip.state='running';trip.stationarySince=null;trip.pauseAnchor=null;trip.resumeCandidates=0;trip.resumeBreakPending=true;persist();updateStats();toast('이동 감지 · 산행 자동 재개');speakHike('산행 기록을 다시 시작합니다.')}
 
 // 전체화면 UI는 브라우저 Fullscreen API 대신 고정 화면으로 구현해 WebView에서도 작동합니다.
 let voiceEnabled=true,announcedStep=0;
@@ -152,13 +161,15 @@ function rebuildMapForViewport(){if(!map||mapResetting)return;mapResetting=true;
 let voiceRequest=0;
 function speakHike(message){if(!voiceEnabled)return;const status=$('#voiceStatus');const report=m=>{if(status)status.textContent=m};if(window.SangilAndroid&&typeof window.SangilAndroid.speak==='function'){try{window.SangilAndroid.speak(message);report('Android 음성 안내 요청됨 · 소리가 안 나면 한국어 TTS 엔진 확인');return}catch(e){report('휴대폰 음성 연결 실패')}}if(!('speechSynthesis' in window)||typeof SpeechSynthesisUtterance==='undefined'){report('이 앱에서는 음성 엔진을 사용할 수 없습니다.');return}const id=++voiceRequest;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(message);u.lang='ko-KR';u.rate=0.90;u.volume=1;u.onstart=()=>{if(id===voiceRequest)report('음성 재생 중')};u.onend=()=>{if(id===voiceRequest)report('음성 안내 준비됨')};u.onerror=e=>{if(id===voiceRequest)report('음성 재생 실패 ('+(e.error||'엔진 오류')+')')};speechSynthesis.speak(u);setTimeout(()=>{if(id===voiceRequest&&speechSynthesis.pending&&!speechSynthesis.speaking)report('음성 엔진 대기 중 · 휴대폰 TTS 설정 확인')},2500)}catch(e){report('음성 실행 오류: '+(e.message||'확인 필요'))}}
 function syncHikeHud(){const active=!!trip&&trip.state!=='done';const activity=trip?.activity==='등산'?'산행':(trip?.activity||selectedActivity);$('#hikePause').textContent=trip?.state==='paused'?'▶ '+activity+' 재개':'Ⅱ 일시정지';$('#hikeFinish').textContent='■ '+activity+' 종료';const wasActive=document.body.classList.contains('hike-fullscreen');document.body.classList.toggle('hike-fullscreen',active);$('#hikeDistance').textContent=(trip?.distance||0).toFixed(2)+' km';$('#hikeDuration').textContent=fmtTime(elapsed());$('#hikeAltitude').textContent=(position&&Number.isFinite(position.alt)?Math.round(position.alt):'—')+' m';if(active!==wasActive)setTimeout(rebuildMapForViewport,180)}
-function announceDistance(){if(!trip||trip.state!=='running'||trip.demo)return;const step=Math.floor((trip.distance||0)/0.5);if(step>announcedStep){announcedStep=step;speakHike('이동 거리 '+(step*0.5).toFixed(1)+' 킬로미터입니다.')}}
+function announceDistance(){if(!trip||trip.state!=='running'||trip.demo)return;const step=Math.floor((trip.distance||0));if(step>announcedStep){announcedStep=step;speakHike('이동 거리 '+step+' 킬로미터입니다.')}}
 $('#hikeHud').addEventListener('dblclick',showMapDiagnostics);$('#hikePause').addEventListener('click',()=>trip?.state==='paused'?resume():pause());
 $('#hikeFinish').addEventListener('click',finish);
 $('#testVoice').addEventListener('click',()=>{voiceEnabled=true;$('#voiceToggle').textContent='🔊 음성 켜짐';$('#voiceToggle').setAttribute('aria-pressed','true');speakHike('산길 음성 안내 테스트입니다. 안전한 산행 되세요.')});$('#voiceToggle').addEventListener('click',()=>{voiceEnabled=!voiceEnabled;$('#voiceToggle').textContent=voiceEnabled?'🔊 음성 켜짐':'🔇 음성 꺼짐';$('#voiceToggle').setAttribute('aria-pressed',String(voiceEnabled));if(voiceEnabled)speakHike('음성 안내를 시작합니다.');else if('speechSynthesis'in window)speechSynthesis.cancel()});
 window.addEventListener('resize',resizeHikeMap);
 window.addEventListener('orientationchange',()=>setTimeout(rebuildMapForViewport,250));document.addEventListener('visibilitychange',()=>{if(!document.hidden)resizeHikeMap()});if(window.ResizeObserver){new ResizeObserver(()=>resizeHikeMap()).observe($('#map'))}document.addEventListener('visibilitychange',()=>{if(!document.hidden)resizeHikeMap()});
-function updateStats(){$('#distance').textContent=(trip?.distance||0).toFixed(2);$('#duration').textContent=fmtTime(elapsed());$('#altitude').textContent=(position&&Number.isFinite(position.alt))?Math.round(position.alt):'—';let a=$('#actions');if(!trip){a.innerHTML='<button class="btn primary" id="start">▶ 산행 시작</button><button class="btn secondary" id="demo">체험 모드</button>'}else if(trip.state==='running'){a.innerHTML='<button class="btn secondary" id="pause">Ⅱ 잠시 멈춤</button><button class="btn danger" id="finish">■ 산행 종료</button>'}else{a.innerHTML='<button class="btn primary" id="resume">▶ 산행 재개</button><button class="btn danger" id="finish">■ 산행 종료</button>'}a.querySelector('#start')?.addEventListener('click',start);a.querySelector('#demo')?.addEventListener('click',startDemo);a.querySelector('#pause')?.addEventListener('click',pause);a.querySelector('#resume')?.addEventListener('click',resume);a.querySelector('#finish')?.addEventListener('click',finish);$('#liveDot').classList.toggle('live',!!trip&&trip.state==='running');let restEl=document.getElementById('restStatus');if(!restEl){restEl=document.createElement('div');restEl.id='restStatus';restEl.className='foot';$('#actions').after(restEl)}restEl.textContent=trip?'휴식 '+fmtTime(restSeconds())+(trip.state==='paused'?' · '+(trip.pauseReason==='auto'?'자동 휴식 중':'수동 휴식 중'):' · 이동 기록 중'):'';syncHikeHud();const note=$('#mapNote');if(note&&trip&&!viewedRecord){note.textContent='📍 이동거리 '+trip.distance.toFixed(2)+' km · GPS 기록 '+trip.points.length+'점 · '+(trip.state==='paused'?'휴식 중':'기록 중')+(trip.points.length<2?' · 이동 경로는 GPS 점 2개 이상부터 표시':'');}}
+function calorieEstimate(r){if(!r)return 0;const weight=Math.max(25,Math.min(250,Number(localStorage.getItem('sangil-weight-kg'))||65));const distance=Math.max(0,Number(r.distance)||0);const factor=r.activity==='달리기'?1.0:r.activity==='등산'?0.85:0.7;return Math.round(weight*distance*factor)}
+function updateCalorieLabel(){const el=document.getElementById('calorieLive');if(el)el.textContent='예상 '+calorieEstimate(trip)+' kcal · 체중 설정';}
+function updateStats(){$('#distance').textContent=(trip?.distance||0).toFixed(2);updateCalorieLabel();$('#duration').textContent=fmtTime(elapsed());$('#altitude').textContent=(position&&Number.isFinite(position.alt))?Math.round(position.alt):'—';let calorieEl=document.getElementById('calorieLive');if(!calorieEl){calorieEl=document.createElement('button');calorieEl.id='calorieLive';calorieEl.type='button';calorieEl.style.cssText='display:block;margin:6px 0;padding:6px 10px;border:1px solid #b5c9be;border-radius:8px;background:#eaf5ee;color:#174e3b;font-size:13px';calorieEl.addEventListener('click',()=>{const old=Number(localStorage.getItem('sangil-weight-kg'))||65;const input=prompt('칼로리 계산에 사용할 체중(kg)을 입력하세요.',String(old));if(input===null)return;const weight=Number(input);if(!Number.isFinite(weight)||weight<25||weight>250){toast('체중은 25~250kg 사이로 입력해 주세요.');return}localStorage.setItem('sangil-weight-kg',String(weight));updateStats();renderRecords()});$('#distance').parentElement.appendChild(calorieEl)}updateCalorieLabel();let a=$('#actions');if(!trip){a.innerHTML='<button class="btn primary" id="start">▶ 운동 시작</button><button class="btn secondary" id="demo">체험 모드</button>'}else if(trip.state==='running'){a.innerHTML='<button class="btn secondary" id="pause">Ⅱ 잠시 멈춤</button><button class="btn danger" id="finish">■ 산행 종료</button>'}else{a.innerHTML='<button class="btn primary" id="resume">▶ 산행 재개</button><button class="btn danger" id="finish">■ 산행 종료</button>'}a.querySelector('#start')?.addEventListener('click',start);a.querySelector('#demo')?.addEventListener('click',startDemo);a.querySelector('#pause')?.addEventListener('click',pause);a.querySelector('#resume')?.addEventListener('click',resume);a.querySelector('#finish')?.addEventListener('click',finish);$('#liveDot').classList.toggle('live',!!trip&&trip.state==='running');let restEl=document.getElementById('restStatus');if(!restEl){restEl=document.createElement('div');restEl.id='restStatus';restEl.className='foot';$('#actions').after(restEl)}restEl.textContent=trip?'휴식 '+fmtTime(restSeconds())+(trip.state==='paused'?' · '+(trip.pauseReason==='auto'?'자동 휴식 중':'수동 휴식 중'):' · 이동 기록 중'):'';syncHikeHud();const note=$('#mapNote');if(note&&trip&&!viewedRecord){note.textContent='📍 이동거리 '+trip.distance.toFixed(2)+' km · GPS 기록 '+trip.points.length+'점 · '+(trip.state==='paused'?'휴식 중':'기록 중')+(trip.points.length<2?' · 이동 경로는 GPS 점 2개 이상부터 표시':'');}}
 let startMarker=null;
 // Presentation-only GPS spike reduction. Original fixes remain in saved records and GPX.
 function displayRoutePoints(points){
@@ -173,7 +184,14 @@ function displayRoutePoints(points){
   const excess=d1+d2-direct;
   // Only remove isolated, low-confidence small GPS detours; never erase large real turns.
   const noisy=accuracy>=20&&accuracy>=Math.max(prevAccuracy,nextAccuracy)*1.25;
-  if(noisy&&d1<45&&d2<45&&direct<55&&excess>Math.max(10,accuracy*.5))continue;
+  // Short out-and-back wiggles also occur with optimistic accuracy readings.
+  // Remove only near-return spikes; keep genuine corners and segment boundaries.
+  const nearReturn=d1>=12&&d2>=12&&direct<=Math.min(22,Math.max(8,accuracy*1.2))&&
+    excess>=Math.max(18,direct*1.8)&&
+    !cur.breakBefore&&!next.breakBefore&&
+    Number(next.t)>Number(cur.t)&&Number(cur.t)>Number(prev.t)&&
+    Number(next.t)-Number(prev.t)<=90000;
+  if(!cur.breakBefore&&!next.breakBefore&&(nearReturn||(noisy&&d1<45&&d2<45&&direct<55&&excess>Math.max(10,accuracy*.5))))continue;
   out.push(cur);
  }
  out.push(a[a.length-1]);
@@ -185,7 +203,7 @@ function draw(){
  const segments=[];let segment=[];
  for(const p of route){
   const prev=segment.at(-1);
-  const gap=prev&&(!Number.isFinite(Number(p.t))||!Number.isFinite(Number(prev.t))||Number(p.t)<=Number(prev.t)||Number(p.t)-Number(prev.t)>30000||km(prev,p)>.12||p.breakBefore);
+  const gap=prev&&(!Number.isFinite(Number(p.t))||!Number.isFinite(Number(prev.t))||Number(p.t)<=Number(prev.t)||Number(p.t)-Number(prev.t)>180000||km(prev,p)>.5||p.breakBefore);
   if(gap){if(segment.length)segments.push(segment);segment=[]}
   segment.push(p);
  }
@@ -205,9 +223,9 @@ function draw(){
  }
  if(focusNext&&position&&!viewedRecord){map.setView([position.lat,position.lon],16);focusNext=false}
 }
-function geoError(e){$('#gpsStatus').textContent='GPS 연결 안 됨';toast('GPS 확인 실패: '+(e?.message||'위치 권한을 확인하세요.'))}
-window.sangilNativeFix=function(lat,lon,alt,accuracy,t){onFix({coords:{latitude:Number(lat),longitude:Number(lon),altitude:Number(alt),accuracy:Number(accuracy)},timestamp:Number(t)||Date.now()})};
-function onFix(p){const c=p.coords;const cur={lat:c.latitude,lon:c.longitude,alt:c.altitude,accuracy:c.accuracy,t:p.timestamp||Date.now()};if(!Number.isFinite(cur.lat)||!Number.isFinite(cur.lon)||!Number.isFinite(cur.accuracy)||cur.accuracy>300)return;if(position&&(cur.t<position.t||(cur.t===position.t&&cur.lat===position.lat&&cur.lon===position.lon)))return;position=cur;lastFix=Date.now();$('#coord').textContent=cur.lat.toFixed(4)+', '+cur.lon.toFixed(4);$('#gpsStatus').textContent='GPS 위치 확인 · 오차 약 '+Math.round(cur.accuracy||0)+'m';$('#safetyCoord').textContent=`위도 ${cur.lat.toFixed(6)} / 경도 ${cur.lon.toFixed(6)} / 오차 약 ${Math.round(cur.accuracy||0)}m`;if(trip&&!trip.demo&&cur.accuracy<=200){
+function geoError(e){if(!window.SangilNative||Date.now()-lastFix>30000)$('#gpsStatus').textContent='보조 GPS 연결 안 됨';if(!window.SangilNative)toast('GPS 확인 실패: '+(e?.message||'위치 권한을 확인하세요.'))}
+window.sangilNativeFix=function(lat,lon,alt,accuracy,t){onFix({coords:{latitude:Number(lat),longitude:Number(lon),altitude:Number(alt),accuracy:Number(accuracy)},timestamp:Number(t)})};
+function onFix(p){const c=p.coords;const cur={lat:c.latitude,lon:c.longitude,alt:c.altitude,accuracy:c.accuracy,t:p.timestamp==null?Date.now():Number(p.timestamp)};if(!Number.isFinite(cur.lat)||!Number.isFinite(cur.lon)||Math.abs(cur.lat)>90||Math.abs(cur.lon)>180||(cur.lat===0&&cur.lon===0)||!Number.isFinite(cur.accuracy)||cur.accuracy<0||!Number.isFinite(cur.t)||cur.t<Date.now()-86400000||cur.t>Date.now()+60000||cur.accuracy>300)return;if(position&&cur.t===position.t&&cur.lat===position.lat&&cur.lon===position.lon)return;if(position&&cur.t<position.t-30000)return;if(trip&&!trip.demo&&trip.points?.length&&cur.t<=trip.points.at(-1).t)return;if(trip&&!trip.demo&&trip.state==='paused'&&position&&cur.t<position.t)return;if(!position||cur.t>=position.t){position=cur;lastFix=Date.now();$('#coord').textContent=cur.lat.toFixed(4)+', '+cur.lon.toFixed(4);$('#gpsStatus').textContent='GPS 위치 확인 · 오차 약 '+Math.round(cur.accuracy||0)+'m';$('#safetyCoord').textContent=`위도 ${cur.lat.toFixed(6)} / 경도 ${cur.lon.toFixed(6)} / 오차 약 ${Math.round(cur.accuracy||0)}m`;}if(trip&&!trip.demo&&cur.accuracy<=200){
   // Set the start marker from the first accepted tracking fix, not a 200m-error fix.
   const anchor=trip.stationaryAnchor||trip.points.at(-1)||cur;
   const anchorDistance=km(anchor,cur);
@@ -218,7 +236,7 @@ function onFix(p){const c=p.coords;const cur={lat:c.latitude,lon:c.longitude,alt
     const threshold=Math.max(.018,Math.min(.055,(cur.accuracy||15)*1.2/1000));
     if(moved>=threshold&&cur.accuracy<=65){
       trip.resumeCandidates=(trip.resumeCandidates||0)+1;
-      if(trip.resumeCandidates>=2)autoResume();
+      if(trip.resumeCandidates>=2||(moved>=.08&&cur.accuracy<=20))autoResume();
     }else trip.resumeCandidates=0;
   }
   if(trip.state==='running'){
@@ -233,17 +251,50 @@ function onFix(p){const c=p.coords;const cur={lat:c.latitude,lon:c.longitude,alt
     // After a GPS outage, restart a new segment instead of rejecting all later fixes
     // against an old point. Do not count the unknown gap as walking distance.
     const reacquired=!!prev&&dt>30&&cur.accuracy<=65;
-    const usableFix=cur.accuracy<=65&&(!prev||(reacquired||(plausibleSpeed&&diff>=noiseKm)));
+    const usableFix=cur.accuracy<=65&&(!prev||(dt>0&&(reacquired||(plausibleSpeed&&diff>=noiseKm))));
     if(usableFix){
-      if(prev&&(reacquired||diff>.12))cur.breakBefore=true;
+      const bridgeGap=prev&&dt>0&&dt<=180&&diff<=.5&&plausibleSpeed&&cur.accuracy<=35&&prev.accuracy<=35;
+      if(prev&&(trip.resumeBreakPending||diff>.12&&!bridgeGap||reacquired&&!bridgeGap))cur.breakBefore=true;
+      // Preserve explicit pause boundaries during native-backup replay.
+      if(trip.resumeBreakPending&&trip.resumeWasManual)cur.manualResumeBoundary=true;
+      trip.resumeWasManual=false;
+      // The first post-rest fix starts a new segment; never count the rest displacement.
+      trip.resumeBreakPending=false;
       if(!trip.startPoint)trip.startPoint={...cur};
-      trip.points.push(cur);
-      if(prev&&!cur.breakBefore)trip.distance+=diff;
+      // Remove a single GPS spike only when the next fix returns near the earlier
+      // position. Recalculate both affected legs so a false detour adds no distance.
+      const beforePrev=trip.points.length>=2?trip.points[trip.points.length-2]:null;
+      const legIn=beforePrev&&prev?km(beforePrev,prev):0;
+      const direct=beforePrev?km(beforePrev,cur):0;
+      const detour=beforePrev?legIn+diff-direct:0;
+      const spike=!!(beforePrev&&prev&&!prev.breakBefore&&!cur.breakBefore&&
+        cur.t>prev.t&&prev.t>beforePrev.t&&
+        cur.t-beforePrev.t<=90000&&legIn>=.015&&diff>=.015&&
+        direct<=Math.max(.025,Math.min(.060,(Number(prev.accuracy)||20)*1.5/1000))&&
+        detour>=.035&&detour>=direct*1.5);
+      if(spike){
+        trip.points.pop();
+        trip.distance=Math.max(0,trip.distance-legIn);
+        // The new fix is kept: it connects directly to the last reliable point.
+        // Retain the newest reliable fix even when the return is under 3 m.
+        // Otherwise the next fix is measured against an older location and time,
+        // which can create an artificial gap or miss the next real movement.
+        trip.points.push(cur);
+        if(direct>=.003&&direct/(Math.max(1,(cur.t-beforePrev.t)/1000))<=(trip.activity==='달리기'?.0055:.0033)){
+          trip.distance+=direct;
+        }
+      }else{
+        trip.points.push(cur);
+        if(prev&&!cur.breakBefore)trip.distance+=diff;
+      }
       persist();announceDistance();
     }
+    // A GPS outage is not evidence of continuous stillness: restart the stationary timer.
+    if(trip.stationaryLastFixT&&cur.t-trip.stationaryLastFixT>30000){trip.stationarySince=null;trip.stationaryAnchor=null;}
+    trip.stationaryLastFixT=cur.t;
     // Do not reset the stationary clock for ordinary GPS drift or each accepted GPS fix.
     if(!trip.stationarySince){trip.stationarySince=cur.t;trip.stationaryAnchor=cur}
-    else if(anchorDistance>=movementThresholdKm){
+    else if(cur.accuracy<=20&&anchor.accuracy<=20&&anchorDistance>=movementThresholdKm){
       trip.stationarySince=cur.t;trip.stationaryAnchor=cur;persist();
     }
     // Auto-pause only with recent GPS reception; missing GPS must not look like a rest.
@@ -256,25 +307,28 @@ updateStats();draw()}
 // Recover GPS fixes from the Android foreground service even when broadcasts are missed.
 let lastRecoveredFixKey='';
 function recoverNativeGps(){
- if(!trip||trip.demo||trip.state!=='running'||!window.SangilNative?.getTrackBackup)return;
+ if(!trip||trip.demo||trip.state==='done'||!window.SangilNative?.getTrackBackup)return;
  try{
   const raw=window.SangilNative.getTrackBackup();if(!raw)return;
-  const existing=new Set((trip.points||[]).map(p=>p.t+':'+p.lat+':'+p.lon));
+  const liveFixKeys=new Set((trip.points||[]).map(p=>p.t+':'+p.lat+':'+p.lon));
+  const existing=new Set(liveFixKeys);
   const recovered=[];
   for(const line of raw.split(/\r?\n/)){
    if(!line.trim())continue;
    let p;try{p=JSON.parse(line)}catch{continue}
    const fix={lat:Number(p.lat),lon:Number(p.lng),alt:Number(p.alt||0),accuracy:Number(p.accuracy),t:Number(p.time)};
-   if(!Number.isFinite(fix.lat)||!Number.isFinite(fix.lon)||!Number.isFinite(fix.t)||!Number.isFinite(fix.accuracy)||fix.accuracy>65)continue;
+   if(!Number.isFinite(fix.lat)||!Number.isFinite(fix.lon)||Math.abs(fix.lat)>90||Math.abs(fix.lon)>180||(fix.lat===0&&fix.lon===0)||!Number.isFinite(fix.t)||fix.t<=0||!Number.isFinite(fix.accuracy)||fix.accuracy<0||fix.accuracy>65)continue;
    if(fix.t<trip.started||fix.t>Date.now()+5000)continue;
    // Never recover points recorded during explicit or automatic pauses.
-   if((trip.rests||[]).some(r=>fix.t>=r.started&&fix.t<=r.ended)||trip.restStarted&&fix.t>=trip.restStarted)continue;
+   if((Array.isArray(trip.rests)?trip.rests:[]).some(r=>r&&r.type==='manual'&&Number.isFinite(Number(r.started))&&Number.isFinite(Number(r.ended))&&fix.t>=Number(r.started)&&fix.t<=Number(r.ended))||(trip.pauseReason==='manual'&&trip.restStarted&&fix.t>=trip.restStarted))continue;
    const key=fix.t+':'+fix.lat+':'+fix.lon;
    if(existing.has(key))continue;
    existing.add(key);recovered.push(fix);
   }
-  if(!recovered.length)return;
-  const all=[...(trip.points||[]),...recovered].sort((a,b)=>a.t-b.t);
+  // Re-evaluate stale gap markers even when native backup contains no new fixes.
+  // A prior interrupted merge may have left a false break on already saved points.
+  if(!recovered.length&&!(trip.points||[]).some(p=>p.breakBefore))return;
+  const all=[...(trip.points||[]).map(p=>({...p})),...recovered].sort((a,b)=>a.t-b.t);
   const filtered=[];let total=0;
   for(const p of all){
    const prev=filtered.at(-1);
@@ -283,21 +337,31 @@ function recoverNativeGps(){
    if(dt<=0)continue;
    const reacquired=dt>30&&p.accuracy<=65;
    const noise=Math.max(.003,Math.min(.012,(p.accuracy+(prev.accuracy||0))*.18/1000));
-   if(!reacquired&&(dist/dt>(trip.activity==='달리기'?.0055:.0033)||dist<noise))continue;
-   if(reacquired||dist>.12)p.breakBefore=true;
-   else total+=dist;
+   // Keep already recorded live fixes during backup merge; filtering them can erase route geometry.
+   if(!reacquired&&(dist/dt>(trip.activity==='달리기'?.0055:.0033)||dist<noise)&&!liveFixKeys.has(p.t+':'+p.lat+':'+p.lon))continue;
+   const safeBridge=reacquired&&dt<=180&&dist<=.5&&dist/dt<=(trip.activity==='달리기'?.0055:.0033)&&p.accuracy<=35&&(prev.accuracy||300)<=35;
+   const crossesRest=(Array.isArray(trip.rests)?trip.rests:[]).some(r=>r&&r.type==='manual'&&Number.isFinite(Number(r.started))&&Number.isFinite(Number(r.ended))&&prev.t<Number(r.ended)&&p.t>Number(r.started))||(trip.pauseReason==='manual'&&Number.isFinite(Number(trip.restStarted))&&Number(trip.restStarted)>0&&prev.t<Number(trip.restStarted)&&p.t>=Number(trip.restStarted));
+   // Recompute segment breaks after inserting missing native fixes: an old gap marker
+   // must not keep suppressing distance when reliable intermediate fixes bridge it.
+   p.breakBefore=!!(p.manualResumeBoundary||crossesRest||(dist>.12&&!safeBridge)||(reacquired&&!safeBridge));
+   if(!p.breakBefore)total+=dist;
    filtered.push(p);
   }
-  if(filtered.length>(trip.points||[]).length){
+  // A recovered route can have the same point count but repaired segment boundaries.
+  // Apply that repair only if the recalculated distance increases; never shorten an
+  // existing route or erase previously recorded distance.
+  if(filtered.length>(trip.points||[]).length||(filtered.length===(trip.points||[]).length&&total>trip.distance+0.001)){
    // Never let replay of raw Android fixes overwrite a longer or different live track.
    // The backup is only safe to use when the web view received no fixes at all.
    if((trip.points||[]).length>0){
      // Merge missed native fixes instead of discarding the whole backup.
      // Never replace the route with fewer points or a shorter distance.
-     if(filtered.length<=(trip.points||[]).length)return;
-     if(total+0.001<trip.distance)return;
+     if(filtered.length<(trip.points||[]).length)return;
+     // Preserve the longer live distance while still restoring missing GPS geometry.
+     // A noisy or discontinuous native backup must not reduce the recorded total.
+     // The recovered points remain available for route display and later diagnosis.
    }
-   trip.points=filtered;trip.distance=total;
+   trip.points=filtered;trip.distance=Math.max(trip.distance||0,total);
    if(!trip.startPoint&&filtered.length)trip.startPoint={...filtered[0]};
    persist();updateStats();draw();
   }
@@ -321,16 +385,16 @@ function refreshGpsDiagnostics(){
 setInterval(refreshGpsDiagnostics,5000);
 setInterval(recoverNativeGps,3000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)recoverNativeGps()});
-function requestLocation(){if(window.SangilNative){try{window.SangilNative.startTracking();$('#gpsStatus').textContent='Android GPS 수신 대기 · 위치 권한 확인'}catch(e){toast('Android GPS 연결 실패 · 브라우저 위치 수신도 시도합니다')}}if(!navigator.geolocation){toast('이 브라우저는 GPS 기능을 지원하지 않습니다.');return}if(!isSecureContext&&!window.SangilNative){toast('GPS는 HTTPS 웹사이트에서 사용해야 합니다.');return}navigator.geolocation.getCurrentPosition(onFix,geoError,{enableHighAccuracy:true,timeout:16000,maximumAge:2000});if(watchId===null)watchId=navigator.geolocation.watchPosition(onFix,e=>{$('#gpsStatus').textContent='GPS 연결 불안정';}, {enableHighAccuracy:true,maximumAge:1000,timeout:20000})}
+function requestLocation(){if(window.SangilNative){try{window.SangilNative.startTracking();$('#gpsStatus').textContent='Android GPS 수신 대기 · 위치 권한 확인'}catch(e){toast('Android GPS 연결 실패 · 브라우저 위치 수신도 시도합니다')}}if(!navigator.geolocation){toast('이 브라우저는 GPS 기능을 지원하지 않습니다.');return}if(!isSecureContext&&!window.SangilNative){toast('GPS는 HTTPS 웹사이트에서 사용해야 합니다.');return}navigator.geolocation.getCurrentPosition(onFix,geoError,{enableHighAccuracy:true,timeout:16000,maximumAge:2000});if(watchId===null)watchId=navigator.geolocation.watchPosition(onFix,e=>{if(!window.SangilNative||Date.now()-lastFix>30000)$('#gpsStatus').textContent='보조 GPS 연결 불안정 · '+(e?.message||'위치 권한 확인');}, {enableHighAccuracy:true,maximumAge:1000,timeout:20000})}
 function start(){if(!window.SangilNative&&(!navigator.geolocation||!isSecureContext)){toast('실제 GPS 기록은 HTTPS 환경에서만 가능합니다. 체험 모드는 사용하실 수 있습니다.');return}if(trip){toast('진행 중인 활동을 먼저 종료하세요.');return}clearSavedRoute();trip={id:Date.now(),activity:selectedActivity,name:$('#hikeName').value.trim()||'오늘의 '+selectedActivity,memo:'',started:Date.now(),segmentStarted:Date.now(),accMs:0,restMs:0,rests:[],stationarySince:null,state:'running',distance:0,points:[],marks:[],startPoint:null,endPoint:null,demo:false};focusNext=true;requestLocation();persist();announcedStep=0;updateStats();draw();speakHike(selectedActivity+' 활동을 시작합니다. 안전하게 운동하세요.');toast(selectedActivity+' 기록 시작 · 휴대폰 위치 권한을 허용하고 GPS 수신을 확인해 주세요.');}
 function startDemo(){if(trip){toast('진행 중인 산행을 먼저 종료하세요.');return}clearSavedRoute();demo=true;const t=Date.now(),base={lat:35.259,lon:128.879};const pts=[[0,0],[.001,.001],[.002,.0015],[.003,.0025],[.0038,.003],[.004,.004]].map(([a,b],i)=>({lat:base.lat+a,lon:base.lon+b,accuracy:10,alt:110+i*18,t:t+i*60000}));let d=0;for(let i=1;i<pts.length;i++)d+=km(pts[i-1],pts[i]);trip={id:t,activity:selectedActivity,name:'체험용 가상 '+selectedActivity,started:t,segmentStarted:t,accMs:0,state:'running',distance:d,points:pts,marks:[],demo:true};position=pts.at(-1);focusNext=true;updateStats();draw();toast('체험 모드입니다. 표시된 경로는 실제 산행이 아닙니다.');}
 function pause(){if(!trip||trip.state!=='running')return;if(window.SangilNative)try{window.SangilNative.pauseTracking()}catch(e){};trip.accMs+=Date.now()-trip.segmentStarted;trip.state='paused';trip.pauseReason='manual';trip.restStarted=Date.now();persist();updateStats();speakHike('산행을 일시 정지합니다.');toast('산행 기록을 일시 정지했습니다.')}
-function resume(){if(!trip||trip.state!=='paused')return;if(window.SangilNative)try{window.SangilNative.resumeTracking()}catch(e){};closeRest();trip.segmentStarted=Date.now();trip.state='running';trip.stationarySince=null;persist();updateStats();speakHike('산행을 재개합니다.');toast('산행 기록을 재개했습니다.')}
+function resume(){if(!trip||trip.state!=='paused')return;if(window.SangilNative)try{window.SangilNative.resumeTracking()}catch(e){};closeRest();trip.segmentStarted=Date.now();trip.state='running';trip.stationarySince=null;trip.resumeBreakPending=true;trip.resumeWasManual=true;persist();updateStats();speakHike('산행을 재개합니다.');toast('산행 기록을 재개했습니다.')}
 function finish(){if(!trip)return;recoverNativeGps();if(!confirm(trip.demo?'체험 모드를 종료할까요? 실제 기록으로는 저장되지 않습니다.':'산행을 종료하고 기록을 저장할까요?'))return;if(trip.state==='running')trip.accMs+=Date.now()-trip.segmentStarted;else closeRest();trip.state='done';if(window.SangilNative)try{window.SangilNative.stopTracking()}catch(e){};trip.ended=Date.now();trip.endPoint=trip.points?.length?{...trip.points.at(-1)}:(trip.startPoint?{...trip.startPoint}:null);trip.memo=$('#hikeMemo').value.trim();if(selectedMountain&&!trip.demo)trip.mountain={...selectedMountain};if(!trip.demo){const r=loadRecords();r.unshift(trip);if(saveRecords(r))toast('산행 기록을 저장했습니다.')}else{toast('체험 모드를 종료했습니다.')}trip=null;demo=false;try{localStorage.removeItem(CURRENT)}catch{}clearSavedRoute();focusNext=false;updateStats();draw();renderRecords();speakHike('활동을 종료했습니다.');}
 function addMark(label){if(!trip||trip.state==='done'){toast('산행을 시작한 뒤 표시할 수 있습니다.');return}if(!position||!Number.isFinite(position.lat)){toast('먼저 GPS 현재 위치를 확인하세요.');return}if(!trip.demo&&Date.now()-lastFix>90000){toast('GPS 위치가 오래되었습니다. 다시 확인하세요.');return}trip.marks.push({lat:position.lat,lon:position.lon,label,t:Date.now()});persist();draw();toast(label+' 위치가 표시되었습니다.')}
 function xml(v){return String(v??'').replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&apos;'}[c]))}
 function download(name,content,mime){const a=document.createElement('a'),url=URL.createObjectURL(new Blob([content],{type:mime}));a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000)}
-function routeGap(prev,cur){return !!prev&&(!!cur.breakBefore||Number(cur.t)-Number(prev.t)>30000||Number(cur.t)<=Number(prev.t)||km(prev,cur)>.12)}
+function routeGap(prev,cur){return !!prev&&(!!cur.breakBefore||Number(cur.t)-Number(prev.t)>180000||Number(cur.t)<=Number(prev.t)||km(prev,cur)>.5)}
 function routeSegments(points){const segments=[];for(const p of (points||[])){if(!Number.isFinite(Number(p.lat))||!Number.isFinite(Number(p.lon)))continue;const prev=segments.length?segments[segments.length-1].at(-1):null;if(!segments.length||routeGap(prev,p))segments.push([]);segments.at(-1).push(p)}return segments}
 function gpx(record){const segs=routeSegments(record.points).map(seg=>'<trkseg>'+seg.map(p=>'<trkpt lat="'+Number(p.lat)+'" lon="'+Number(p.lon)+'">'+(Number.isFinite(Number(p.alt))?'<ele>'+Number(p.alt)+'</ele>':'')+(Number.isFinite(Number(p.t))?'<time>'+new Date(Number(p.t)).toISOString()+'</time>':'')+'</trkpt>').join('')+'</trkseg>').join('');const marks=(record.marks||[]).map(m=>'<wpt lat="'+Number(m.lat)+'" lon="'+Number(m.lon)+'"><name>'+xml(m.label)+'</name></wpt>').join('');return '<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1" creator="Sangil" xmlns="http://www.topografix.com/GPX/1/1">'+marks+'<trk><name>'+xml(record.name)+'</name>'+segs+'</trk></gpx>'}
 async function exportHikeResultPng(record,share=false){
@@ -364,9 +428,9 @@ async function exportHikeResultPng(record,share=false){
  ctx.fillStyle='rgba(12,38,28,.10)';ctx.fillRect(0,mapTop,W,mapHeight);
  const xy=i=>({x:(projection[i].x-originX)*256,y:mapTop+(projection[i].y-originY)*256});
  ctx.lineJoin='round';ctx.lineCap='round';
- for(const [color,width] of [['#ffffff',22],['#1678d4',14]]){ctx.beginPath();projection.forEach((p,i)=>{const v=xy(i);const prev=pts[i-1];const gap=prev&&(pts[i].breakBefore||Number(pts[i].t)-Number(prev.t)>30000||Number(pts[i].t)<=Number(prev.t)||km(prev,pts[i])>.12);i&&!gap?ctx.lineTo(v.x,v.y):ctx.moveTo(v.x,v.y)});ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke()}
+ for(const [color,width] of [['#ffffff',22],['#1678d4',14]]){ctx.beginPath();projection.forEach((p,i)=>{const v=xy(i);const prev=pts[i-1];const gap=prev&&(pts[i].breakBefore||Number(pts[i].t)-Number(prev.t)>180000||Number(pts[i].t)<=Number(prev.t)||km(prev,pts[i])>.5);i&&!gap?ctx.lineTo(v.x,v.y):ctx.moveTo(v.x,v.y)});ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke()}
  const step=Math.max(1,Math.floor(pts.length/10));ctx.strokeStyle='#ffffff';ctx.lineWidth=3;
- for(let i=step;i<pts.length;i+=step){const a=xy(i-1),b=xy(i),ang=Math.atan2(b.y-a.y,b.x-a.x);if(pts[i].breakBefore||Number(pts[i].t)-Number(pts[i-1].t)>30000||km(pts[i-1],pts[i])>.12||Math.hypot(b.x-a.x,b.y-a.y)<2)continue;ctx.save();ctx.translate(b.x,b.y);ctx.rotate(ang);ctx.beginPath();ctx.moveTo(-9,-7);ctx.lineTo(7,0);ctx.lineTo(-9,7);ctx.stroke();ctx.restore()}
+ for(let i=step;i<pts.length;i+=step){const a=xy(i-1),b=xy(i),ang=Math.atan2(b.y-a.y,b.x-a.x);if(pts[i].breakBefore||Number(pts[i].t)-Number(pts[i-1].t)>180000||km(pts[i-1],pts[i])>.5||Math.hypot(b.x-a.x,b.y-a.y)<2)continue;ctx.save();ctx.translate(b.x,b.y);ctx.rotate(ang);ctx.beginPath();ctx.moveTo(-9,-7);ctx.lineTo(7,0);ctx.lineTo(-9,7);ctx.stroke();ctx.restore()}
  const nearStartEnd=Math.hypot(xy(0).x-xy(pts.length-1).x,xy(0).y-xy(pts.length-1).y)<75;
  for(const [i,color,label] of [[0,'#1874d1','출발'],[pts.length-1,'#e85e32','도착']]){const p=xy(i);ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(p.x,p.y,17,0,Math.PI*2);ctx.fill();ctx.fillStyle=color;ctx.beginPath();ctx.arc(p.x,p.y,12,0,Math.PI*2);ctx.fill();ctx.font='bold 26px sans-serif';ctx.fillStyle='#183d31';ctx.fillText(label,p.x+20,p.y+(nearStartEnd?(i===0?-28:42):-14))}
  ctx.fillStyle='#174d3c';ctx.fillRect(0,0,W,mapTop);ctx.fillRect(0,mapBottom,W,H-mapBottom);
@@ -479,7 +543,7 @@ function renderRecords(){
   const totalSeconds=r.ended&&r.started?Math.max(0,(Number(r.ended)-Number(r.started))/1000):null;
   const restSecondsValue=totalSeconds===null?Math.max(0,(Number(r.restMs)||0)/1000):Math.max(0,totalSeconds-seconds);
   const metrics=[
-   ['거리',dist.toFixed(2)+' km'],['운동시간',fmtTime(seconds)],['전체시간',totalSeconds===null?'—':fmtTime(totalSeconds)],['휴식시간',fmtTime(restSecondsValue)],['칼로리','—'],
+   ['거리',dist.toFixed(2)+' km'],['운동시간',fmtTime(seconds)],['전체시간',totalSeconds===null?'—':fmtTime(totalSeconds)],['휴식시간',fmtTime(restSecondsValue)],['칼로리',calorieEstimate(r)+' kcal (예상)'],
    ['평균속도',avg===null?'—':avg.toFixed(1)+' km/h'],
    ['최고속도',maxSpeed===null?'—':maxSpeed.toFixed(1)+' km/h'],
    ['최고고도',alts.length?Math.round(Math.max(...alts))+' m':'—'],
@@ -653,7 +717,7 @@ function tab(name){$$('.screen').forEach(x=>x.classList.toggle('active',x.id==='
 const checks=['날씨 및 일몰시간 확인','충분한 물과 행동식 준비','등산화·여벌옷·우비 준비','휴대전화 배터리·보조배터리 확인','가족에게 산행 코스와 하산 예정시간 공유'];for(let i=0;i<checks.length;i++){let label=document.createElement('label');label.style.cssText='display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #edf0ea;font-size:13px';let box=document.createElement('input');box.type='checkbox';box.style.accentColor='#285a43';label.append(box,document.createTextNode(checks[i]));$('#checklist').append(label)}
 $$('.navbtn').forEach(x=>x.addEventListener('click',()=>tab(x.dataset.tab)));$('#mountainFind').addEventListener('click',()=>searchMountains($('#mountainSearch').value));$('#mountainSearch').addEventListener('keydown',e=>{if(e.key==='Enter')searchMountains(e.target.value)});$('#mountainMyRecords').addEventListener('click',()=>tab('records'));$$('[data-mark]').forEach(x=>x.addEventListener('click',()=>addMark(x.dataset.mark)));$('#mapCheck').addEventListener('click',()=>showMapDiagnostics());$('#trailToggle').addEventListener('click',loadNearbyTrails);$('#zoomIn').addEventListener('click',()=>map?.zoomIn());$('#zoomOut').addEventListener('click',()=>map?.zoomOut());$('#locate').addEventListener('click',()=>{clearSavedRoute();focusNext=true;requestLocation();if(position&&map)map.setView([position.lat,position.lon],16)});$('#fit').addEventListener('click',()=>{if(map&&viewedRecord?.points?.length>1)map.fitBounds(L.latLngBounds(viewedRecord.points.map(p=>[p.lat,p.lon])),{padding:[45,45]});else if(map&&trip?.points?.length>1)map.fitBounds(L.latLngBounds(trip.points.map(p=>[p.lat,p.lon])),{padding:[35,35]});else if(position&&map)map.setView([position.lat,position.lon],15);else toast('표시할 GPS 경로가 없습니다.')});$('#copyCoords').addEventListener('click',async()=>{if(!position){toast('위치 정보가 없습니다. 홈에서 GPS를 확인하세요.');return}const msg=`현재 위치: 위도 ${position.lat.toFixed(6)}, 경도 ${position.lon.toFixed(6)} (오차 약 ${Math.round(position.accuracy||0)}m)`;try{await navigator.clipboard.writeText(msg);toast('좌표를 복사했습니다.')}catch{prompt('좌표를 직접 복사하세요.',msg)}});$('#exportAll').addEventListener('click',()=>download('산길_기록백업_'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(loadRecords(),null,2),'application/json'));
 try{const old=JSON.parse(localStorage.getItem(CURRENT));if(old&&['running','paused'].includes(old.state)){old.state='paused';old.accMs=(old.accMs||0)+(old.segmentStarted?Math.max(0,Math.min(Date.now()-old.segmentStarted,30000)):0);trip=old;selectedActivity=old.activity==='등산'?'산행':(old.activity||'산행');toast('이전 산행 기록을 복구했습니다. 정지 상태로 표시됩니다.')}}catch{}
-if(trip&&document.querySelector('#activityStatus')){document.querySelector('#activityStatus').textContent='복구된 활동: '+(trip.activity==='등산'?'산행':(trip.activity||'산행'))}announcedStep=Math.floor((trip?.distance||0)/0.5);try{updateStats()}catch(e){console.error('SANGIL_ACTIONS',e);const a=document.querySelector('#actions');if(a){a.innerHTML='<button class="btn primary" id="start">▶ 산행 시작</button>';a.querySelector('#start').addEventListener('click',start)}}try{renderRecords()}catch(e){console.error('SANGIL_RECORDS',e)}setTimeout(()=>{try{initMap()}catch(mapError){console.error('SANGIL_MAP_INIT',mapError);const f=document.querySelector('.map-fallback');if(f){f.style.zIndex='2';f.textContent='지도 초기화 오류: '+String(mapError&&mapError.message||mapError)}const status=document.querySelector('#gpsStatus');if(status)status.textContent='지도 오류 · 운동 기록 기능은 사용 가능'}},0);setInterval(()=>{if(trip){$('#duration').textContent=fmtTime(elapsed());$('#hikeDuration').textContent=fmtTime(elapsed())}},1000);
+if(trip&&document.querySelector('#activityStatus')){document.querySelector('#activityStatus').textContent='복구된 활동: '+(trip.activity==='등산'?'산행':(trip.activity||'산행'))}announcedStep=Math.floor((trip?.distance||0)/0.5);try{updateStats()}catch(e){console.error('SANGIL_ACTIONS',e);const a=document.querySelector('#actions');if(a){a.innerHTML='<button class="btn primary" id="start">▶ 운동 시작</button>';a.querySelector('#start').addEventListener('click',start)}}try{renderRecords()}catch(e){console.error('SANGIL_RECORDS',e)}setTimeout(()=>{try{initMap()}catch(mapError){console.error('SANGIL_MAP_INIT',mapError);const f=document.querySelector('.map-fallback');if(f){f.style.zIndex='2';f.textContent='지도 초기화 오류: '+String(mapError&&mapError.message||mapError)}const status=document.querySelector('#gpsStatus');if(status)status.textContent='지도 오류 · 운동 기록 기능은 사용 가능'}},0);setInterval(()=>{if(trip){$('#duration').textContent=fmtTime(elapsed());$('#hikeDuration').textContent=fmtTime(elapsed())}},1000);
 // Check inactivity independently of GPS callback timing; require a recent accurate fix.
 setInterval(()=>{
  if(!trip||trip.demo||!['running','paused'].includes(trip.state))return;
@@ -680,5 +744,43 @@ document.addEventListener('DOMContentLoaded',()=>{
   note.querySelector('#localProfileLogout').onclick=()=>{localStorage.removeItem(key);render()};
   render();
 });
+
+// Existing QR examination bridge: link-only, no unverified data synchronization.
+(function(){
+ const field=document.getElementById('contestExamUrl'), status=document.getElementById('contestExamStatus');
+ const key='sangil-contest-exam-url-v1';
+ function valid(value){
+   try{
+     const u=new URL(value);
+     return u.protocol==='https:' && u.hostname==='script.google.com' &&
+       u.pathname.startsWith('/macros/s/') && u.pathname.endsWith('/exec') &&
+       !['judge','admin'].includes((u.searchParams.get('role')||'').toLowerCase()) ? u.href : '';
+   }catch{return ''}
+ }
+ const currentDeployment='https://script.google.com/macros/s/AKfycbziD0WYBAERgauwiyEKWlC_UUmSnflg7nuqWU29J1N1XDGnvt0Ijp5Wfw419g-EaO04Gg/exec';
+ const saved=valid(localStorage.getItem(key)||'');
+ field.value=currentDeployment;
+ if(saved!==currentDeployment)localStorage.setItem(key,currentDeployment);
+ document.getElementById('contestExamSave').addEventListener('click',()=>{
+   const url=valid(field.value.trim());
+   if(!url){status.textContent='올바른 선수용 Apps Script 실행 주소를 입력하세요. 관리자·심판 주소는 저장할 수 없습니다.';return}
+   localStorage.setItem(key,url);status.textContent='이 휴대전화에 선수 시험 주소를 저장했습니다. 다른 휴대전화에는 별도 설정이 필요합니다.';
+ });
+ document.querySelectorAll('[data-exam-type]').forEach(button=>button.addEventListener('click',()=>{
+   const base=valid(field.value.trim())||valid(localStorage.getItem(key)||'');
+   if(!base){status.textContent='먼저 기존 시험 주소를 입력하고 저장하세요.';return}
+   const u=new URL(base);
+   const type=button.getAttribute('data-exam-type');
+   u.searchParams.set('type',type);
+   // Return destination for the athlete exam. Native Android return requires app-link handling.
+   u.searchParams.set('return',window.location.origin+window.location.pathname+'#contest');
+   status.textContent=type+'형 선수 시험을 엽니다.';
+   if(window.SangilAndroid && typeof window.SangilAndroid.openExam==='function'){
+     window.SangilAndroid.openExam(u.href);
+   }else{
+     window.location.assign(u.href);
+   }
+ }));
+})();
 </script>
 </body></html>
