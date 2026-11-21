@@ -45,7 +45,7 @@ result=run([a,{...c,breakBefore:true}],[a,b,c].map(encode).join('\n'),[pause]);
 assert.equal(result.trip.points.some(p=>p.t===b.t),false,'manual pause must not be bypassed by gap repair');
 // An explicit resume boundary must remain even when migrated rest metadata is missing.
 const manualResume={...c,breakBefore:true,manualResumeBoundary:true};
-result=run([a,manualResume],[a,b,c].map(encode).join('\\n'),[]);
+result=run([a,manualResume],[a,b,c].map(encode).join('\n'),[]);
 assert.equal(result.trip.points.length,3,'native middle fix still restores route geometry');
 assert.equal(result.trip.points[2].breakBefore,true,'manual resume boundary cannot be bridged by native replay');
 assert.equal(result.trip.points[2].manualResumeBoundary,true,'explicit boundary marker survives recovery');
