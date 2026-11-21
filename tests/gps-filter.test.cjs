@@ -33,3 +33,8 @@ assert.equal(elapsed({started:start,ended:start+180000,rests:[{type:'manual',sta
 assert.match(html,/trip\.state!=='running'\|\|!window\.SangilNative/,'Recovery skips paused state');
 assert.match(html,/trip\.rests\|\|\[\]/,'Recovery excludes rest windows');
 assert.match(html,/Math\.min\(\.012/,'Walking GPS noise floor');
+
+// Saved-route lifecycle regressions: deleting records or ending a session must not leave stale map layers.
+assert.match(html,/if\(saveRecords\(\[\]\)\)\{clearSavedRoute\(\)/,'Deleting all records clears map overlay');
+assert.match(html,/if\(!trip\)\{if\(trackLine\)trackLine\.setLatLngs\(\[\]\)/,'Idle map clears old live track');
+assert.match(html,/localStorage\.removeItem\(CURRENT\)\}catch\{\}clearSavedRoute\(\)/,'Finishing clears old map overlays');
