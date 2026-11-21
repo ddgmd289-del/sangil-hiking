@@ -200,9 +200,9 @@ function onFix(p){const c=p.coords;const cur={lat:c.latitude,lon:c.longitude,alt
     // Keep ordinary walking fixes: a strict 8–30 m filter hid real movement.
     // Use a modest noise floor and retain points even at short GPS intervals.
     const noiseKm=prev?Math.max(.002,Math.min(.005,(cur.accuracy+(prev.accuracy||0))*.04/1000)):0;
-    const plausibleSpeed=dt>=0&&(dt===0?diff<=.03:diff/dt<=.012); // 43.2 km/h, allow same-time small fixes
+    const plausibleSpeed=dt>0&&diff/dt<=.008; // 28.8 km/h ceiling; reject duplicate-time fixes and large GPS jumps
     // Preserve real walking fixes; GPS may report multiple points with equal timestamps.
-    const usableFix=!prev||(dt>=0&&plausibleSpeed&&diff>=noiseKm);
+    const usableFix=cur.accuracy<=65&&(!prev||(plausibleSpeed&&diff>=noiseKm));
     if(usableFix){
       trip.points.push(cur);trip.distance+=diff;persist();announceDistance();
     }
@@ -216,7 +216,7 @@ function onFix(p){const c=p.coords;const cur={lat:c.latitude,lon:c.longitude,alt
   }
 }
 updateStats();draw()}
-window.sangilNativeFix=function(lat,lon,alt,accuracy,t){onFix({coords:{latitude:Number(lat),longitude:Number(lon),altitude:Number(alt),accuracy:Number(accuracy)},timestamp:Number(t)||Date.now()})};
+
 // Recover GPS fixes from the Android foreground service even when broadcasts are missed.
 let lastRecoveredFixKey='';
 function recoverNativeGps(){
@@ -229,7 +229,7 @@ function recoverNativeGps(){
    if(!line.trim())continue;
    let p;try{p=JSON.parse(line)}catch{continue}
    const fix={lat:Number(p.lat),lon:Number(p.lng),alt:Number(p.alt||0),accuracy:Number(p.accuracy),t:Number(p.time)};
-   if(!Number.isFinite(fix.lat)||!Number.isFinite(fix.lon)||!Number.isFinite(fix.t)||!Number.isFinite(fix.accuracy)||fix.accuracy>200)continue;
+   if(!Number.isFinite(fix.lat)||!Number.isFinite(fix.lon)||!Number.isFinite(fix.t)||!Number.isFinite(fix.accuracy)||fix.accuracy>65)continue;
    if(fix.t<trip.started-5000||fix.t>Date.now()+5000)continue;
    const key=fix.t+':'+fix.lat+':'+fix.lon;
    if(existing.has(key))continue;
@@ -242,7 +242,7 @@ function recoverNativeGps(){
    const prev=filtered.at(-1);
    if(!prev){filtered.push(p);continue}
    const dt=(p.t-prev.t)/1000,dist=km(prev,p);
-   if(dt<0||(dt===0&&dist>.03)||(dt>0&&dist/dt>.012)||dist<.002)continue;
+   if(dt<=0||dist/dt>.008||dist<Math.max(.002,Math.min(.005,(p.accuracy+(prev.accuracy||0))*.04/1000)))continue;
    total+=dist;filtered.push(p);
   }
   if(filtered.length>(trip.points||[]).length){
