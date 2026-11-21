@@ -350,8 +350,9 @@ jobs:
                   (getSystemService(NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(channel)
               }
               override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-                  if (intent?.action == "STOP") { stopSelf(); return START_NOT_STICKY }
-                  if (intent?.action == "PAUSE") { try { location.removeUpdates(this) } catch (_: Exception) {}; return START_STICKY }
+                  if (intent == null) { stopSelf(); return START_NOT_STICKY }
+                  if (intent.action == "STOP") { stopSelf(); return START_NOT_STICKY }
+                  if (intent?.action == "PAUSE") { try { location.removeUpdates(this) } catch (_: Exception) {}; return START_NOT_STICKY }
                   // Tapping the ongoing GPS notification returns to the existing activity.
                   val openApp = Intent(this, MainActivity::class.java).apply {
                       addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
@@ -385,7 +386,8 @@ jobs:
 
                       } catch (e: Exception) { getSharedPreferences("sangil_gps", MODE_PRIVATE).edit().putString("serviceError",e.message ?: "GPS 등록 오류").apply(); android.util.Log.e("SANGIL_GPS", "Location registration failed", e) }
                   }
-                  return START_STICKY
+                  // Do not silently restart a stopped or paused hike after process death.
+                  return START_NOT_STICKY
               }
               override fun onLocationChanged(loc: Location) {
                   // Reject cached/stale fixes; never relabel old positions with the current time.
