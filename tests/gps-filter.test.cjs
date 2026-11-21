@@ -125,3 +125,16 @@ const resumeSource=html.match(/function resume\(\)\{[^\n]+/);
 assert.ok(resumeSource,'Manual resume handler exists');
 assert.match(resumeSource[0],/trip\.resumeBreakPending=true/,'Manual resume must split the next GPS segment');
 assert.match(html,/trip\.resumeBreakPending\|\|diff>\.12/,'First fix after manual resume must not bridge the pause');
+
+ 
+// Execute the production pace helper rather than only mirroring its intended arithmetic.
+const vm = require('node:vm');
+const paceSource = html.slice(html.indexOf('function paceSeconds('), html.indexOf('function elapsed(){'));
+assert.ok(paceSource.startsWith('function paceSeconds(') && paceSource.includes('return Math.max(0,'), 'Extract production paceSeconds implementation');
+const productionPace = vm.runInNewContext(paceSource + '\npaceSeconds', {Date});
+const t0 = Date.UTC(2026,10,18,0,0,0);
+assert.equal(productionPace({started:t0,ended:t0+600000,rests:[{type:'auto',started:t0+60000,ended:t0+300000}]}),600,'Auto-pause does not artificially increase average speed');
+assert.equal(productionPace({started:t0,ended:t0+600000,rests:[{type:'manual',started:t0+60000,ended:t0+180000},{type:'manual',started:t0+120000,ended:t0+240000}]}),420,'Overlapping manual rests are deducted once');
+assert.equal(productionPace({started:t0,ended:t0+600000,rests:[{type:'manual',started:t0-60000,ended:t0+60000},{type:'manual',started:t0+540000,ended:t0+660000}]}),480,'Rest periods outside hike bounds are clamped');
+assert.equal(productionPace({started:t0,rests:[],restStarted:t0+300000,pauseReason:'manual'},t0+600000),300,'Open manual pause is excluded from moving time');
+assert.equal(productionPace({started:t0,rests:[],restStarted:t0+300000,pauseReason:'auto'},t0+600000),600,'Open automatic pause does not overstate moving speed');
