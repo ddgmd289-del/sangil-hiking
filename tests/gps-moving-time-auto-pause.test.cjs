@@ -1,0 +1,18 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const vm=require('node:vm');
+const html=fs.readFileSync('index.html','utf8');
+const start=html.indexOf('function paceSeconds(');
+const end=html.indexOf('function elapsed(){',start);
+assert.ok(start>=0&&end>start,'production paceSeconds source exists');
+const sandbox={Date,Number,Math,Array};
+vm.runInNewContext(html.slice(start,end),sandbox,{timeout:3000});
+const pace=sandbox.paceSeconds;
+const t=1000000;
+assert.equal(pace({started:t,ended:t+600000,rests:[]}),600,'uninterrupted moving time');
+assert.equal(pace({started:t,ended:t+600000,rests:[{type:'auto',started:t+120000,ended:t+300000}]}),420,'completed automatic pause excluded');
+assert.equal(pace({started:t,ended:t+600000,rests:[{type:'manual',started:t+120000,ended:t+240000},{type:'auto',started:t+200000,ended:t+360000}]}),360,'overlapping pauses counted only once');
+assert.equal(pace({started:t,rests:[],restStarted:t+300000,pauseReason:'auto'},t+600000),300,'ongoing automatic pause excluded');
+assert.equal(pace({started:t,rests:[],restStarted:t+300000,pauseReason:'manual'},t+600000),300,'ongoing manual pause excluded');
+assert.equal(pace({started:t,ended:t+600000,rests:[{type:'auto',started:t-100000,ended:t+700000}]}),0,'pause clamped to trip interval');
+console.log('Moving time excludes auto/manual pauses: PASS');
