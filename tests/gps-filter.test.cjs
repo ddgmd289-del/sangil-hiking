@@ -64,9 +64,9 @@ assert.match(html,/localStorage\.removeItem\(CURRENT\)\}catch\{\}clearSavedRoute
 assert.match(html,/trip\.distance=Math\.max\(trip\.distance\|\|0,total\)/,'Native backup must not reduce recorded distance');
 assert.match(html,/if\(prev&&!cur\.breakBefore\)trip\.distance\+=diff;/,'First GPS fix must not add phantom distance');
 
-assert.match(html,/filter\(x=>x&&x\.type==='manual'\)/,'Only manual pauses excluded from pace denominator');
+assert.match(html,/function paceSeconds\(r,now=Date\.now\(\)\)/,'Moving time helper includes automatic and manual pauses');
 assert.match(html,/Math\.max\(a,restEnd\)/,'Overlapping manual pauses merged before subtracting elapsed time');
-assert.match(html,/if\(r\.restStarted&&r\.pauseReason==='manual'\)intervals\.push/, 'Open manual rest included in pace denominator');
+assert.match(html,/r\.restStarted/, 'Open rest included in moving time calculation');
 
 assert.match(html,/window\.SangilNative\.startTracking\(\)/,'Native GPS starts');
 assert.match(html,/navigator\.geolocation\.watchPosition\(onFix/,'Browser GPS fallback starts');
@@ -133,11 +133,11 @@ const paceSource = html.slice(html.indexOf('function paceSeconds('), html.indexO
 assert.ok(paceSource.startsWith('function paceSeconds(') && paceSource.includes('return Math.max(0,'), 'Extract production paceSeconds implementation');
 const productionPace = vm.runInNewContext(paceSource + '\npaceSeconds', {Date});
 const t0 = Date.UTC(2026,10,18,0,0,0);
-assert.equal(productionPace({started:t0,ended:t0+600000,rests:[{type:'auto',started:t0+60000,ended:t0+300000}]}),600,'Auto-pause does not artificially increase average speed');
+assert.equal(productionPace({started:t0,ended:t0+600000,rests:[{type:'auto',started:t0+60000,ended:t0+300000}]}),360,'Completed auto-pause is excluded from moving time');
 assert.equal(productionPace({started:t0,ended:t0+600000,rests:[{type:'manual',started:t0+60000,ended:t0+180000},{type:'manual',started:t0+120000,ended:t0+240000}]}),420,'Overlapping manual rests are deducted once');
 assert.equal(productionPace({started:t0,ended:t0+600000,rests:[{type:'manual',started:t0-60000,ended:t0+60000},{type:'manual',started:t0+540000,ended:t0+660000}]}),480,'Rest periods outside hike bounds are clamped');
 assert.equal(productionPace({started:t0,rests:[],restStarted:t0+300000,pauseReason:'manual'},t0+600000),300,'Open manual pause is excluded from moving time');
-assert.equal(productionPace({started:t0,rests:[],restStarted:t0+300000,pauseReason:'auto'},t0+600000),600,'Open automatic pause does not overstate moving speed');
+assert.equal(productionPace({started:t0,rests:[],restStarted:t0+300000,pauseReason:'auto'},t0+600000),300,'Open automatic pause is excluded from moving time');
 
 // A manual resume marker must survive backup replays even if restored rest metadata is incomplete.
 assert.match(html,/if\(trip\.resumeBreakPending&&trip\.resumeWasManual\)cur\.manualResumeBoundary=true/,'Manual resume records a durable GPS segment boundary');
