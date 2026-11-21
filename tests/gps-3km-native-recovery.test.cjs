@@ -72,4 +72,17 @@ for(const length of [160,220,280,count]){
 }
 assert.ok(Math.abs(chunkTrip.distance-expected)<0.03,'incremental native recovery reaches 3.1 km');
 
+
+// A service restart may temporarily expose a shorter backup snapshot.
+// Recovery must not erase the already reconstructed route or decrease distance.
+const completeDistance=chunkTrip.distance;
+availableBackup=fixes.slice(0,80).map(p=>JSON.stringify({lat:p.lat,lng:p.lon,accuracy:p.accuracy,time:p.t})).join('\n');
+vm.runInNewContext(source+'\nrecoverNativeGps();',chunkSandbox,{timeout:5000});
+assert.equal(chunkTrip.points.length,count,'shorter post-restart backup cannot truncate recovered route');
+assert.equal(chunkTrip.distance,completeDistance,'shorter post-restart backup cannot reduce accumulated distance');
+availableBackup=backup;
+vm.runInNewContext(source+'\nrecoverNativeGps();',chunkSandbox,{timeout:5000});
+assert.equal(chunkTrip.points.length,count,'full backup after restart remains idempotent');
+assert.equal(chunkTrip.distance,completeDistance,'full backup after restart cannot double-count distance');
+
 console.log('Native GPS 3.1 km synthetic recovery: PASS');
