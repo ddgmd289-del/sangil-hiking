@@ -35,7 +35,8 @@ jobs:
             tests/gps-recovery-distance-preservation.test.cjs \
             tests/gps-3km-native-recovery.test.cjs \
             tests/gps-long-outage-no-phantom-distance.test.cjs \
-            tests/gps-backup-noise-regression.test.cjs; do
+            tests/gps-backup-noise-regression.test.cjs \
+            tests/gps-moving-time-auto-pause.test.cjs; do
             echo "::group::$file"
             node "$file"
             echo "::endgroup::"
