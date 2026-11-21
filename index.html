@@ -134,8 +134,8 @@ function paceSeconds(r,now=Date.now()){
  // Clamp and merge manual rest intervals: duplicated or overlapping restores must not
  // subtract the same elapsed time twice or push moving time below its true value.
  const start=Number(r.started);
- const intervals=(Array.isArray(r.rests)?r.rests:[]).filter(x=>x&&x.type==='manual').map(x=>[Number(x.started),Number(x.ended)]);
- if(r.restStarted&&r.pauseReason==='manual')intervals.push([Number(r.restStarted),end]);
+ const intervals=(Array.isArray(r.rests)?r.rests:[]).filter(x=>x&&(x.type==='manual'||x.type==='auto')).map(x=>[Number(x.started),Number(x.ended)]);
+ if(r.restStarted&&(r.pauseReason==='manual'||r.pauseReason==='auto'))intervals.push([Number(r.restStarted),end]);
  const valid=intervals.filter(([a,b])=>Number.isFinite(a)&&Number.isFinite(b)&&b>a)
   .map(([a,b])=>[Math.max(start,a),Math.min(end,b)]).filter(([a,b])=>b>a).sort((a,b)=>a[0]-b[0]);
  let restMs=0,restEnd=start;
