@@ -2,7 +2,7 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const html = fs.readFileSync('index.html', 'utf8');
-assert.match(html, /p\.breakBefore=!!\(crossesRest\|\|\(dist>\.12&&!safeBridge\)\|\|\(reacquired&&!safeBridge\)\)/, 'Replayed native fixes recompute stale segment breaks without bridging rests');
+assert.match(html, /p\.breakBefore=!!\(p\.manualResumeBoundary\|\|crossesRest\|\|\(dist>\.12&&!safeBridge\)\|\|\(reacquired&&!safeBridge\)\)/, 'Replayed native fixes recompute stale segment breaks without bridging rests');
 assert.match(html, /trip\.state==='done'\|\|!window\.SangilNative\?\.getTrackBackup/, 'Native GPS recovery remains available during pause while excluding pause-time fixes');
 assert.match(html, /moved>=\.08&&cur\.accuracy<=20/, 'Auto-paused hike resumes on one high-confidence movement fix');
 const workflow = fs.readFileSync('.github/workflows/build-android-apk.yml', 'utf8');
@@ -37,7 +37,7 @@ assert.match(html, /if\(!reacquired&&\(dist\/dt>\(trip.activity==='달리기'\?\
 assert.match(html, /const reacquired=dt>30&&p\.accuracy<=65;/, 'Recovery resumes after signal outage');
 assert.match(html, /const safeBridge=reacquired&&dt<=180&&dist<=\.5&&dist\/dt<=/, 'Only bounded plausible outages may reconnect');
 assert.match(html, /const crossesRest=\(Array\.isArray\(trip\.rests\)\?trip\.rests:\[\]\)\.some/, 'Recovery safely checks rest intervals before merging native GPS fixes');
-assert.match(html, /p\.breakBefore=!!\(crossesRest\|\|\(dist>\.12&&!safeBridge\)\|\|\(reacquired&&!safeBridge\)\)/, 'Recovery recalculates unsafe and rest boundaries after merging fixes');
+assert.match(html, /p\.breakBefore=!!\(p\.manualResumeBoundary\|\|crossesRest\|\|\(dist>\.12&&!safeBridge\)\|\|\(reacquired&&!safeBridge\)\)/, 'Recovery recalculates unsafe and rest boundaries after merging fixes');
 assert.equal(accepted({accuracy:25,dt:90,diff:0.4}), true, 'GPS reconnect after long gap');
 assert.match(html, /const routeLines=segments\.map/, 'Track rendered as separated segments');
 assert.match(html, /p\.breakBefore/, 'Disconnected fixes preserve break marker');
@@ -138,3 +138,8 @@ assert.equal(productionPace({started:t0,ended:t0+600000,rests:[{type:'manual',st
 assert.equal(productionPace({started:t0,ended:t0+600000,rests:[{type:'manual',started:t0-60000,ended:t0+60000},{type:'manual',started:t0+540000,ended:t0+660000}]}),480,'Rest periods outside hike bounds are clamped');
 assert.equal(productionPace({started:t0,rests:[],restStarted:t0+300000,pauseReason:'manual'},t0+600000),300,'Open manual pause is excluded from moving time');
 assert.equal(productionPace({started:t0,rests:[],restStarted:t0+300000,pauseReason:'auto'},t0+600000),600,'Open automatic pause does not overstate moving speed');
+
+// A manual resume marker must survive backup replays even if restored rest metadata is incomplete.
+assert.match(html,/if\(trip\.resumeBreakPending&&trip\.resumeWasManual\)cur\.manualResumeBoundary=true/,'Manual resume records a durable GPS segment boundary');
+assert.match(html,/trip\.resumeWasManual=true/,'Manual resume arms the boundary marker');
+assert.match(html,/p\.manualResumeBoundary\|\|crossesRest/,'Backup replay preserves the explicit pause boundary');
