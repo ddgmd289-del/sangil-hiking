@@ -54,4 +54,22 @@ const autoDistance=autoTrip.distance;
 vm.runInNewContext(source+'\nrecoverNativeGps();',autoSandbox,{timeout:5000});
 assert.equal(autoTrip.distance,autoDistance,'auto-pause recovery replay cannot inflate distance');
 
+
+// A real foreground service backup can be observed in multiple snapshots while
+// the WebView remains alive. Replaying partial snapshots must grow monotonically
+// to the full 3.1 km route without duplicating earlier fixes.
+const chunkTrip={started:start,state:'active',activity:'걷기',points:partial.map(p=>({...p})),distance:partialDistance,rests:[],restStarted:0};
+let availableBackup='';
+const chunkSandbox={trip:chunkTrip,window:{SangilNative:{getTrackBackup:()=>availableBackup}},
+ km,persist(){},updateStats(){},draw(){},console,Date,Number,Math,Set,JSON,Array};
+let previousDistance=chunkTrip.distance;
+for(const length of [160,220,280,count]){
+ availableBackup=fixes.slice(0,length).map(p=>JSON.stringify({lat:p.lat,lng:p.lon,accuracy:p.accuracy,time:p.t})).join('\\n');
+ vm.runInNewContext(source+'\\nrecoverNativeGps();',chunkSandbox,{timeout:5000});
+ assert.equal(chunkTrip.points.length,length,'incremental backup restores all available fixes');
+ assert.ok(chunkTrip.distance>=previousDistance,'incremental recovery never loses distance');
+ previousDistance=chunkTrip.distance;
+}
+assert.ok(Math.abs(chunkTrip.distance-expected)<0.03,'incremental native recovery reaches 3.1 km');
+
 console.log('Native GPS 3.1 km synthetic recovery: PASS');
