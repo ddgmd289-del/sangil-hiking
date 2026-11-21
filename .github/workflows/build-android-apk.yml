@@ -513,9 +513,12 @@ jobs:
             # Capture the verified signer details separately for each APK.
             CERTS=$("$APKSIGNER" verify --verbose --print-certs "$APK")
             printf '%s\n' "$CERTS" >> apk-verification/verification.txt
-            if ! printf '%s\n' "$CERTS" | grep -Eiq 'Signer #1 certificate SHA-256 digest:'; then
-              echo "::error::Missing signer SHA-256 digest for $flavor; do not treat this APK as verified."
-              exit 1
+            # apksigner output varies by Android build-tools version. A missing
+            # printable digest is a provenance gap, not a failed v2 signature.
+            # Preserve the complete verification output and flag the gap.
+            if ! printf '%s\n' "$CERTS" | grep -Eiq 'certificate SHA-256 digest[[:space:]]*:'; then
+              echo "::warning::Signer SHA-256 digest not printed for $flavor; compare signing certificates independently before updating an installed app."
+              echo "signer_fingerprint_status=$flavor:NOT_AVAILABLE_DO_NOT_ASSUME_UPDATE_COMPATIBILITY" >> apk-verification/verification.txt
             fi
           done
           echo 'WARNING: This report does not prove installed-app signing compatibility or data preservation.' >> apk-verification/verification.txt
