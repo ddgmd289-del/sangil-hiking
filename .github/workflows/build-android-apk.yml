@@ -26,7 +26,8 @@ jobs:
             tests/gps-recovery-distance-preservation.test.cjs \
             tests/gps-3km-native-recovery.test.cjs \
             tests/gps-long-outage-no-phantom-distance.test.cjs \
-            tests/gps-backup-noise-regression.test.cjs; do
+            tests/gps-backup-noise-regression.test.cjs \
+            tests/gps-moving-time-auto-pause.test.cjs; do
             node "$file"
           done
       - name: Verify permission grant never starts an unrequested trip
