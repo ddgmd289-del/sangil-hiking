@@ -19,7 +19,7 @@ assert.match(html, /const reacquired=dt>30&&p\.accuracy<=65;/, 'Recovery resumes
 assert.equal(accepted({accuracy:25,dt:90,diff:0.4}), true, 'GPS reconnect after long gap');
 assert.match(html, /const routeLines=segments\.map/, 'Track rendered as separated segments');
 assert.match(html, /p\.breakBefore/, 'Disconnected fixes preserve break marker');
-assert.match(html, /if\(!cur\.breakBefore\)trip\.distance\+=diff/, 'No distance counted across a GPS gap');
+assert.match(html, /if\(prev&&!cur\.breakBefore\)trip\.distance\+=diff/, 'No distance counted across a GPS gap');
 console.log('GPS filter static and scenario checks passed');
 
 assert.match(html,/function paceSeconds\(r,now=Date\.now\(\)\)/,'Pace time helper');
@@ -38,3 +38,6 @@ assert.match(html,/Math\.min\(\.012/,'Walking GPS noise floor');
 assert.match(html,/if\(saveRecords\(\[\]\)\)\{clearSavedRoute\(\)/,'Deleting all records clears map overlay');
 assert.match(html,/if\(!trip\)\{if\(trackLine\)trackLine\.setLatLngs\(\[\]\)/,'Idle map clears old live track');
 assert.match(html,/localStorage\.removeItem\(CURRENT\)\}catch\{\}clearSavedRoute\(\)/,'Finishing clears old map overlays');
+
+assert.match(html,/if\(\(trip\.points\|\|\[\]\)\.length>0\)return;/,'Native backup must not overwrite a live GPS route');
+assert.match(html,/if\(prev&&!cur\.breakBefore\)trip\.distance\+=diff;/,'First GPS fix must not add phantom distance');
