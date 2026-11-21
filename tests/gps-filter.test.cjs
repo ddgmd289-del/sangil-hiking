@@ -146,5 +146,5 @@ assert.match(html,/p\.manualResumeBoundary\|\|crossesRest/,'Backup replay preser
 
 // Android must not restart GPS recording after process death without a new user action.
 assert.match(workflow, /if \(intent == null\) \{ stopSelf\(\); return START_NOT_STICKY \}/, 'Null service restart intent must stop GPS');
-assert.match(workflow, /if \(intent.action == "PAUSE"\)/, 'PAUSE action still handled');
+assert.match(workflow, /if \(intent\?\.action == "PAUSE"\)/, 'PAUSE action still handled with nullable intent guard');
 assert.doesNotMatch(workflow, /return START_STICKY/, 'No sticky restart may silently resume GPS tracking');
