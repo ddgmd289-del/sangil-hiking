@@ -143,3 +143,8 @@ assert.equal(productionPace({started:t0,rests:[],restStarted:t0+300000,pauseReas
 assert.match(html,/if\(trip\.resumeBreakPending&&trip\.resumeWasManual\)cur\.manualResumeBoundary=true/,'Manual resume records a durable GPS segment boundary');
 assert.match(html,/trip\.resumeWasManual=true/,'Manual resume arms the boundary marker');
 assert.match(html,/p\.manualResumeBoundary\|\|crossesRest/,'Backup replay preserves the explicit pause boundary');
+
+// Android must not restart GPS recording after process death without a new user action.
+assert.match(workflow, /if \(intent == null\) \{ stopSelf\(\); return START_NOT_STICKY \}/, 'Null service restart intent must stop GPS');
+assert.match(workflow, /if \(intent.action == "PAUSE"\)/, 'PAUSE action still handled');
+assert.doesNotMatch(workflow, /return START_STICKY/, 'No sticky restart may silently resume GPS tracking');
