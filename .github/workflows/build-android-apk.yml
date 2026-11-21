@@ -34,7 +34,7 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          src = Path('.github/workflows/build-android-apk.yml').read_text()
+          src = Path('app/src/main/java/kr/sangil/myhiking/MainActivity.kt').read_text()
           assert 'private var startAfterPermission = false' in src
           assert 'startAfterPermission = true' in src
           assert 'val shouldStart = startAfterPermission' in src
