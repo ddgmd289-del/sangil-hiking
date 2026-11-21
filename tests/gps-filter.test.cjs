@@ -41,3 +41,6 @@ assert.match(html,/localStorage\.removeItem\(CURRENT\)\}catch\{\}clearSavedRoute
 
 assert.match(html,/if\(\(trip\.points\|\|\[\]\)\.length>0\)return;/,'Native backup must not overwrite a live GPS route');
 assert.match(html,/if\(prev&&!cur\.breakBefore\)trip\.distance\+=diff;/,'First GPS fix must not add phantom distance');
+
+assert.match(html,/const rests=\(r\.rests\|\|\[\]\)\.reduce/,'Average speed excludes auto and manual rests');
+assert.match(html,/const openRest=r\.restStarted\?/,'Average speed excludes ongoing rest');
