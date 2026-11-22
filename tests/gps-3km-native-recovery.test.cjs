@@ -86,7 +86,7 @@ assert.equal(chunkTrip.points.length,count,'full backup after restart remains id
 assert.equal(chunkTrip.distance,completeDistance,'full backup after restart cannot double-count distance');
 
 // Corrupt backup lines and impossible coordinates must not change a valid recovered trip.
-const noisyBackup=[backup,'not-json',JSON.stringify({lat:95,lng:128,accuracy:5,time:start+4000000}),JSON.stringify({lat:35,lng:128,accuracy:999,time:start+4010000})].join('\n');
+const noisyBackup=[backup,'not-json',JSON.stringify({lat:95,lng:128,accuracy:5,time:start+4000000}),JSON.stringify({lat:35,lng:128,accuracy:999,time:start+4010000}),JSON.stringify({lng:128,accuracy:5,time:start+4020000}),JSON.stringify({lat:35,accuracy:5,time:start+4030000}),JSON.stringify({lat:35,lng:128,time:start+4040000})].join('\n');
 const noisyTrip={started:start,state:'active',activity:'걷기',points:fixes.map(p=>({...p})),distance:expected,rests:[],restStarted:0};
 const noisySandbox={trip:noisyTrip,window:{SangilNative:{getTrackBackup:()=>noisyBackup}},km,persist(){},updateStats(){},draw(){},console,Date,Number,Math,Set,JSON,Array};
 vm.runInNewContext(source+'\nrecoverNativeGps();',noisySandbox,{timeout:5000});
