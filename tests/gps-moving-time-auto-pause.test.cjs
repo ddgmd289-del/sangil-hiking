@@ -23,4 +23,6 @@ assert.equal(pace({started:t,ended:t+600000,rests:[{type:'auto',started:t+120000
 assert.equal(pace({started:t,ended:t+600000,rests:[{type:'auto',started:'invalid',ended:t+300000},{type:'manual',started:t+400000,ended:t+350000}]}),600,'malformed and reversed pauses ignored');
 assert.equal(pace({started:t,ended:t+600000,rests:[{type:'auto',started:t+300000,ended:t+900000}]}),300,'pause extending past finish is clamped');
 assert.equal(pace({started:t,ended:t+600000,rests:[],restStarted:t+300000,pauseReason:'auto'},t+600000),300,'ongoing pause cannot extend beyond finished trip');
+assert.equal(pace({started:t,ended:t+600000,rests:[{type:'auto',started:'',ended:t+300000}]}),600,'empty pause start must not subtract time');
+assert.equal(pace({started:t,ended:t+600000,rests:[{type:'manual',started:null,ended:t+300000}]}),600,'null pause start must not subtract time');
 console.log('Moving time excludes auto/manual pauses: PASS');
