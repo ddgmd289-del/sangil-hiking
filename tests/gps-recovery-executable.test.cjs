@@ -39,6 +39,19 @@ assert.equal(result.points.length,1,'automatically paused fix must not be recove
 result=run({live:[a],backup:[b,c],rests:[{type:'auto',started:base+5000,ended:base+15000}]});
 assert.equal(result.points.length,2,'backup after auto pause may resume without replaying paused fix');
 assert.equal(result.points[1].breakBefore,true,'distance must not bridge automatic pause');
+// Native backup must never turn missing fields or a (0,0) placeholder into a route fix.
+for (const invalid of [
+  {...b,lat:0,lon:0},
+  {...b,lat:undefined},
+  {...b,lon:undefined},
+  {...b,t:undefined},
+  {...b,accuracy:undefined},
+  {...b,accuracy:-1},
+  {...b,accuracy:100}
+]) {
+  result=run({live:[a],backup:[invalid]});
+  assert.equal(result.points.length,1,'malformed native backup fix must be ignored');
+}
 result=run({live:[a],backup:[{...b,lat:91}]});
 assert.equal(result.points.length,1,'invalid latitude must be rejected');
 // A backup longer than the historical 250-fix limit must be fully replayed.
