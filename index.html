@@ -316,6 +316,8 @@ function recoverNativeGps(){
   for(const line of raw.split(/\r?\n/)){
    if(!line.trim())continue;
    let p;try{p=JSON.parse(line)}catch{continue}
+   // Missing JSON fields must not coerce to valid-looking zero coordinates.
+   if(p.lat==null||p.lng==null||p.time==null||p.accuracy==null)continue;
    const fix={lat:Number(p.lat),lon:Number(p.lng),alt:Number(p.alt||0),accuracy:Number(p.accuracy),t:Number(p.time)};
    if(!Number.isFinite(fix.lat)||!Number.isFinite(fix.lon)||Math.abs(fix.lat)>90||Math.abs(fix.lon)>180||(fix.lat===0&&fix.lon===0)||!Number.isFinite(fix.t)||fix.t<=0||!Number.isFinite(fix.accuracy)||fix.accuracy<0||fix.accuracy>65)continue;
    if(fix.t<trip.started||fix.t>Date.now()+5000)continue;
