@@ -9,7 +9,12 @@ on:
       - '.github/workflows/gps-recovery-extended.yml'
   pull_request:
     branches:
+      - main
       - fix/gps-reception-diagnostics-20261117
+    paths:
+      - 'index.html'
+      - 'tests/**'
+      - '.github/workflows/gps-recovery-extended.yml'
   workflow_dispatch:
 permissions:
   contents: read
