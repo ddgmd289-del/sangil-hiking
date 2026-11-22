@@ -128,14 +128,14 @@ function fmtTime(seconds){let s=Math.max(0,Math.floor(seconds)),h=Math.floor(s/3
 // Conservative pace denominator: GPS-triggered auto pauses are not verified rests.
 // Exclude only explicit manual pauses, so false auto-pause cannot inflate walking pace.
 function paceSeconds(r,now=Date.now()){
- if(!r||r.started==null||r.started===''||!Number.isFinite(Number(r.started))||Number(r.started)<=0)return 0;
+ if(!r||r.started==null||r.started===''||typeof r.started==='boolean'||!Number.isFinite(Number(r.started))||Number(r.started)<=0)return 0;
  const ended=Number(r.ended);
  const end=r.ended!=null&&typeof r.ended!=='boolean'&&Number.isFinite(ended)&&ended>0?ended:now;
  // Clamp and merge manual rest intervals: duplicated or overlapping restores must not
  // subtract the same elapsed time twice or push moving time below its true value.
  const start=Number(r.started);
- const intervals=(Array.isArray(r.rests)?r.rests:[]).filter(x=>x&&(x.type==='manual'||x.type==='auto')&&x.started!=null&&x.started!==''&&x.ended!=null&&x.ended!=='').map(x=>[Number(x.started),Number(x.ended)]);
- if(r.restStarted&&(r.pauseReason==='manual'||r.pauseReason==='auto'))intervals.push([Number(r.restStarted),end]);
+ const intervals=(Array.isArray(r.rests)?r.rests:[]).filter(x=>x&&(x.type==='manual'||x.type==='auto')&&x.started!=null&&x.started!==''&&typeof x.started!=='boolean'&&x.ended!=null&&x.ended!==''&&typeof x.ended!=='boolean').map(x=>[Number(x.started),Number(x.ended)]);
+ if(r.restStarted&&typeof r.restStarted!=='boolean'&&(r.pauseReason==='manual'||r.pauseReason==='auto'))intervals.push([Number(r.restStarted),end]);
  const valid=intervals.filter(([a,b])=>Number.isFinite(a)&&Number.isFinite(b)&&b>a)
   .map(([a,b])=>[Math.max(start,a),Math.min(end,b)]).filter(([a,b])=>b>a).sort((a,b)=>a[0]-b[0]);
  let restMs=0,restEnd=start;
