@@ -57,6 +57,11 @@ const record=(type)=>({started:start,ended:start+180000,rests:[{type,started:sta
 assert.equal(paceSeconds(record('auto')),120,'Completed automatic pause is excluded from moving time');
 assert.equal(paceSeconds(record('manual')),120,'Manual rest excluded from moving time');
 assert.equal(paceSeconds({started:start,ended:start+180000,rests:[]}),180);
+assert.equal(paceSeconds({started:true,ended:start+180000,rests:[]}),0,'Boolean start timestamp is invalid');
+assert.equal(paceSeconds({started:false,ended:start+180000,rests:[]}),0,'False start timestamp is invalid');
+assert.equal(paceSeconds({started:start,ended:start+180000,rests:[{type:'manual',started:true,ended:start+90000}]}),180,'Boolean rest start cannot subtract moving time');
+assert.equal(paceSeconds({started:start,ended:start+180000,rests:[{type:'auto',started:start+30000,ended:true}]}),180,'Boolean rest end cannot subtract moving time');
+assert.equal(paceSeconds({started:start,ended:start+180000,restStarted:true,pauseReason:'auto'}),180,'Boolean open pause start cannot subtract moving time');
 assert.equal(paceSeconds({started:start,ended:0,rests:[]},start+180000),180,'Zero end timestamp means active trip, not completed trip');
 assert.equal(paceSeconds({started:start,ended:'invalid',rests:[]},start+180000),180,'Corrupt end timestamp falls back to supplied current time');
 assert.equal(paceSeconds({started:start,ended:start-1000,rests:[]},start+180000),0,'End before start never produces negative moving time');
