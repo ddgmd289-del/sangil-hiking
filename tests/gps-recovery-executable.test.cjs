@@ -47,7 +47,13 @@ for (const invalid of [
   {...b,t:undefined},
   {...b,accuracy:undefined},
   {...b,accuracy:-1},
-  {...b,accuracy:100}
+  {...b,accuracy:100},
+  {...b,lat:''},
+  {...b,lon:'   '},
+  {...b,t:''},
+  {...b,accuracy:''},
+  {...b,lat:false},
+  {...b,accuracy:false}
 ]) {
   result=run({live:[a],backup:[invalid]});
   assert.equal(result.points.length,1,'malformed native backup fix must be ignored');
