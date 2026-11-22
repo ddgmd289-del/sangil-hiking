@@ -18,4 +18,9 @@ assert.equal(pace({started:t,ended:t+600000,rests:[{type:'auto',started:t-100000
 assert.equal(pace({started:null,ended:t+600000,rests:[]}),0,'missing start cannot become Unix epoch');
 assert.equal(pace({started:'',ended:t+600000,rests:[]}),0,'empty start cannot become Unix epoch');
 assert.equal(pace({started:0,ended:t+600000,rests:[]}),0,'zero start cannot become Unix epoch');
+// Corrupted or duplicated rest history must not inflate stopped time or produce NaN.
+assert.equal(pace({started:t,ended:t+600000,rests:[{type:'auto',started:t+120000,ended:t+300000},{type:'auto',started:t+120000,ended:t+300000}]}),420,'duplicate restored pauses counted once');
+assert.equal(pace({started:t,ended:t+600000,rests:[{type:'auto',started:'invalid',ended:t+300000},{type:'manual',started:t+400000,ended:t+350000}]}),600,'malformed and reversed pauses ignored');
+assert.equal(pace({started:t,ended:t+600000,rests:[{type:'auto',started:t+300000,ended:t+900000}]}),300,'pause extending past finish is clamped');
+assert.equal(pace({started:t,ended:t+600000,rests:[],restStarted:t+300000,pauseReason:'auto'},t+600000),300,'ongoing pause cannot extend beyond finished trip');
 console.log('Moving time excludes auto/manual pauses: PASS');
