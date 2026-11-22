@@ -25,4 +25,7 @@ assert.equal(pace({started:t,ended:t+600000,rests:[{type:'auto',started:t+300000
 assert.equal(pace({started:t,ended:t+600000,rests:[],restStarted:t+300000,pauseReason:'auto'},t+600000),300,'ongoing pause cannot extend beyond finished trip');
 assert.equal(pace({started:t,ended:t+600000,rests:[{type:'auto',started:'',ended:t+300000}]}),600,'empty pause start must not subtract time');
 assert.equal(pace({started:t,ended:t+600000,rests:[{type:'manual',started:null,ended:t+300000}]}),600,'null pause start must not subtract time');
+assert.equal(pace({started:t,ended:t+600000,rests:[{type:'auto',started:t+120000,ended:null}]}),600,'null pause end must not be interpreted as Unix epoch');
+assert.equal(pace({started:t,ended:t+600000,rests:[{type:'manual',started:t+120000,ended:''}]}),600,'empty pause end must not be interpreted as Unix epoch');
+assert.equal(pace({started:t,ended:t+600000,rests:[{type:'auto',started:t+120000,ended:false}]}),600,'boolean pause end must not corrupt moving time');
 console.log('Moving time excludes auto/manual pauses: PASS');
