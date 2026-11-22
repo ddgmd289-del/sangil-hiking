@@ -321,8 +321,8 @@ function recoverNativeGps(){
    const fix={lat:Number(p.lat),lon:Number(p.lng),alt:Number(p.alt||0),accuracy:Number(p.accuracy),t:Number(p.time)};
    if(!Number.isFinite(fix.lat)||!Number.isFinite(fix.lon)||Math.abs(fix.lat)>90||Math.abs(fix.lon)>180||(fix.lat===0&&fix.lon===0)||!Number.isFinite(fix.t)||fix.t<=0||!Number.isFinite(fix.accuracy)||fix.accuracy<0||fix.accuracy>65)continue;
    if(fix.t<trip.started||fix.t>Date.now()+5000)continue;
-   // Never recover points recorded during explicit or automatic pauses.
-   if((Array.isArray(trip.rests)?trip.rests:[]).some(r=>r&&(r.type==='manual'||r.type==='auto')&&Number.isFinite(Number(r.started))&&Number.isFinite(Number(r.ended))&&fix.t>=Number(r.started)&&fix.t<=Number(r.ended))||(trip.pauseReason==='manual'&&trip.restStarted&&fix.t>=trip.restStarted))continue;
+   // Manual pauses always block recovery. Auto pauses can be repaired only when a later live GPS fix confirms resumed movement.
+   if((Array.isArray(trip.rests)?trip.rests:[]).some(r=>r&&(r.type==='manual'||(r.type==='auto'&&!(trip.points||[]).some(live=>live.t>Number(r.ended))))&&Number.isFinite(Number(r.started))&&Number.isFinite(Number(r.ended))&&fix.t>=Number(r.started)&&fix.t<=Number(r.ended))||(trip.pauseReason==='manual'&&trip.restStarted&&fix.t>=trip.restStarted))continue;
    const key=fix.t+':'+fix.lat+':'+fix.lon;
    if(existing.has(key))continue;
    existing.add(key);recovered.push(fix);
@@ -342,7 +342,7 @@ function recoverNativeGps(){
    // Keep already recorded live fixes during backup merge; filtering them can erase route geometry.
    if(!reacquired&&(dist/dt>(trip.activity==='달리기'?.0055:.0033)||dist<noise)&&!liveFixKeys.has(p.t+':'+p.lat+':'+p.lon))continue;
    const safeBridge=reacquired&&dt<=180&&dist<=.5&&dist/dt<=(trip.activity==='달리기'?.0055:.0033)&&p.accuracy<=35&&(prev.accuracy||300)<=35;
-   const crossesRest=(Array.isArray(trip.rests)?trip.rests:[]).some(r=>r&&(r.type==='manual'||r.type==='auto')&&Number.isFinite(Number(r.started))&&Number.isFinite(Number(r.ended))&&prev.t<Number(r.ended)&&p.t>Number(r.started))||(trip.pauseReason==='manual'&&Number.isFinite(Number(trip.restStarted))&&Number(trip.restStarted)>0&&prev.t<Number(trip.restStarted)&&p.t>=Number(trip.restStarted));
+   const crossesRest=(Array.isArray(trip.rests)?trip.rests:[]).some(r=>r&&(r.type==='manual'||(r.type==='auto'&&!(trip.points||[]).some(live=>live.t>Number(r.ended))))&&Number.isFinite(Number(r.started))&&Number.isFinite(Number(r.ended))&&prev.t<Number(r.ended)&&p.t>Number(r.started))||(trip.pauseReason==='manual'&&Number.isFinite(Number(trip.restStarted))&&Number(trip.restStarted)>0&&prev.t<Number(trip.restStarted)&&p.t>=Number(trip.restStarted));
    // Recompute segment breaks after inserting missing native fixes: an old gap marker
    // must not keep suppressing distance when reliable intermediate fixes bridge it.
    p.breakBefore=!!(p.manualResumeBoundary||crossesRest||(dist>.12&&!safeBridge)||(reacquired&&!safeBridge));
