@@ -28,4 +28,7 @@ assert.equal(pace({started:t,ended:t+600000,rests:[{type:'manual',started:null,e
 assert.equal(pace({started:t,ended:t+600000,rests:[{type:'auto',started:t+120000,ended:null}]}),600,'null pause end must not be interpreted as Unix epoch');
 assert.equal(pace({started:t,ended:t+600000,rests:[{type:'manual',started:t+120000,ended:''}]}),600,'empty pause end must not be interpreted as Unix epoch');
 assert.equal(pace({started:t,ended:t+600000,rests:[{type:'auto',started:t+120000,ended:false}]}),600,'boolean pause end must not corrupt moving time');
+
+assert.equal(pace({started:t,ended:true,rests:[]},t+600000),600,'boolean true end timestamp must use current time');
+assert.equal(pace({started:t,ended:false,rests:[]},t+600000),600,'boolean false end timestamp must use current time');
 console.log('Moving time excludes auto/manual pauses: PASS');
