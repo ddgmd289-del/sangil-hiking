@@ -19,8 +19,9 @@ for (const [live, backup, expected] of [[3.1, 1.33, 3.1], [1.33, 3.1, 3.1], [0, 
 }
 // Auto-pause can be a false positive while walking. Its native fixes must remain
 // eligible for replay; explicit manual pauses must remain excluded.
-assert.match(recovery, /r\.type==='manual'\|\|\(r\.type==='auto'&&/,
+assert.match(recovery, /r\.type==='manual'\|\|autoPauseBlocks\(r\)/,
   'Recovery must distinguish manual rest from automatic pause');
+assert.match(recovery, /autoPauseHasWalkingEvidence/, 'False auto-pause recovery must require native walking evidence');
 assert.match(recovery, /trip\.pauseReason==='manual'&&Number\.isFinite\(Number\(trip\.restStarted\)\)/,
   'Active manual rest must still block native replay');
 assert.doesNotMatch(recovery, /\(trip\.restStarted&&fix\.t>=trip\.restStarted\)/,
