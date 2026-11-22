@@ -317,7 +317,7 @@ function recoverNativeGps(){
   const backupFixes=raw.split(/\r?\n/).flatMap(line=>{try{
    const p=JSON.parse(line);if(p.lat==null||p.lng==null||p.time==null||p.accuracy==null)return [];
    const fix={lat:Number(p.lat),lon:Number(p.lng),t:Number(p.time),accuracy:Number(p.accuracy)};
-   return Number.isFinite(fix.lat)&&Number.isFinite(fix.lon)&&Math.abs(fix.lat)<=90&&Math.abs(fix.lon)<=180&&Number.isFinite(fix.t)&&fix.t>0&&Number.isFinite(fix.accuracy)&&fix.accuracy>=0&&fix.accuracy<=35?[fix]:[];
+   return Number.isFinite(fix.lat)&&Number.isFinite(fix.lon)&&Math.abs(fix.lat)<=90&&Math.abs(fix.lon)<=180&&!(fix.lat===0&&fix.lon===0)&&Number.isFinite(fix.t)&&fix.t>0&&Number.isFinite(fix.accuracy)&&fix.accuracy>=0&&fix.accuracy<=35?[fix]:[];
   }catch{return []}}).sort((a,b)=>a.t-b.t);
   const autoPauseHasWalkingEvidence=r=>{
    const start=Number(r.started),end=Number(r.ended);
