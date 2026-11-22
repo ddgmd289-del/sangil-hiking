@@ -130,7 +130,7 @@ function fmtTime(seconds){let s=Math.max(0,Math.floor(seconds)),h=Math.floor(s/3
 function paceSeconds(r,now=Date.now()){
  if(!r||r.started==null||r.started===''||!Number.isFinite(Number(r.started))||Number(r.started)<=0)return 0;
  const ended=Number(r.ended);
- const end=r.ended!=null&&Number.isFinite(ended)&&ended>0?ended:now;
+ const end=r.ended!=null&&typeof r.ended!=='boolean'&&Number.isFinite(ended)&&ended>0?ended:now;
  // Clamp and merge manual rest intervals: duplicated or overlapping restores must not
  // subtract the same elapsed time twice or push moving time below its true value.
  const start=Number(r.started);
