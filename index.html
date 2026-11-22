@@ -128,7 +128,7 @@ function fmtTime(seconds){let s=Math.max(0,Math.floor(seconds)),h=Math.floor(s/3
 // Conservative pace denominator: GPS-triggered auto pauses are not verified rests.
 // Exclude only explicit manual pauses, so false auto-pause cannot inflate walking pace.
 function paceSeconds(r,now=Date.now()){
- if(!r||!Number.isFinite(Number(r.started)))return 0;
+ if(!r||r.started==null||r.started===''||!Number.isFinite(Number(r.started))||Number(r.started)<=0)return 0;
  const ended=Number(r.ended);
  const end=r.ended!=null&&Number.isFinite(ended)&&ended>0?ended:now;
  // Clamp and merge manual rest intervals: duplicated or overlapping restores must not
