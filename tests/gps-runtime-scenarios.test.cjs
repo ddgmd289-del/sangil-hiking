@@ -95,7 +95,7 @@ const gapLine=html.split('\n').find(line=>line.includes('const crossesRest='));
 assert.ok(gapLine,'Native GPS reconstruction rest guard must exist');
 const gapExpression=gapLine.trim().replace(/^const crossesRest=/,'').replace(/;$/,'');
 const gapCrosses=(rests,restStarted,from,to)=>vm.runInNewContext(
- 'Boolean('+gapExpression+')',{trip:{rests,restStarted,pauseReason:restStarted?'manual':null},prev:{t:from},p:{t:to},Number,Array});
+ 'Boolean('+gapExpression+')',{trip:{rests,restStarted,pauseReason:restStarted?'manual':null},prev:{t:from},p:{t:to},Number,Array,autoPauseBlocks:r=>r.type==='auto'});
 assert.equal(gapCrosses(null,null,start,start+60000),false,'Null rests cannot abort native route reconstruction');
 assert.equal(gapCrosses({legacy:true},null,start,start+60000),false,'Object rests cannot abort native route reconstruction');
 assert.equal(gapCrosses([null,{type:'manual',started:start+30000,ended:start+90000}],null,start,start+60000),true,'Valid manual rest still breaks the segment with a null entry');
