@@ -15,4 +15,7 @@ assert.equal(pace({started:t,ended:t+600000,rests:[{type:'manual',started:t+1200
 assert.equal(pace({started:t,rests:[],restStarted:t+300000,pauseReason:'auto'},t+600000),300,'ongoing automatic pause excluded');
 assert.equal(pace({started:t,rests:[],restStarted:t+300000,pauseReason:'manual'},t+600000),300,'ongoing manual pause excluded');
 assert.equal(pace({started:t,ended:t+600000,rests:[{type:'auto',started:t-100000,ended:t+700000}]}),0,'pause clamped to trip interval');
+assert.equal(pace({started:null,ended:t+600000,rests:[]}),0,'missing start cannot become Unix epoch');
+assert.equal(pace({started:'',ended:t+600000,rests:[]}),0,'empty start cannot become Unix epoch');
+assert.equal(pace({started:0,ended:t+600000,rests:[]}),0,'zero start cannot become Unix epoch');
 console.log('Moving time excludes auto/manual pauses: PASS');
