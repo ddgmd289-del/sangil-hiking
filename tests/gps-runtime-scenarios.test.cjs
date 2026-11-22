@@ -79,6 +79,12 @@ assert.equal(paceSeconds({started:start,ended:start+180000,rests:null}),180);
 assert.equal(paceSeconds({started:start,ended:start+180000,rests:{unexpected:true}}),180);
 assert.equal(paceSeconds({started:start,ended:start+180000,rests:[null,{type:'manual',started:start+30000,ended:start+90000}]}),120);
 
+// Null Island (0,0) is not a valid GPS backup fix and must not count as
+// evidence that an automatically paused hiker resumed walking.
+const evidenceParser=html.slice(html.indexOf('const backupFixes=raw.split('),html.indexOf('const autoPauseHasWalkingEvidence='));
+assert.ok(evidenceParser.includes('!(fix.lat===0&&fix.lon===0)'),
+ 'Auto-pause walking evidence must reject zero-coordinate backup fixes');
+
 // Execute the actual native-backup pause exclusion predicate with migrated rest data.
 const backupPauseLine=html.split('\n').find(line=>line.includes('Array.isArray(trip.rests)?trip.rests:[]')&&line.includes('fix.t>='));
 assert.ok(backupPauseLine,'Native backup pause guard must exist');
