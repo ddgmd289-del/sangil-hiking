@@ -599,10 +599,13 @@ function renderRecords(){
   const coords=pts.filter(p=>Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lon))&&Math.abs(Number(p.lat))<=90&&Math.abs(Number(p.lon))<=180);
   if(coords.length>1){
    const xs=coords.map(p=>Number(p.lon)),ys=coords.map(p=>Number(p.lat));
-   const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
-   const scale=76/Math.max(maxX-minX,(maxY-minY)*Math.cos((minY+maxY)*Math.PI/360),1e-7);
+   // Fit the entire GPS track inside the preview without clipping long routes.
+   const cosLat=Math.max(0.01,Math.cos(ys[0]*Math.PI/180));
+   let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+   for(let i=0;i<xs.length;i++){const x=xs[i]*cosLat,y=ys[i];minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y)}
+   const scale=76/Math.max(maxX-minX,maxY-minY,1e-7);
    const midX=(minX+maxX)/2,midY=(minY+maxY)/2;
-   const points=coords.map(p=>[50+(Number(p.lon)-midX)*scale*Math.cos(midY*Math.PI/180),50-(Number(p.lat)-midY)*scale].map(v=>Math.max(3,Math.min(97,v)).toFixed(1)).join(',')).join(' ');
+   const points=coords.map(p=>[50+(Number(p.lon)*cosLat-midX)*scale,50-(Number(p.lat)-midY)*scale].map(v=>v.toFixed(1)).join(',')).join(' ');
    const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 100 100');svg.setAttribute('aria-label','저장된 GPS 경로 미리보기');
    const line=document.createElementNS('http://www.w3.org/2000/svg','polyline');line.setAttribute('points',points);line.setAttribute('fill','none');line.setAttribute('stroke','#f05b32');line.setAttribute('stroke-width','3');line.setAttribute('stroke-linecap','round');line.setAttribute('stroke-linejoin','round');svg.append(line);thumbnail.append(svg);
   }else thumbnail.textContent='🗺️';
