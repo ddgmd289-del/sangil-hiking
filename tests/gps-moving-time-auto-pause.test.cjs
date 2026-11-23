@@ -31,4 +31,9 @@ assert.equal(pace({started:t,ended:t+600000,rests:[{type:'auto',started:t+120000
 
 assert.equal(pace({started:t,ended:true,rests:[]},t+600000),600,'boolean true end timestamp must use current time');
 assert.equal(pace({started:t,ended:false,rests:[]},t+600000),600,'boolean false end timestamp must use current time');
+// Restored pauses can start before trip creation; only the overlap with the trip counts.
+assert.equal(pace({started:t,ended:t+600000,rests:[{type:'auto',started:t-180000,ended:t+120000}]}),480,'pre-trip restored pause is clamped to trip start');
+assert.equal(pace({started:t,ended:t+600000,rests:[{type:'manual',started:t-180000,ended:t+120000},{type:'auto',started:t+60000,ended:t+180000}]}),420,'pre-trip overlapping pauses are merged after clamping');
+assert.equal(pace({started:t,ended:t+600000,rests:[{type:'auto',started:t+700000,ended:t+900000}]}),600,'future pause is ignored after trip finish');
+assert.equal(pace({started:t,ended:t+600000,rests:[],restStarted:t-180000,pauseReason:'auto'},t+900000),0,'restored ongoing pause before trip starts cannot exceed trip duration');
 console.log('Moving time excludes auto/manual pauses: PASS');
