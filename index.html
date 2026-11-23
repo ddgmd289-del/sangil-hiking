@@ -342,7 +342,7 @@ function recoverNativeGps(){
    }
    return steps>=3&&distance>=.06&&km(inside[0],inside.at(-1))>=.05;
   };
-  const autoPauseBlocks=r=>r.type==='auto'&&!((trip.points||[]).some(live=>live.t>Number(r.ended))||autoPauseHasWalkingEvidence(r));
+  const autoPauseBlocks=r=>r.type==='auto'&&!autoPauseHasWalkingEvidence(r);
   const recovered=[];
   for(const line of raw.split(/\r?\n/)){
    if(!line.trim())continue;
