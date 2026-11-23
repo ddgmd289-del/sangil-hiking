@@ -636,8 +636,10 @@ function renderRecords(){
    const input=window.prompt('산행지 이름을 입력하세요 (예: 남해 금산, 지리산). 빈칸으로 저장하면 기존 산 이름이나 GPS 출발 좌표가 표시됩니다.',r.placeName||r.mountain?.name||'');
    if(input===null)return;
    const value=input.trim().slice(0,80);
-   const saved=loadRecords();const idx=saved.findIndex(x=>Number(x.started)===Number(r.started)&&Number(x.ended)===Number(r.ended)&&x.activity===r.activity);
-   if(idx<0){toast('수정할 기록을 찾지 못했습니다.');return}
+   const saved=loadRecords();
+   const matches=saved.map((x,i)=>({x,i})).filter(({x})=>Number(x.started)===Number(r.started)&&Number(x.ended)===Number(r.ended)&&x.activity===r.activity&&Number(x.distance)===Number(r.distance));
+   if(matches.length!==1){toast(matches.length?'같은 시간의 기록이 여러 개 있어 수정을 중단했습니다.':'수정할 기록을 찾지 못했습니다.');return}
+   const idx=matches[0].i;
    if(value)saved[idx].placeName=value;else delete saved[idx].placeName;
    if(saveRecords(saved))renderRecords();
   });actions.append(editPlace);
