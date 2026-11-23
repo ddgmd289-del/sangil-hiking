@@ -549,7 +549,7 @@ function renderRecords(){
  const query=search.value.trim().toLocaleLowerCase('ko-KR');
  const records=allRecords.filter(r=>{
  const kind=r.activity==='산행'?'등산':r.activity==='달리기'?'러닝':r.activity;
- const title=[r.name,r.mountain?.name,kind].filter(Boolean).join(' ').toLocaleLowerCase('ko-KR');
+ const title=[r.name,r.mountain?.name,r.placeName,kind].filter(Boolean).join(' ').toLocaleLowerCase('ko-KR');
  return (!query||title.includes(query))&&(activity.value==='all'||kind===activity.value)&&(year.value==='all'||new Date(Number(r.started)).getFullYear()===Number(year.value));
  }).sort((a,b)=>order.value==='old'?Number(a.started)-Number(b.started):Number(b.started)-Number(a.started));
  $('#recordCount').textContent='총 '+records.length+'개'+(records.length!==allRecords.length?' / 전체 '+allRecords.length+'개':'');
