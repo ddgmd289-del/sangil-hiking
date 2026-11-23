@@ -623,7 +623,7 @@ function renderRecords(){
   // Coordinates are used instead of guessing a place name from a route thumbnail.
   const place=document.createElement('span');place.className='record-date';
   const first=coords[0];
-  place.textContent=r.mountain?.name?'📍 산행지 · '+r.mountain.name:first?'📍 시작 위치 · '+Number(first.lat).toFixed(5)+', '+Number(first.lon).toFixed(5):'📍 위치 정보 없음';
+  place.textContent=r.placeName?'📍 산행지 · '+r.placeName:r.mountain?.name?'📍 산행지 · '+r.mountain.name:first?'📍 시작 위치 · '+Number(first.lat).toFixed(5)+', '+Number(first.lon).toFixed(5):'📍 위치 정보 없음';
   info.append(name,summary,dated,place);header.append(thumbnail,info);
   const expanded=document.createElement('div');expanded.className='record-expanded';expanded.hidden=true;
   header.addEventListener('click',()=>{expanded.hidden=!expanded.hidden;header.setAttribute('aria-expanded',String(!expanded.hidden))});
@@ -631,6 +631,16 @@ function renderRecords(){
   for(const [label,value] of metrics){const cell=document.createElement('div');cell.className='record-metric';const l=document.createElement('span');l.textContent=label;const v=document.createElement('b');v.textContent=value;cell.append(l,v);grid.append(cell)}
   const detail=document.createElement('div');detail.className='record-detail';detail.textContent='시작 '+clock(r.started)+' · 종료 '+clock(r.ended);
   const actions=document.createElement('div');actions.className='record-actions';
+  const editPlace=document.createElement('button');editPlace.className='tiny-btn';editPlace.type='button';editPlace.textContent='산행지 이름 수정';
+  editPlace.addEventListener('click',()=>{
+   const input=window.prompt('산행지 이름을 입력하세요 (예: 남해 금산, 지리산). 빈칸으로 저장하면 기존 산 이름이나 GPS 출발 좌표가 표시됩니다.',r.placeName||r.mountain?.name||'');
+   if(input===null)return;
+   const value=input.trim().slice(0,80);
+   const saved=loadRecords();const idx=saved.findIndex(x=>Number(x.started)===Number(r.started)&&Number(x.ended)===Number(r.ended)&&x.activity===r.activity);
+   if(idx<0){toast('수정할 기록을 찾지 못했습니다.');return}
+   if(value)saved[idx].placeName=value;else delete saved[idx].placeName;
+   if(saveRecords(saved))renderRecords();
+  });actions.append(editPlace);
   const view=document.createElement('button');view.className='tiny-btn';view.type='button';view.textContent='지도 보기';view.addEventListener('click',()=>showSavedRoute(r));actions.append(view);
   const pngBtn=document.createElement('button');pngBtn.className='tiny-btn';pngBtn.type='button';pngBtn.textContent='지도 포함 PNG';pngBtn.addEventListener('click',()=>exportHikeResultPng(r));actions.append(pngBtn);
   const shareBtn=document.createElement('button');shareBtn.className='tiny-btn';shareBtn.type='button';shareBtn.textContent='산행 이미지 공유';shareBtn.addEventListener('click',()=>exportHikeResultPng(r,true));actions.append(shareBtn);
