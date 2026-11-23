@@ -195,7 +195,7 @@ function displayRoutePoints(points){
   const noisy=accuracy>=20&&accuracy>=Math.max(prevAccuracy,nextAccuracy)*1.25;
   // Short out-and-back wiggles also occur with optimistic accuracy readings.
   // Remove only near-return spikes; keep genuine corners and segment boundaries.
-  const nearReturn=d1>=12&&d2>=12&&direct<=Math.min(22,Math.max(8,accuracy*1.2))&&
+  const nearReturn=accuracy>=20&&d1>=12&&d2>=12&&direct<=Math.min(22,Math.max(8,accuracy*1.2))&&
     excess>=Math.max(18,direct*1.8)&&
     !cur.breakBefore&&!next.breakBefore&&
     Number(next.t)>Number(cur.t)&&Number(cur.t)>Number(prev.t)&&
@@ -219,7 +219,7 @@ function draw(){
  if(segment.length)segments.push(segment);
  const pts=segments.flat().map(p=>[Number(p.lat),Number(p.lon)]);
  const routeLines=segments.map(seg=>seg.map(p=>[Number(p.lat),Number(p.lon)]));
- if(!trackLine)trackLine=L.polyline(routeLines,{color:'#1678d4',weight:5,opacity:.95,lineJoin:'round',lineCap:'round'}).addTo(map);
+ if(!trackLine)trackLine=L.polyline(routeLines,{color:'#1678d4',weight:3,opacity:.95,lineJoin:'round',lineCap:'round'}).addTo(map);
  else trackLine.setLatLngs(routeLines);
  if(!marksLayer)marksLayer=L.layerGroup().addTo(map);
  marksLayer.clearLayers();
