@@ -522,7 +522,7 @@ function showSavedRoute(record){
  if(!map){toast('지도가 준비되지 않았습니다.');return}
  viewedRecord=record;
  if(savedRouteLayer){savedRouteLayer.remove();savedRouteLayer=null}
- const pts=(record.points||[]).filter(p=>Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lon))).map(p=>[Number(p.lat),Number(p.lon)]);
+ const pts=(record.points||[]).filter(p=>p&&p.lat!=null&&p.lon!=null&&p.lat!==''&&p.lon!==''&&typeof p.lat!=='boolean'&&typeof p.lon!=='boolean'&&Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lon))&&Math.abs(Number(p.lat))<=90&&Math.abs(Number(p.lon))<=180&&!(Number(p.lat)===0&&Number(p.lon)===0)).map(p=>[Number(p.lat),Number(p.lon)]);
  const duration=fmtTime(Math.max(0,(Number(record.accMs)||0)/1000));const dist=(Number(record.distance)||0).toFixed(2);
  if(!pts.length){toast('이 기록에는 GPS 경로가 없습니다.');viewedRecord=null;return}
  savedRouteLayer=L.layerGroup().addTo(map);
