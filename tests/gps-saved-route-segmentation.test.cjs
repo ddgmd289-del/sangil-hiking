@@ -19,4 +19,13 @@ assert.equal(route([p(35,128,1000),p(95,128,1500),p(35.001,128,2000)]).length,2,
 assert.equal(route([p(35,128,1000),p(35.001,128,190000)]).length,2,'long GPS outage splits route');
 assert.equal(route([p(35,128,1000),p(35.001,128,2000,{breakBefore:true})]).length,2,'explicit break splits route');
 assert.equal(route([p(35,128,1000),p(35.001,128,2000)]).flat().length,2,'valid fixes remain preserved');
+const gapPoints=[p(35,128,1000),p(35.001,128,2000),p(0,0,2500),p(35.01,128.01,3000),p(35.011,128.01,4000)];
+const split=route(gapPoints);
+assert.equal(split.length,2,'invalid fix separates two valid stretches');
+assert.equal(split[0][0],gapPoints[0],'first route segment retains original start');
+assert.equal(split[0].at(-1),gapPoints[1],'first segment retains last valid point before gap');
+assert.equal(split[1][0],gapPoints[3],'second segment begins after gap');
+assert.equal(split[1].at(-1),gapPoints[4],'last route segment retains original finish');
+assert.equal(split.flat().length,4,'invalid fix is excluded without dropping valid fixes');
+assert.equal(route([p(0,0,1000),p(35,128,2000),p(0,0,3000)]).length,1,'leading and trailing invalid fixes do not create empty segments');
 console.log('Saved GPS route segmentation regression: passed');
