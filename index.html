@@ -531,7 +531,7 @@ function showSavedRoute(record){
  L.circleMarker(record.endPoint&&Number.isFinite(record.endPoint.lat)?[record.endPoint.lat,record.endPoint.lon]:pts[pts.length-1],{radius:9,color:'#fff',weight:3,fillColor:'#c14b33',fillOpacity:1}).bindPopup('도착 · '+new Date(record.ended||record.started).toLocaleTimeString('ko-KR')).addTo(savedRouteLayer);
  tab('home');
  setTimeout(()=>{if(!map)return;map.invalidateSize();if(pts.length>1)map.fitBounds(L.latLngBounds(pts),{padding:[45,45],maxZoom:17});else map.setView(pts[0],16)},200);
- const note=$('#mapNote');if(note)note.textContent='🥾 '+(record.name||'산행')+' · '+dist+' km · '+duration+' · 초록=출발 · 빨강=도착 · 파랑=실제 GPS 경로';
+ const note=$('#mapNote');if(note)note.textContent='📍 '+(record.placeName||record.mountain?.name||record.name||'산행지 미지정')+' · '+dist+' km · '+duration+' · 초록=출발 · 빨강=도착 · 파랑=실제 GPS 경로';
  toast('저장된 산행 경로를 표시했습니다. 현재 위치 버튼을 누르면 돌아갑니다.');
 }
 function clearSavedRoute(){
