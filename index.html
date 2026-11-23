@@ -596,7 +596,7 @@ function renderRecords(){
   const header=document.createElement('button');header.type='button';header.className='record-summary';header.setAttribute('aria-expanded','false');
   const thumbnail=document.createElement('div');thumbnail.className='record-thumb';
   // Local vector preview from stored coordinates; no external map or GPS upload.
-  const coords=pts.filter(p=>Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lon))&&Math.abs(Number(p.lat))<=90&&Math.abs(Number(p.lon))<=180);
+  const coords=pts.filter(p=>p&&p.lat!=null&&p.lon!=null&&p.lat!==''&&p.lon!==''&&typeof p.lat!=='boolean'&&typeof p.lon!=='boolean'&&Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lon))&&Math.abs(Number(p.lat))<=90&&Math.abs(Number(p.lon))<=180&&!(Number(p.lat)===0&&Number(p.lon)===0));
   if(coords.length>1){
    const xs=coords.map(p=>Number(p.lon)),ys=coords.map(p=>Number(p.lat));
    // Fit the entire GPS track inside the preview without clipping long routes.
