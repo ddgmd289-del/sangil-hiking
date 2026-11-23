@@ -600,7 +600,8 @@ function renderRecords(){
   if(coords.length>1){
    const xs=coords.map(p=>Number(p.lon)),ys=coords.map(p=>Number(p.lat));
    // Fit the entire GPS track inside the preview without clipping long routes.
-   const cosLat=Math.max(0.01,Math.cos(((Math.min(...ys)+Math.max(...ys))/2)*Math.PI/180));
+   let south=90,north=-90;for(const latitude of ys){south=Math.min(south,latitude);north=Math.max(north,latitude)}
+   const cosLat=Math.max(0.01,Math.cos(((south+north)/2)*Math.PI/180));
    let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
    for(let i=0;i<xs.length;i++){const x=xs[i]*cosLat,y=ys[i];minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y)}
    const scale=76/Math.max(maxX-minX,maxY-minY,1e-7);
