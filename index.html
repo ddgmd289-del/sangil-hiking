@@ -605,7 +605,10 @@ function renderRecords(){
    for(let i=0;i<xs.length;i++){const x=xs[i]*cosLat,y=ys[i];minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y)}
    const scale=76/Math.max(maxX-minX,maxY-minY,1e-7);
    const midX=(minX+maxX)/2,midY=(minY+maxY)/2;
-   // Keep long multi-hour tracks responsive in the history list; retain both endpoints.\n   const stride=Math.max(1,Math.ceil((coords.length-1)/399));\n   const preview=coords.filter((_,i)=>i%stride===0||i===coords.length-1);\n   const points=preview.map(p=>[50+(Number(p.lon)*cosLat-midX)*scale,50-(Number(p.lat)-midY)*scale].map(v=>v.toFixed(1)).join(',')).join(' ');
+   // Keep long multi-hour tracks responsive in the history list; retain both endpoints.
+   const stride=Math.max(1,Math.ceil((coords.length-1)/399));
+   const preview=coords.filter((_,i)=>i%stride===0||i===coords.length-1);
+   const points=preview.map(p=>[50+(Number(p.lon)*cosLat-midX)*scale,50-(Number(p.lat)-midY)*scale].map(v=>v.toFixed(1)).join(',')).join(' ');
    const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 100 100');svg.setAttribute('aria-label','저장된 GPS 경로 미리보기');
    const line=document.createElementNS('http://www.w3.org/2000/svg','polyline');line.setAttribute('points',points);line.setAttribute('fill','none');line.setAttribute('stroke','#f05b32');line.setAttribute('stroke-width','3');line.setAttribute('stroke-linecap','round');line.setAttribute('stroke-linejoin','round');svg.append(line);thumbnail.append(svg);
   }else thumbnail.textContent='🗺️';
