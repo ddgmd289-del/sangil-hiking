@@ -263,7 +263,7 @@ function onFix(p){const c=p.coords;const cur={lat:c.latitude,lon:c.longitude,alt
     const usableFix=cur.accuracy<=65&&(!prev||(dt>0&&(reacquired||(plausibleSpeed&&diff>=noiseKm))));
     if(usableFix){
       const bridgeGap=prev&&dt>0&&dt<=180&&diff<=.5&&plausibleSpeed&&cur.accuracy<=35&&prev.accuracy<=35;
-      if(prev&&(trip.resumeBreakPending||reacquired&&!bridgeGap))cur.breakBefore=true;
+      if(prev&&(trip.resumeBreakPending||diff>.12&&!bridgeGap||reacquired&&!bridgeGap))cur.breakBefore=true;
       // Preserve explicit pause boundaries during native-backup replay.
       if(trip.resumeBreakPending&&trip.resumeWasManual)cur.manualResumeBoundary=true;
       trip.resumeWasManual=false;
