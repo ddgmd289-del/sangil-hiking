@@ -32,4 +32,10 @@ assert.equal(route([p(35,128,1000),p(35.001,128,null)]).length,2,'null timestamp
 assert.equal(route([p(35,128,1000),p(35.001,128,'')]).length,2,'blank timestamp cannot bridge route');
 assert.equal(route([p(35,128,1000),p(35.001,128,NaN)]).length,2,'nonfinite timestamp cannot bridge route');
 assert.equal(route([p(35,128,1000),p(35.001,128,0)]).length,2,'epoch zero timestamp cannot bridge route');
+
+const gpxStart=html.indexOf('function gpx(',end);
+const gpxEnd=html.indexOf('function ',gpxStart+10);
+assert(gpxStart>=0&&gpxEnd>gpxStart,'GPX export function must exist');
+const gpxSource=html.slice(gpxStart,gpxEnd);
+assert(gpxSource.includes('Number(p.t)<=8640000000000000'),'GPX export must guard Date.toISOString range');
 console.log('Saved GPS route segmentation regression: passed');
