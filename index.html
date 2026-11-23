@@ -619,7 +619,12 @@ function renderRecords(){
   const dated=document.createElement('span');dated.className='record-date';
   const kind=document.createElement('span');kind.className='record-type';kind.textContent=r.activity==='산행'?'등산':r.activity==='달리기'?'러닝':(r.activity||'등산');
   dated.append(kind,document.createTextNode(new Date(Number(r.started)).toLocaleString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})));
-  info.append(name,summary,dated);header.append(thumbnail,info);
+  // Show the recorded mountain name when available; otherwise show the actual GPS start location.
+  // Coordinates are used instead of guessing a place name from a route thumbnail.
+  const place=document.createElement('span');place.className='record-date';
+  const first=coords[0];
+  place.textContent=r.mountain?.name?'📍 산행지 · '+r.mountain.name:first?'📍 시작 위치 · '+Number(first.lat).toFixed(5)+', '+Number(first.lon).toFixed(5):'📍 위치 정보 없음';
+  info.append(name,summary,dated,place);header.append(thumbnail,info);
   const expanded=document.createElement('div');expanded.className='record-expanded';expanded.hidden=true;
   header.addEventListener('click',()=>{expanded.hidden=!expanded.hidden;header.setAttribute('aria-expanded',String(!expanded.hidden))});
   const grid=document.createElement('div');grid.className='record-metrics';
