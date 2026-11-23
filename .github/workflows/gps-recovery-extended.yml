@@ -31,17 +31,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for file in \
-            tests/gps-filter.test.cjs \
-            tests/gps-runtime-scenarios.test.cjs \
-            tests/gps-recovery-executable.test.cjs \
-            tests/gps-recovery-gap-replay.test.cjs \
-            tests/gps-repaired-gap-pause.test.cjs \
-            tests/gps-recovery-distance-preservation.test.cjs \
-            tests/gps-3km-native-recovery.test.cjs \
-            tests/gps-long-outage-no-phantom-distance.test.cjs \
-            tests/gps-backup-noise-regression.test.cjs \
-            tests/gps-moving-time-auto-pause.test.cjs; do
+          # Discover all GPS regression tests so newly added cases cannot be silently skipped.
+          mapfile -t gps_tests < <(find tests -maxdepth 1 -type f -name 'gps-*.test.cjs' | sort)
+          if [ "${#gps_tests[@]}" -eq 0 ]; then
+            echo "::error::No GPS regression tests found"
+            exit 1
+          fi
+          echo "Running ${#gps_tests[@]} GPS regression suites"
+          for file in "${gps_tests[@]}"; do
             echo "::group::$file"
             node "$file"
             echo "::endgroup::"
