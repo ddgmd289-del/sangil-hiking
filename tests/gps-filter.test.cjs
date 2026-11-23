@@ -46,7 +46,7 @@ console.log('GPS filter static and scenario checks passed');
 
 assert.match(html,/function paceSeconds\(r,now=Date\.now\(\)\)/,'Pace time helper');
 assert.match(html,/cur\.accuracy<=20&&anchorDistance<\.020\)autoPause\(\)/,'Auto pause needs high-quality stillness');
-assert.match(html,/const paceDuration=paceSeconds\(r\)/,'Record average pace uses conservative denominator');
+assert.match(html,/const paceDuration=speedDenominatorSeconds\(r\)/,'Record average speed uses conservative denominator');
 const start=Date.UTC(2026,10,16,9,0,0);
 const elapsed=(r)=>{const rests=(r.rests||[]).filter(x=>x.type==='manual'||x.type==='auto').reduce((n,x)=>n+(x.ended-x.started),0);return (r.ended-r.started-rests)/1000};
 assert.equal(elapsed({started:start,ended:start+180000,rests:[{type:'auto',started:start+30000,ended:start+90000}]}),120,'Automatic rest is excluded from moving time');
