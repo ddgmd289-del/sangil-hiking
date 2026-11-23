@@ -47,12 +47,15 @@ body.hike-fullscreen .hike-toolbar{bottom:calc(env(safe-area-inset-bottom) + 16p
 body.hike-fullscreen .hike-toolbar button{min-height:60px;border-radius:20px;font-size:17px;font-weight:800;box-shadow:0 4px 14px #0003}
 body.hike-fullscreen .float-controls{top:calc(env(safe-area-inset-top) + 112px);right:14px}
 body.hike-fullscreen .map-wrap #map{width:100%;height:100%}
+
+/* Compact history layout: list presentation only; stored GPS records are unchanged. */
+.record-browser{display:grid;gap:10px;margin:12px 0 14px}.record-browser>input{width:100%;background:#fff;border:1px solid #ddd;border-radius:12px;padding:15px}.record-filters{display:flex;gap:8px}.record-filters select{min-width:0;flex:1;border-radius:22px;background:#fff;padding:10px 6px;font-size:13px}.record-list-compact{background:#fff;border-radius:14px;overflow:hidden}.record-list-compact .record-card{border:0;border-bottom:1px solid #ececec;border-radius:0;padding:12px 4px;margin:0;background:#fff}.record-summary{display:flex;align-items:center;gap:13px;width:100%;text-align:left;border:0;background:transparent;color:#222;padding:0}.record-thumb{width:94px;height:94px;flex:none;background:#eef1e9;border-radius:11px;overflow:hidden;display:grid;place-items:center}.record-thumb svg{width:100%;height:100%}.record-summary-info{min-width:0;flex:1}.record-summary-info strong{display:block;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.record-summary-info .record-short{display:block;color:#666;font-size:13px;margin:8px 0}.record-summary-info .record-date{display:block;color:#999;font-size:12px}.record-type{display:inline-block;background:#eee;color:#666;border-radius:5px;padding:4px 7px;margin-right:8px}.record-expanded{margin:12px 0 0;padding:12px 6px 0;border-top:1px solid #eee}.record-expanded[hidden]{display:none!important}
 </style>
 </head>
 <body><div class="app">
 <header class="hero"><div class="brand"><div><div class="brand-name">⛰ 산길 <small>트레킹</small></div></div><div class="avatar">🌿</div></div><p class="tagline">나의 발걸음이 하나의 이야기가 되도록</p><h1>오늘도 안전하게,<br><em>산에서 만나요.</em></h1><span class="status"><span class="dot" id="liveDot"></span><span id="gpsStatus">GPS 위치 확인 전</span></span></header>
 <section class="screen active" id="screen-home"><main class="body"><div class="section-head"><h2>나의 산행 지도</h2><span class="sub" id="coord">위치 정보 없음</span></div><div class="map-wrap"><div class="map-fallback">지도를 불러오는 중입니다.<br>인터넷 연결이 필요합니다.</div><div id="map"></div><div class="float-controls"><button class="square" id="mapCheck" aria-label="지도 상태 점검">ⓘ</button><button class="square" id="zoomIn" aria-label="지도 확대">＋</button><button class="square" id="zoomOut" aria-label="지도 축소">－</button><button class="square" id="trailToggle" aria-label="주변 등산로 보기" title="주변 등산로">🥾</button><button class="square" id="shareMap" aria-label="현재 지도 또는 산행 경로 공유" title="지도 공유">↗</button><button class="square" id="locate" aria-label="현재 위치 확인">⌖</button><button class="square" id="fit" aria-label="전체 경로 보기">▧</button></div><div class="map-note" id="mapNote">📍 현재 위치 버튼을 눌러 주변 등산로를 확인하세요.</div></div><div class="metrics"><div class="metric"><small>이동 거리</small><strong id="distance">0.00</strong><span>km</span></div><div class="metric"><small>산행 시간</small><strong id="duration">00:00</strong><span>시:분</span></div><div class="metric"><small>현재 고도</small><strong id="altitude">—</strong><span>m</span></div></div><div class="note-card" style="margin:10px 0"><strong>활동 선택</strong><div class="ext-actions" id="activityModes"><button type="button" class="btn secondary" data-activity="산행">🥾 산행</button><button type="button" class="btn secondary" data-activity="걷기">🚶 걷기</button><button type="button" class="btn secondary" data-activity="달리기">🏃 달리기</button></div><p class="details" id="activityStatus">현재 활동: 산행</p></div><div class="actionbar" id="actions"><button class="btn primary" id="start">▶ 운동 시작</button><button class="btn secondary" id="demo">체험 모드</button></div><div class="note-card"><h3>📌 산행 중 위치 표시</h3><p>휴식 장소나 위험 구간을 기록해 산행 경로에 남겨두세요. GPS 산행을 시작한 후 사용할 수 있습니다.</p><div class="waypoints"><button class="chip" data-mark="휴식">☕ 휴식</button><button class="chip" data-mark="전망">🌄 전망</button><button class="chip" data-mark="위험">⚠️ 위험</button><button class="chip" data-mark="기타">📍 기타</button></div></div><div class="notice">안전 안내 · 이 앱은 구조 요청을 자동 전송하지 않습니다. 위험 시 119에 직접 신고하고 위치 좌표를 전달하세요. GPS 정확도는 환경과 기기에 따라 달라집니다.</div></main></section>
-<section class="screen" id="screen-records"><main class="body"><div class="section-head"><h2>산행 기록</h2><span class="sub" id="recordCount">0개 기록</span></div><div class="ext-actions" style="margin:0 0 12px"><button class="btn secondary" type="button" id="backupRecords">기록 전체 백업</button><button class="btn secondary" type="button" id="exportRecordsCsv">통계 CSV</button><button class="btn secondary" type="button" id="restoreRecords">백업 불러오기</button><input type="file" id="restoreRecordsFile" accept=".json,application/json" hidden><button class="btn secondary" type="button" id="deleteAllRecords">전체 기록 삭제</button></div><div class="note-card" style="margin-top:0" id="recordList"><div class="empty">저장된 산행 기록이 없습니다.</div></div><p class="foot">저장 기록은 현재 브라우저 기기에 보관됩니다.<br>브라우저 데이터를 삭제하면 사라질 수 있습니다.</p></main></section>
+<section class="screen" id="screen-records"><main class="body"><div class="section-head"><h2>산행 기록</h2><span class="sub" id="recordCount">0개 기록</span></div><div class="ext-actions" style="margin:0 0 12px"><button class="btn secondary" type="button" id="backupRecords">기록 전체 백업</button><button class="btn secondary" type="button" id="exportRecordsCsv">통계 CSV</button><button class="btn secondary" type="button" id="restoreRecords">백업 불러오기</button><input type="file" id="restoreRecordsFile" accept=".json,application/json" hidden><button class="btn secondary" type="button" id="deleteAllRecords">전체 기록 삭제</button></div><div class="record-browser"><input id="recordSearch" class="ext-field" type="search" placeholder="⌕  기록 제목을 입력해 주세요" aria-label="기록 검색"><div class="record-filters"><select id="recordActivity" class="ext-field" aria-label="운동 종류"><option value="all">전체</option><option value="등산">등산</option><option value="걷기">걷기</option><option value="러닝">러닝</option></select><select id="recordYear" class="ext-field" aria-label="기록 연도"><option value="all">전체 연도</option></select><select id="recordOrder" class="ext-field" aria-label="정렬"><option value="new">최신순</option><option value="old">오래된순</option></select></div></div><div class="record-list-compact" id="recordList"><div class="empty">저장된 산행 기록이 없습니다.</div></div><p class="foot">저장 기록은 현재 브라우저 기기에 보관됩니다.<br>브라우저 데이터를 삭제하면 사라질 수 있습니다.</p></main></section>
 
 <section class="screen" id="screen-mountains"><main class="body">
 <div class="section-head"><h2>⛰ 전국 산·등산코스</h2><span class="sub">산 검색·지도·기록 공유</span></div>
@@ -533,9 +536,19 @@ function clearSavedRoute(){
  const note=$('#mapNote');if(note)note.textContent='📍 현재 위치 버튼을 눌러 주변 등산로를 확인하세요.';
 }
 function renderRecords(){
- const records=loadRecords();$('#recordCount').textContent=records.length+'개 기록';
+ const allRecords=loadRecords();
+ const search=$('#recordSearch'),activity=$('#recordActivity'),year=$('#recordYear'),order=$('#recordOrder');
+ const previousYear=year.value;const years=[...new Set(allRecords.map(r=>new Date(Number(r.started)).getFullYear()).filter(Number.isFinite))].sort((a,b)=>b-a);
+ year.replaceChildren(new Option('전체 연도','all'),...years.map(y=>new Option(y+'년',String(y))));year.value=years.includes(Number(previousYear))?previousYear:'all';
+ const query=search.value.trim().toLocaleLowerCase('ko-KR');
+ const records=allRecords.filter(r=>{
+ const kind=r.activity==='산행'?'등산':r.activity==='달리기'?'러닝':r.activity;
+ const title=[r.name,r.mountain?.name,kind].filter(Boolean).join(' ').toLocaleLowerCase('ko-KR');
+ return (!query||title.includes(query))&&(activity.value==='all'||kind===activity.value)&&(year.value==='all'||new Date(Number(r.started)).getFullYear()===Number(year.value));
+ }).sort((a,b)=>order.value==='old'?Number(a.started)-Number(b.started):Number(b.started)-Number(a.started));
+ $('#recordCount').textContent='총 '+records.length+'개'+(records.length!==allRecords.length?' / 전체 '+allRecords.length+'개':'');
  const target=$('#recordList');target.replaceChildren();
- if(!records.length){if(viewedRecord)clearSavedRoute();target.innerHTML='<div class="empty">저장된 산행 기록이 없습니다.<br>산행을 마치면 이곳에 표시됩니다.</div>';return}
+ if(!records.length){target.innerHTML='<div class="empty">저장된 산행 기록이 없습니다.<br>산행을 마치면 이곳에 표시됩니다.</div>';return}
  for(const r of records){
   const item=document.createElement('article');item.className='record record-card';
   const pts=Array.isArray(r.points)?r.points:[];
@@ -574,12 +587,31 @@ function renderRecords(){
    ['최저속도',minSpeed===null?'—':minSpeed.toFixed(1)+' km/h'],
    ['최저고도',alts.length?Math.round(Math.min(...alts))+' m':'—']
   ];
-  const header=document.createElement('div');header.className='record-heading';
-  header.innerHTML='<strong>🥾 '+clean(r.activity==='등산'?'산행':(r.activity||'산행'))+' · '+clean(r.name||'오늘의 산행')+clean(mountain)+'</strong><small>'+date+'</small>';
+  const header=document.createElement('button');header.type='button';header.className='record-summary';header.setAttribute('aria-expanded','false');
+  const thumbnail=document.createElement('div');thumbnail.className='record-thumb';
+  // Local vector preview from stored coordinates; no external map or GPS upload.
+  const coords=pts.filter(p=>Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lon))&&Math.abs(Number(p.lat))<=90&&Math.abs(Number(p.lon))<=180);
+  if(coords.length>1){
+   const xs=coords.map(p=>Number(p.lon)),ys=coords.map(p=>Number(p.lat));
+   const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
+   const scale=76/Math.max(maxX-minX,(maxY-minY)*Math.cos((minY+maxY)*Math.PI/360),1e-7);
+   const midX=(minX+maxX)/2,midY=(minY+maxY)/2;
+   const points=coords.map(p=>[50+(Number(p.lon)-midX)*scale*Math.cos(midY*Math.PI/180),50-(Number(p.lat)-midY)*scale].map(v=>Math.max(3,Math.min(97,v)).toFixed(1)).join(',')).join(' ');
+   const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 100 100');svg.setAttribute('aria-label','저장된 GPS 경로 미리보기');
+   const line=document.createElementNS('http://www.w3.org/2000/svg','polyline');line.setAttribute('points',points);line.setAttribute('fill','none');line.setAttribute('stroke','#f05b32');line.setAttribute('stroke-width','3');line.setAttribute('stroke-linecap','round');line.setAttribute('stroke-linejoin','round');svg.append(line);thumbnail.append(svg);
+  }else thumbnail.textContent='🗺️';
+  const info=document.createElement('div');info.className='record-summary-info';
+  const name=document.createElement('strong');name.textContent=r.name||r.mountain?.name||'산행 기록';
+  const summary=document.createElement('span');summary.className='record-short';summary.textContent=dist.toFixed(1)+'km · '+fmtTime(totalSeconds??seconds);
+  const dated=document.createElement('span');dated.className='record-date';
+  const kind=document.createElement('span');kind.className='record-type';kind.textContent=r.activity==='산행'?'등산':r.activity==='달리기'?'러닝':(r.activity||'등산');
+  dated.append(kind,document.createTextNode(new Date(Number(r.started)).toLocaleString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})));
+  info.append(name,summary,dated);header.append(thumbnail,info);
+  const expanded=document.createElement('div');expanded.className='record-expanded';expanded.hidden=true;
+  header.addEventListener('click',()=>{expanded.hidden=!expanded.hidden;header.setAttribute('aria-expanded',String(!expanded.hidden))});
   const grid=document.createElement('div');grid.className='record-metrics';
   for(const [label,value] of metrics){const cell=document.createElement('div');cell.className='record-metric';const l=document.createElement('span');l.textContent=label;const v=document.createElement('b');v.textContent=value;cell.append(l,v);grid.append(cell)}
-  const detail=document.createElement('div');detail.className='record-detail';detail.textContent='시작 '+clock(r.started)+' · 종료 '+clock(r.ended)+' · 전체시간은 시작~종료 기준, 휴식은 전체시간에서 운동시간을 뺀 값';
-  if(r.mountain&&pts.length){const goal={lat:Number(r.mountain.lat),lon:Number(r.mountain.lon)};const distances=pts.map(p=>km(p,goal)).filter(Number.isFinite);if(distances.length)detail.textContent+=' · 선택 산 정상 좌표까지 최소 '+Math.min(...distances).toFixed(2)+'km (실제 코스 일치 여부 아님)';}
+  const detail=document.createElement('div');detail.className='record-detail';detail.textContent='시작 '+clock(r.started)+' · 종료 '+clock(r.ended);
   const actions=document.createElement('div');actions.className='record-actions';
   const view=document.createElement('button');view.className='tiny-btn';view.type='button';view.textContent='지도 보기';view.addEventListener('click',()=>showSavedRoute(r));actions.append(view);
   const pngBtn=document.createElement('button');pngBtn.className='tiny-btn';pngBtn.type='button';pngBtn.textContent='지도 포함 PNG';pngBtn.addEventListener('click',()=>exportHikeResultPng(r));actions.append(pngBtn);
@@ -587,10 +619,11 @@ function renderRecords(){
   const imageBtn=document.createElement('button');imageBtn.className='tiny-btn';imageBtn.type='button';imageBtn.textContent='결과 이미지';imageBtn.addEventListener('click',()=>exportHikeResultImage(r));actions.append(imageBtn);
   const btn=document.createElement('button');btn.className='tiny-btn';btn.type='button';btn.textContent='GPX';btn.addEventListener('click',()=>download('산길_'+new Date(r.started).toISOString().slice(0,10)+'.gpx',gpx(r),'application/gpx+xml'));actions.append(btn);
   const del=document.createElement('button');del.className='tiny-btn';del.type='button';del.textContent='삭제';del.addEventListener('click',()=>{if(!confirm('이 기록을 삭제할까요? 삭제 후 복구할 수 없습니다.'))return;const next=loadRecords().filter(x=>x.id!==r.id);if(saveRecords(next)){renderRecords();toast('선택한 기록을 삭제했습니다.')}});actions.append(del);
-  item.append(header,grid,detail,actions);target.append(item);
+  expanded.append(grid,detail,actions);item.append(header,expanded);target.append(item);
  }
 }
 // Portable, local-only backup: never uploads private GPS tracks.
+['recordSearch','recordActivity','recordYear','recordOrder'].forEach(id=>$('#'+id).addEventListener(id==='recordSearch'?'input':'change',renderRecords));
 $('#backupRecords').addEventListener('click',()=>{
  const records=loadRecords();if(!records.length){toast('백업할 기록이 없습니다.');return}
  download('산길_산행기록_백업_'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify({format:'sangil-records',version:1,exportedAt:new Date().toISOString(),records},null,2),'application/json');
