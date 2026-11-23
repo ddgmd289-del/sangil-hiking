@@ -1,0 +1,18 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const html=fs.readFileSync('index.html','utf8');
+const start=html.indexOf('function renderRecords(){');
+const end=html.indexOf('function ',start+9);
+assert.ok(start>=0,'history renderer exists');
+const source=html.slice(start,end>start?end:undefined);
+assert.ok(source.includes('const preview=coords.filter'),'history preview samples GPS points');
+assert.ok(!source.includes('\\\\n   const stride'),'history sampling must not contain escaped newlines');
+assert.ok(source.includes('i===coords.length-1'),'history preview preserves last GPS point');
+assert.ok(source.includes('coords.length-1)/399'),'history preview has bounded point count');
+const sample=Array.from({length:10000},(_,i)=>({lat:35+i*.00001,lon:128+i*.00001}));
+const stride=Math.max(1,Math.ceil((sample.length-1)/399));
+const preview=sample.filter((_,i)=>i%stride===0||i===sample.length-1);
+assert.ok(preview.length<=401,'long history stays bounded');
+assert.equal(preview[0],sample[0]);
+assert.equal(preview.at(-1),sample.at(-1));
+console.log('History route preview regression: PASS');
