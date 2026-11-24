@@ -27,3 +27,25 @@ assert.equal(saved.length,1);
 assert.equal(c.trip,null);
 assert.ok(html.includes("old.state==='done'"),'completed pending record is recoverable');
 console.log('Finished record storage regression: PASS');
+
+const storageStart=html.indexOf('function loadRecords(){');
+const storageEnd=html.indexOf('// 인증은',storageStart);
+assert.ok(storageStart>=0&&storageEnd>storageStart);
+let raw=null,writes=0,blocked=false;
+const sc={STORE:'records',toast:noop,localStorage:{getItem:()=>raw,setItem:(key,value)=>{if(blocked)throw Error('quota');writes++;raw=value}}};
+vm.createContext(sc);
+vm.runInContext(html.slice(storageStart,storageEnd),sc);
+for(const invalid of ['{broken','{}','null','42']){
+ raw=invalid;
+ assert.equal(sc.saveRecords([]),false);
+ assert.equal(raw,invalid);
+}
+assert.equal(writes,0);
+raw='[{"id":1}]';
+blocked=true;
+assert.equal(sc.saveRecords([{id:2}]),false);
+assert.equal(raw,'[{"id":1}]');
+blocked=false;
+assert.equal(sc.saveRecords([{id:1},{id:2}]),true);
+assert.equal(JSON.parse(raw).length,2);
+console.log('Existing record overwrite guard: PASS');
