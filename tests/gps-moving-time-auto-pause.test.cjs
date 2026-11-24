@@ -73,3 +73,23 @@ console.log('Moving time excludes auto/manual pauses: PASS');
  for(const invalid of [NaN,Infinity,-1,0,null,'invalid'])assert.equal(estimate({activity:'산행',distance:invalid}),0);
  assert.equal(estimate(null),0);
  console.log('Production calorie estimate regression: PASS');
+
+ // Execute the actual distance voice milestone functions.
+ const voiceStart=html.indexOf('function distanceVoiceStep(distance){');
+ const voiceEnd=html.indexOf('\n',html.indexOf('function announceDistance(){',voiceStart));
+ assert.ok(voiceStart>=0&&voiceEnd>voiceStart);
+ const heard=[];let voiceSaves=0;
+ const voice={trip:{state:'running',distance:0.99,demo:false},announcedStep:0,persist:()=>voiceSaves++,speakHike:m=>heard.push(m),Math,Number};
+ vm.runInNewContext(html.slice(voiceStart,voiceEnd),voice);
+ voice.announceDistance();assert.equal(heard.length,0);
+ voice.trip.distance=1;voice.announceDistance();assert.equal(heard.length,1);
+ voice.trip.distance=1.2;voice.announceDistance();assert.equal(heard.length,1);
+ voice.announcedStep=0;voice.announceDistance();assert.equal(heard.length,1,'persisted milestone suppresses repeats');
+ voice.trip.distance=0.9;voice.announceDistance();assert.equal(heard.length,1);
+ voice.trip.distance=2.01;voice.announceDistance();assert.equal(heard.length,2);
+ assert.equal(voice.trip.announcedKm,2);
+ voice.trip.state='paused';voice.trip.distance=3;voice.announceDistance();assert.equal(heard.length,2);
+ voice.trip.state='running';voice.trip.demo=true;voice.announceDistance();assert.equal(heard.length,2);
+ assert.equal(voiceSaves,2);
+ for(const bad of [NaN,Infinity,-1,null,'bad'])assert.equal(voice.distanceVoiceStep(bad),0);
+ console.log('Voice distance milestones regression: PASS');
