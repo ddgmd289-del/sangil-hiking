@@ -265,7 +265,7 @@ jobs:
                       val prefs = getSharedPreferences("sangil_steps", MODE_PRIVATE)
                       val day = java.text.SimpleDateFormat("yyyy-MM-dd", Locale.US).format(java.util.Date())
                       val allowed = Build.VERSION.SDK_INT < 29 || checkSelfPermission(Manifest.permission.ACTIVITY_RECOGNITION) == PackageManager.PERMISSION_GRANTED
-                      return JSONObject().put("available", stepSensor != null).put("allowed", allowed).put("count", if (prefs.getString("day", "") == day) prefs.getLong("total", 0L) else 0L).toString()
+                      return org.json.JSONObject().put("available", stepSensor != null).put("allowed", allowed).put("count", if (prefs.getString("day", "") == day) prefs.getLong("total", 0L) else 0L).toString()
                   }
                   @JavascriptInterface fun enableSteps() { runOnUiThread {
                       if (stepSensor == null) { web.evaluateJavascript("window.sangilStepStatus?.('걸음수 센서 없음')", null); return@runOnUiThread }
