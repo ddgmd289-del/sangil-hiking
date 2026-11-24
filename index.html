@@ -223,7 +223,7 @@ function displayRoutePoints(points){
  out.push(a[a.length-1]);
  return out;
 }
-let routeDrawCache=null;
+let routeDrawCache=null,markerDrawCache=null;
 function draw(){
  if(!map)return;
  const source=trip?.points||null;
@@ -244,11 +244,19 @@ function draw(){
  else trackLine.setLatLngs(routeLines);
  routeDrawCache={map,source,length:source?.length||0,first:pts[0]||null};
  }
- if(!marksLayer)marksLayer=L.layerGroup().addTo(map);
- marksLayer.clearLayers();
- (trip?.marks||[]).forEach(m=>L.marker([m.lat,m.lon]).addTo(marksLayer).bindPopup(clean(m.label)));
- if(startMarker){startMarker.remove();startMarker=null}
- if(routeDrawCache.first){startMarker=L.circleMarker(trip?.startPoint?[trip.startPoint.lat,trip.startPoint.lon]:routeDrawCache.first,{radius:7,color:'#fff',weight:3,fillColor:'#198754',fillOpacity:1}).addTo(map).bindTooltip('출발',{direction:'top'})}
+ const marks=trip?.marks||null;
+ if(!marksLayer){marksLayer=L.layerGroup().addTo(map);markerDrawCache=null;}
+ if(!markerDrawCache||markerDrawCache.layer!==marksLayer||markerDrawCache.source!==marks||markerDrawCache.length!==(marks?.length||0)){
+  marksLayer.clearLayers();
+  (marks||[]).forEach(m=>L.marker([m.lat,m.lon]).addTo(marksLayer).bindPopup(clean(m.label)));
+  markerDrawCache={layer:marksLayer,source:marks,length:marks?.length||0};
+ }
+ const start=routeDrawCache.first?(trip?.startPoint?[trip.startPoint.lat,trip.startPoint.lon]:routeDrawCache.first):null;
+ if(!start&&startMarker){startMarker.remove();startMarker=null}
+ if(start){
+  if(!startMarker)startMarker=L.circleMarker(start,{radius:7,color:'#fff',weight:3,fillColor:'#198754',fillOpacity:1}).addTo(map).bindTooltip('출발',{direction:'top'});
+  else{const old=startMarker.getLatLng();if(old.lat!==Number(start[0])||old.lng!==Number(start[1]))startMarker.setLatLng(start);}
+ }
  if(position){
   if(!myMarker)myMarker=L.circleMarker([position.lat,position.lon],{radius:8,weight:3,color:'white',fillColor:'#e35b3b',fillOpacity:1}).addTo(map);
   else myMarker.setLatLng([position.lat,position.lon]);
@@ -605,7 +613,7 @@ function clearSavedRoute(){
  viewedRecord=null;
  if(savedRouteLayer){savedRouteLayer.remove();savedRouteLayer=null}
  // An old session must not leave a visible live polyline or start marker.
- if(!trip){if(trackLine)trackLine.setLatLngs([]);if(startMarker){startMarker.remove();startMarker=null}if(marksLayer)marksLayer.clearLayers()}
+ if(!trip){if(trackLine)trackLine.setLatLngs([]);if(startMarker){startMarker.remove();startMarker=null}if(marksLayer)marksLayer.clearLayers();markerDrawCache=null;routeDrawCache=null;}
  const note=$('#mapNote');if(note)note.textContent='📍 현재 위치 버튼을 눌러 주변 등산로를 확인하세요.';
 }
 function renderRecords(){
