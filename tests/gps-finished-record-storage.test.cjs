@@ -201,7 +201,7 @@ console.log('Demo lifecycle isolates native GPS and saved records: PASS');
  const deletionStart=html.indexOf("$('#deleteLocalPersonalData').addEventListener('click',");
  const deletionEnd=html.indexOf('\n',deletionStart);
  assert.ok(deletionStart>=0&&deletionEnd>deletionStart);
- function deletionFixture(options={}){
+ function nativeDeletionOrderFixture(options={}){
   const keys=['records','current','sangil-weight-kg','sangil-local-profile','sangil-unified-v2','sangil_selected_mountain_v1'];
   const store=new Map([...keys,'unrelated'].map(k=>[k,'data']));
   const calls=[];let handler;
@@ -211,11 +211,11 @@ console.log('Demo lifecycle isolates native GPS and saved records: PASS');
   handler();return {store,calls};
  }
  for(const options of [{trip:{state:'running'}},{confirm:false},{typed:false}]){
-  const result=deletionFixture(options);assert.equal(result.store.size,7);assert.ok(!result.calls.includes('gps'));
+  const result=nativeDeletionOrderFixture(options);assert.equal(result.store.size,7);assert.ok(!result.calls.includes('gps'));
  }
- const gpsFailure=deletionFixture({gps:false});assert.equal(gpsFailure.store.size,7);assert.ok(!gpsFailure.calls.includes('steps'));assert.ok(gpsFailure.calls.some(x=>x.includes('실패')));
- const stepFailure=deletionFixture({steps:false});assert.equal(stepFailure.store.size,7);assert.ok(stepFailure.calls.some(x=>x.includes('실패')));
+ const gpsFailure=nativeDeletionOrderFixture({gps:false});assert.equal(gpsFailure.store.size,7);assert.ok(!gpsFailure.calls.includes('steps'));assert.ok(gpsFailure.calls.some(x=>x.includes('실패')));
+ const stepFailure=nativeDeletionOrderFixture({steps:false});assert.equal(stepFailure.store.size,7);assert.ok(stepFailure.calls.some(x=>x.includes('실패')));
  for(const options of [{},{web:true}]){
-  const result=deletionFixture(options);assert.equal(result.store.size,1);assert.equal(result.store.get('unrelated'),'data');assert.ok(result.calls.some(x=>x.includes('삭제했습니다')));
+  const result=nativeDeletionOrderFixture(options);assert.equal(result.store.size,1);assert.equal(result.store.get('unrelated'),'data');assert.ok(result.calls.some(x=>x.includes('삭제했습니다')));
  }
  console.log('Confirmed personal data deletion and native failure guard regression: PASS');
