@@ -163,3 +163,36 @@ console.log('Demo lifecycle isolates native GPS and saved records: PASS');
  pc.trip.demo=true;pc.persist();assert.equal(checkpointWrites,5);
  pc.trip=null;pc.persist();assert.equal(checkpointWrites,5);
  console.log('Checkpoint deduplication and write retry regression: PASS');
+
+ // Execute actual local personal data deletion handler with simulated storage and native bridge.
+ const deletionStart=html.indexOf("$('#deleteLocalPersonalData').addEventListener('click'");
+ const deletionEnd=html.indexOf('\n',deletionStart);
+ assert.ok(deletionStart>=0&&deletionEnd>deletionStart);
+ const deletionSource=html.slice(deletionStart,deletionEnd);
+ const personalKeys=['records','current','sangil-weight-kg','sangil-local-profile','sangil-unified-v2','sangil_selected_mountain_v1'];
+ function deletionFixture(opts={}){
+  const entries=new Map(personalKeys.map(k=>[k,'personal']));
+  entries.set('unrelated','keep');
+  const calls=[],alerts=[];let handler;
+  const ctx={trip:opts.trip||null,STORE:'records',CURRENT:'current',
+   $:()=>({addEventListener:(_event,fn)=>{handler=fn;}}),
+   toast:()=>calls.push('blocked'),confirm:()=>opts.confirm!==false,prompt:()=>opts.word===undefined?'삭제':opts.word,
+   alert:msg=>alerts.push(msg),location:{reload:()=>calls.push('reload')},
+   window:opts.browser?{}:{SangilNative:{deleteGpsBackup:()=>{calls.push('gps');return opts.gps!==false;},deleteStepData:()=>{calls.push('steps');return opts.steps!==false;}}},
+   localStorage:{removeItem:k=>{calls.push('remove:'+k);if(k!==opts.failedKey)entries.delete(k);},getItem:k=>entries.get(k)??null}
+  };
+  if(opts.noBridge)delete ctx.window.SangilNative.deleteGpsBackup;
+  vm.runInNewContext(deletionSource,ctx);handler();
+  return {entries,calls,alerts};
+ }
+ for(const opts of [{trip:{state:'running'}},{confirm:false},{word:'cancel'}]){
+  const d=deletionFixture(opts);assert.equal(d.entries.size,7);assert.ok(!d.calls.includes('gps'));assert.equal(d.alerts.length,0);
+ }
+ for(const opts of [{gps:false},{noBridge:true},{steps:false}]){
+  const d=deletionFixture(opts);assert.equal(d.entries.size,7);assert.ok(d.alerts[0].includes('실패'));
+ }
+ for(const opts of [{},{browser:true}]){
+  const d=deletionFixture(opts);assert.equal(d.entries.size,1);assert.equal(d.entries.get('unrelated'),'keep');assert.ok(d.alerts[0].includes('삭제했습니다'));assert.ok(d.calls.includes('reload'));
+ }
+ const partial=deletionFixture({failedKey:'records'});assert.equal(partial.entries.get('records'),'personal');assert.ok(partial.alerts[0].includes('실패'));
+ console.log('Confirmed personal data deletion and failure handling regression: PASS');
