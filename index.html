@@ -983,12 +983,12 @@ document.getElementById('enableHomeSteps').addEventListener('click',()=>{if(wind
 </script>
 <script>
 (function(){
- const photos=[["봄","지리산","Jirisan_in_spring.jpg","Olga Lipunova"],["여름","설악산","SeoRakSan_1.jpg","Herge.tw"],["가을","설악산","Seoraksan_in_the_Fall_1-_설악산_단풍.jpg","Joycekim77"],["겨울","설악산","겨울_설악산_풍경.jpg","Sohyeon Bak"]];
+ const photos=[["봄","지리산","Jirisan_in_spring.jpg","Olga Lipunova"],["여름","설악산","Seoraksan_National_Park,_Summer.jpg","Olga Lipunova"],["가을","설악산","Seoraksan_in_the_Fall_1-_설악산_단풍.jpg","Joycekim77"],["겨울","설악산","겨울_설악산_풍경.jpg","Sohyeon Bak"]];
  function seasonIndex(month){return month>=3&&month<=5?0:month>=6&&month<=8?1:month>=9&&month<=11?2:3}
  let current=-1;
  function refreshSeason(){const index=seasonIndex(new Date().getMonth()+1);if(index===current)return;current=index;
  const [season,mountain,file,author]=photos[index];const img=document.getElementById('seasonPhoto'),title=document.getElementById('seasonTitle'),desc=document.getElementById('seasonDescription'),credit=document.getElementById('seasonCredit');
- const encoded=encodeURIComponent(file);title.textContent=season+'의 산길';desc.textContent=mountain+' · 계절 사진';credit.href='https://commons.wikimedia.org/wiki/File:'+encoded;credit.textContent=author+' · 출처';credit.hidden=false;img.hidden=true;img.alt=season+' '+mountain+' 풍경';
+ const encoded=encodeURIComponent(file);title.textContent=season+'의 산길';desc.textContent=mountain+' · 계절 사진 (화면 맞춤)';credit.href='https://commons.wikimedia.org/wiki/File:'+encoded;credit.textContent=author+' · 출처';credit.hidden=false;img.hidden=true;img.alt=season+' '+mountain+' 풍경';
  img.onload=()=>{img.hidden=false;desc.textContent=mountain+' · 계절 사진'};
  img.onerror=()=>{img.hidden=true;desc.textContent=mountain+' · 사진을 불러오지 못했습니다'};
  img.src='https://commons.wikimedia.org/wiki/Special:FilePath/'+encoded+'?width=640';
