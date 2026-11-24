@@ -131,3 +131,19 @@ console.log('Moving time excludes auto/manual pauses: PASS');
  live.refreshHikeAverageSpeed();assert.equal(speedField.textContent,'7.5 km/h');
  for(const invalid of [NaN,Infinity,-1,'bad']){live.trip.distance=invalid;live.refreshHikeAverageSpeed();assert.equal(speedField.textContent,'— km/h');}
  console.log('Live average speed HUD regression: PASS');
+
+ // Stress the actual SVG export with more points than JS spread argument limits.
+ const largePoints=Array.from({length:150000},(_,i)=>({lat:35+i*0.0000001,lon:128,t:t+i*2000,accuracy:5}));
+ largePoints[75000].breakBefore=true;
+ resultSvg='';
+ const largeRecord={started:t,ended:t+300000000,distance:1.67,rests:[],name:'Long track',workoutSteps:2300,points:largePoints};
+ resultContext.exportHikeResultImage(largeRecord);
+ assert.ok(resultSvg.startsWith('<svg '));
+ assert.ok(resultSvg.includes('2,300 보'));
+ assert.ok(resultSvg.includes('1.67 km'));
+ const largeRoute=resultSvg.match(/<path d="(M[^"]+)" fill="none" stroke="#ffffff" stroke-width="10"/)[1];
+ assert.equal((largeRoute.match(/M/g)||[]).length,2);
+ assert.equal((largeRoute.match(/L/g)||[]).length,149998);
+ assert.equal(largePoints.length,150000);
+ assert.equal(largePoints[75000].breakBefore,true);
+ console.log('Large 150000-point SVG export regression: PASS');
