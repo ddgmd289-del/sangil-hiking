@@ -67,10 +67,10 @@ jobs:
           from PIL import Image
           import io
           photos = {
-              'spring': 'Jirisan_in_spring.jpg',
-              'summer': 'Seoraksan_National_Park,_Summer.jpg',
-              'autumn': 'Seoraksan_in_the_Fall_1-_설악산_단풍.jpg',
-              'winter': '겨울_설악산_풍경.jpg',
+              'spring': 'Royal_Azaleas_of_Hallasan.png',
+              'summer': 'Baemsagol_MS3812.JPG',
+              'autumn': 'Seoraksan_in_the_Fall_2-_설악산_단풍.jpg',
+              'winter': 'Taebaeksan_2016_12_30_winter.jpg',
           }
           dest = Path('app/src/main/assets/scenery')
           dest.mkdir(exist_ok=True)
