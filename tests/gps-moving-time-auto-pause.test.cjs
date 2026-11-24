@@ -37,3 +37,21 @@ assert.equal(pace({started:t,ended:t+600000,rests:[{type:'manual',started:t-1800
 assert.equal(pace({started:t,ended:t+600000,rests:[{type:'auto',started:t+700000,ended:t+900000}]}),600,'future pause is ignored after trip finish');
 assert.equal(pace({started:t,ended:t+600000,rests:[],restStarted:t-180000,pauseReason:'auto'},t+900000),0,'restored ongoing pause before trip starts cannot exceed trip duration');
 console.log('Moving time excludes auto/manual pauses: PASS');
+
+ // Home summary must use the same conservative denominator as saved details.
+ const homeStart=html.indexOf('function refreshHomeOverview(){');
+ const homeEnd=html.indexOf("document.getElementById('homeQuickStart').addEventListener",homeStart);
+ assert.ok(homeStart>=0&&homeEnd>homeStart);
+ const today=Date.now()-600000;
+ const records=[{started:today,ended:today+600000,distance:1,rests:[{type:'auto',started:today+120000,ended:today+300000}]},{started:today,ended:today+600000,distance:1,rests:[{type:'manual',started:today+120000,ended:today+240000}]}];
+ // Fix the calendar date so midnight cannot make this regression intermittent.
+ const fixed=new Date(2026,10,24,12).getTime();
+ for(const r of records){const delta=fixed-r.started;r.started+=delta;r.ended+=delta;for(const rest of r.rests){rest.started+=delta;rest.ended+=delta}}
+ class FixedDate extends Date{constructor(...args){super(...(args.length?args:[fixed+600000]))}static now(){return fixed+600000}}
+ const fields={};
+ const home={Date:FixedDate,Math,Number,Array,loadRecords:()=>records,paceSeconds:sandbox.paceSeconds,speedDenominatorSeconds:sandbox.speedDenominatorSeconds,document:{getElementById:id=>fields[id]??=( {})}};
+ vm.runInNewContext(html.slice(homeStart,homeEnd)+'\nrefreshHomeOverview();',home);
+ assert.equal(fields.homeTodayKm.textContent,'2.00');
+ assert.equal(fields.homeTodayMin.textContent,15);
+ assert.equal(fields.homeTodaySpeed.textContent,'6.7');
+ console.log('Home and saved statistics consistency: PASS');
