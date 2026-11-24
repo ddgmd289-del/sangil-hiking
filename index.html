@@ -433,7 +433,9 @@ function gpx(record){const segs=routeSegments(record.points).map(seg=>'<trkseg>'
 async function exportHikeResultPng(record,share=false){
  const pts=displayRoutePoints(record.points||[]);
  if(pts.length<2){toast('GPS 경로가 2개 이상 있어야 결과 이미지를 만들 수 있습니다.');return}
- const W=900,H=1200,mapTop=150,mapBottom=960,mapHeight=mapBottom-mapTop;
+ let region=String(record.placeName||record.mountain?.name||'').trim();
+ if(!region){const entered=window.prompt('결과 이미지 상단에 표시할 운동 지역을 입력하세요. 예: 경상남도 창원시 의창구 동정동 (취소하면 지역명 미지정으로 표시)','');region=String(entered||'').trim().slice(0,80)}
+ const W=900,H=1200,mapTop=180,mapBottom=960,mapHeight=mapBottom-mapTop;
  const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;const ctx=canvas.getContext('2d');
  ctx.fillStyle='#edf3ee';ctx.fillRect(0,0,W,H);
  const merc=(lat,lon,z)=>{const n=2**z,clamped=Math.max(-85.0511,Math.min(85.0511,lat)),rad=clamped*Math.PI/180;return {x:(lon+180)/360*n,y:(1-Math.log(Math.tan(rad)+1/Math.cos(rad))/Math.PI)/2*n}};
@@ -461,14 +463,15 @@ async function exportHikeResultPng(record,share=false){
  ctx.fillStyle='rgba(12,38,28,.10)';ctx.fillRect(0,mapTop,W,mapHeight);
  const xy=i=>({x:(projection[i].x-originX)*256,y:mapTop+(projection[i].y-originY)*256});
  ctx.lineJoin='round';ctx.lineCap='round';
- for(const [color,width] of [['#ffffff',10],['#1678d4',6]]){ctx.beginPath();projection.forEach((p,i)=>{const v=xy(i);const prev=pts[i-1];const gap=prev&&(pts[i].breakBefore||Number(pts[i].t)-Number(prev.t)>180000||Number(pts[i].t)<=Number(prev.t)||km(prev,pts[i])>.5);i&&!gap?ctx.lineTo(v.x,v.y):ctx.moveTo(v.x,v.y)});ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke()}
+ for(const [color,width] of [['#ffffff',6],['#1678d4',3]]){ctx.beginPath();projection.forEach((p,i)=>{const v=xy(i);const prev=pts[i-1];const gap=prev&&(pts[i].breakBefore||Number(pts[i].t)-Number(prev.t)>180000||Number(pts[i].t)<=Number(prev.t)||km(prev,pts[i])>.5);i&&!gap?ctx.lineTo(v.x,v.y):ctx.moveTo(v.x,v.y)});ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke()}
  const step=Math.max(1,Math.floor(pts.length/10));ctx.strokeStyle='#ffffff';ctx.lineWidth=3;
  for(let i=step;i<pts.length;i+=step){const a=xy(i-1),b=xy(i),ang=Math.atan2(b.y-a.y,b.x-a.x);if(pts[i].breakBefore||Number(pts[i].t)-Number(pts[i-1].t)>180000||km(pts[i-1],pts[i])>.5||Math.hypot(b.x-a.x,b.y-a.y)<2)continue;ctx.save();ctx.translate(b.x,b.y);ctx.rotate(ang);ctx.beginPath();ctx.moveTo(-5,-3);ctx.lineTo(4,0);ctx.lineTo(-5,3);ctx.stroke();ctx.restore()}
  const nearStartEnd=Math.hypot(xy(0).x-xy(pts.length-1).x,xy(0).y-xy(pts.length-1).y)<75;
  for(const [i,color,label] of [[0,'#1874d1','출발'],[pts.length-1,'#e85e32','도착']]){const p=xy(i);ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(p.x,p.y,17,0,Math.PI*2);ctx.fill();ctx.fillStyle=color;ctx.beginPath();ctx.arc(p.x,p.y,12,0,Math.PI*2);ctx.fill();ctx.font='bold 26px sans-serif';ctx.fillStyle='#183d31';ctx.fillText(label,p.x+20,p.y+(nearStartEnd?(i===0?-28:42):-14))}
  ctx.fillStyle='#174d3c';ctx.fillRect(0,0,W,mapTop);ctx.fillRect(0,mapBottom,W,H-mapBottom);
  ctx.fillStyle='#fff';ctx.font='bold 42px sans-serif';ctx.fillText('산길 트레킹',42,63);
- ctx.font='28px sans-serif';ctx.fillText((record.placeName||record.mountain?.name||record.name||'지역명 미지정')+' · '+new Date(record.started).toLocaleDateString('ko-KR'),42,114,W-84);
+ ctx.font='bold 32px sans-serif';ctx.fillText(region||'지역명 미지정',42,111,W-84);
+ ctx.font='24px sans-serif';ctx.fillText(new Date(record.started).toLocaleDateString('ko-KR'),42,151,W-84);
  const seconds=Math.max(0,(Number(record.accMs)||0)/1000),distance=Math.max(0,Number(record.distance)||0);
  const stats=[['이동시간',fmtTime(seconds)],['거리',distance.toFixed(2)+' km'],['평균속도',speedDenominatorSeconds(record)?(distance*3600/speedDenominatorSeconds(record)).toFixed(1)+' km/h':'—']];
  stats.forEach(([label,value],i)=>{const x=40+i*290;ctx.fillStyle='#c9e0d2';ctx.font='25px sans-serif';ctx.fillText(label,x,1025);ctx.fillStyle='#fff';ctx.font='bold 38px sans-serif';ctx.fillText(value,x,1090)});
