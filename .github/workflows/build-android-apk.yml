@@ -672,7 +672,21 @@ jobs:
         run: gradle --no-daemon :app:bundleRelease
       - name: Verify release AAB exists
         if: steps.signing.outputs.enabled == 'true'
-        run: test -s app/build/outputs/bundle/release/app-release.aab
+        run: |
+          set -euo pipefail
+          AAB=app/build/outputs/bundle/release/app-release.aab
+          test -s "$AAB"
+          jarsigner -verify "$AAB"
+          python3 - <<'PY'
+          import os, zipfile
+          from pathlib import Path
+          with zipfile.ZipFile('app/build/outputs/bundle/release/app-release.aab') as z:
+              for filename in ('index.html','build-info.txt','auth-config.js'):
+                  assert z.read('base/assets/'+filename)==Path('app/src/main/assets',filename).read_bytes(), filename
+              assert ('source_commit='+os.environ['GITHUB_SHA']).encode() in z.read('base/assets/build-info.txt')
+              assert 'base/manifest/AndroidManifest.xml' in z.namelist()
+          print('AAB assets and source revision verified; PREVIEW ONLY, NOT FOR PLAY SUBMISSION')
+          PY
       - uses: actions/upload-artifact@v4
         if: steps.signing.outputs.enabled == 'true'
         with:
