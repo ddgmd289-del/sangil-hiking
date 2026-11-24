@@ -40,7 +40,7 @@ console.log('Moving time excludes auto/manual pauses: PASS');
 
  // Home summary must use the same conservative denominator as saved details.
  const homeStart=html.indexOf('function refreshHomeOverview(){');
- const homeEnd=html.indexOf("document.getElementById('homeQuickStart').addEventListener",homeStart);
+ const homeEnd=html.indexOf('refreshHomeOverview();window.addEventListener',homeStart);
  assert.ok(homeStart>=0&&homeEnd>homeStart);
  const today=Date.now()-600000;
  const records=[{started:today,ended:today+600000,distance:1,rests:[{type:'auto',started:today+120000,ended:today+300000}]},{started:today,ended:today+600000,distance:1,rests:[{type:'manual',started:today+120000,ended:today+240000}]}];
