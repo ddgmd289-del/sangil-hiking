@@ -114,3 +114,20 @@ console.log('Moving time excludes auto/manual pauses: PASS');
  assert.equal((routePath.match(/L/g)||[]).length,2);
  assert.equal((resultSvg.match(/rotate\(/g)||[]).length,2);
  console.log('SVG result statistics and route gap regression: PASS');
+
+ // Actual live HUD calculation must match the stored-record speed denominator.
+ const liveStart=html.indexOf('function refreshHikeAverageSpeed(){');
+ const liveEnd=html.indexOf('function syncHikeHud(){',liveStart);
+ assert.ok(liveStart>=0&&liveEnd>liveStart);
+ const speedField={textContent:''};
+ const live={trip:null,$:()=>speedField,speedDenominatorSeconds:sandbox.speedDenominatorSeconds,Number};
+ vm.runInNewContext(html.slice(liveStart,liveEnd),live);
+ live.refreshHikeAverageSpeed();assert.equal(speedField.textContent,'— km/h');
+ live.trip={started:t,ended:t+600000,distance:1,rests:[]};
+ live.refreshHikeAverageSpeed();assert.equal(speedField.textContent,'6.0 km/h');
+ live.trip.rests=[{type:'auto',started:t+120000,ended:t+300000}];
+ live.refreshHikeAverageSpeed();assert.equal(speedField.textContent,'6.0 km/h');
+ live.trip.rests=[{type:'manual',started:t+120000,ended:t+240000}];
+ live.refreshHikeAverageSpeed();assert.equal(speedField.textContent,'7.5 km/h');
+ for(const invalid of [NaN,Infinity,-1,'bad']){live.trip.distance=invalid;live.refreshHikeAverageSpeed();assert.equal(speedField.textContent,'— km/h');}
+ console.log('Live average speed HUD regression: PASS');
