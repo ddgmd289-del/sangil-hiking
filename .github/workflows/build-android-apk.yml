@@ -226,6 +226,18 @@ jobs:
                   }
               }
               inner class Bridge {
+                  @JavascriptInterface fun resolveLocality(lat: Double, lon: Double): String {
+                      if (!lat.isFinite() || !lon.isFinite() || lat !in -90.0..90.0 || lon !in -180.0..180.0 || (lat == 0.0 && lon == 0.0)) return ""
+                      return try {
+                          if (!android.location.Geocoder.isPresent()) return ""
+                          val task = java.util.concurrent.FutureTask<String> {
+                              val a = android.location.Geocoder(this@MainActivity, Locale.KOREAN).getFromLocation(lat, lon, 1)?.firstOrNull()
+                              if (a == null) "" else listOfNotNull(a.adminArea, a.locality, a.subLocality, a.thoroughfare?.takeIf { it.endsWith("동") || it.endsWith("읍") || it.endsWith("면") }).flatMap { it.trim().split(Regex("\\s+")) }.filter { it.isNotBlank() }.distinct().joinToString(" ")
+                          }
+                          Thread(task, "sangil-locality").apply { isDaemon = true }.start()
+                          try { task.get(3, java.util.concurrent.TimeUnit.SECONDS) } finally { task.cancel(true) }
+                      } catch (e: Exception) { "" }
+                  }
                   @JavascriptInterface fun openExam(url: String) { runOnUiThread {
                       try {
                           val uri = android.net.Uri.parse(url)
