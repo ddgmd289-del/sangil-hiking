@@ -484,10 +484,10 @@ async function exportHikeResultPng(record,share=false){
  for(let z=19;z>=4;z--){
   const p=pts.map(q=>merc(Number(q.lat),Number(q.lon),z));
   const xx=p.map(v=>v.x),yy=p.map(v=>v.y);
-  const ex={minX:Math.min(...xx),maxX:Math.max(...xx),minY:Math.min(...yy),maxY:Math.max(...yy)};
+  const ex={minX:xx.reduce((a,b)=>Math.min(a,b),Infinity),maxX:xx.reduce((a,b)=>Math.max(a,b),-Infinity),minY:yy.reduce((a,b)=>Math.min(a,b),Infinity),maxY:yy.reduce((a,b)=>Math.max(a,b),-Infinity)};
   if((ex.maxX-ex.minX)*256<W-110&&(ex.maxY-ex.minY)*256<mapHeight-110){zoom=z;projection=p;extent=ex;break}
  }
- if(!projection){zoom=4;projection=pts.map(q=>merc(Number(q.lat),Number(q.lon),zoom));const xx=projection.map(v=>v.x),yy=projection.map(v=>v.y);extent={minX:Math.min(...xx),maxX:Math.max(...xx),minY:Math.min(...yy),maxY:Math.max(...yy)}}
+ if(!projection){zoom=4;projection=pts.map(q=>merc(Number(q.lat),Number(q.lon),zoom));const xx=projection.map(v=>v.x),yy=projection.map(v=>v.y);extent={minX:xx.reduce((a,b)=>Math.min(a,b),Infinity),maxX:xx.reduce((a,b)=>Math.max(a,b),-Infinity),minY:yy.reduce((a,b)=>Math.min(a,b),Infinity),maxY:yy.reduce((a,b)=>Math.max(a,b),-Infinity)}}
  const centerX=(extent.minX+extent.maxX)/2,centerY=(extent.minY+extent.maxY)/2;
  const originX=centerX-W/512,originY=centerY-mapHeight/512;
  const tileMinX=Math.floor(originX),tileMaxX=Math.ceil(originX+W/256),tileMinY=Math.floor(originY),tileMaxY=Math.ceil(originY+mapHeight/256);
@@ -544,7 +544,7 @@ function exportHikeResultImage(record){
  const lat0=points.reduce((a,p)=>a+Number(p.lat),0)/points.length;
  const xScale=Math.max(.01,Math.cos(lat0*Math.PI/180));
  const xs=points.map(p=>Number(p.lon)*xScale),ys=points.map(p=>Number(p.lat));
- const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
+ const minX=xs.reduce((a,b)=>Math.min(a,b),Infinity),maxX=xs.reduce((a,b)=>Math.max(a,b),-Infinity),minY=ys.reduce((a,b)=>Math.min(a,b),Infinity),maxY=ys.reduce((a,b)=>Math.max(a,b),-Infinity);
  const width=Math.max(maxX-minX,.00025),height=Math.max(maxY-minY,.00025);
  const scale=Math.min((W-2*pad)/width,(bottom-top)/height);
  const xy=i=>[W/2+(xs[i]-(minX+maxX)/2)*scale,(top+bottom)/2-(ys[i]-(minY+maxY)/2)*scale];
@@ -664,9 +664,9 @@ function renderRecords(){
    ['거리',dist.toFixed(2)+' km'],['운동시간',fmtTime(seconds)],['전체시간',totalSeconds===null?'—':fmtTime(totalSeconds)],['휴식시간',fmtTime(restSecondsValue)],['칼로리',calorieEstimate(r)+' kcal (예상)'],['걸음수',Number.isSafeInteger(r.workoutSteps)?r.workoutSteps.toLocaleString('ko-KR')+' 보':'—'],
    ['평균속도',avg===null?'—':avg.toFixed(1)+' km/h'],
    ['최고속도',maxSpeed===null?'—':maxSpeed.toFixed(1)+' km/h'],
-   ['최고고도',alts.length?Math.round(Math.max(...alts))+' m':'—'],
+   ['최고고도',alts.length?Math.round(alts.reduce((a,b)=>Math.max(a,b),-Infinity))+' m':'—'],
    ['최저속도',minSpeed===null?'—':minSpeed.toFixed(1)+' km/h'],
-   ['최저고도',alts.length?Math.round(Math.min(...alts))+' m':'—']
+   ['최저고도',alts.length?Math.round(alts.reduce((a,b)=>Math.min(a,b),Infinity))+' m':'—']
   ];
   const header=document.createElement('button');header.type='button';header.className='record-summary';header.setAttribute('aria-expanded','false');
   const thumbnail=document.createElement('div');thumbnail.className='record-thumb';
