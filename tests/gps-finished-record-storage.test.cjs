@@ -118,3 +118,25 @@ console.log('Demo lifecycle isolates native GPS and saved records: PASS');
  sensor.allowed=true;stepContext.trip.state='done';update();assert.equal(stepContext.trip.workoutSteps,70);
  stepContext.trip={state:'running',demo:true};update();assert.equal(stepContext.trip.workoutSteps,undefined);
  console.log('Workout steps sensor fixture regression: PASS');
+
+ // Exercise production background checkpoint and adaptive recovery scheduler.
+ const scheduleStart=html.indexOf('let lastScheduledRecovery=0;');
+ const scheduleEnd=html.indexOf('setInterval(scheduleGpsRecovery,3000);',scheduleStart);
+ const checkpointStart=html.indexOf('function checkpointWorkout(){');
+ const checkpointEnd=html.indexOf("document.addEventListener('visibilitychange'",checkpointStart);
+ assert.ok(scheduleStart>=0&&scheduleEnd>scheduleStart&&checkpointStart>=0&&checkpointEnd>checkpointStart);
+ let clock=100000,recoveries=0,checkpoints=0,stepRefreshes=0;
+ const scheduling={trip:{state:'running',demo:false},document:{hidden:false},Date:{now:()=>clock},lastFix:clock,recoverNativeGps:()=>recoveries++,updateWorkoutSteps:()=>stepRefreshes++,persist:()=>checkpoints++};
+ vm.runInNewContext(html.slice(scheduleStart,scheduleEnd)+html.slice(checkpointStart,checkpointEnd),scheduling);
+ scheduling.scheduleGpsRecovery();assert.equal(recoveries,1);
+ for(let i=1;i<=4;i++){clock+=3000;scheduling.lastFix=clock;scheduling.scheduleGpsRecovery();}
+ assert.equal(recoveries,1);
+ clock+=3000;scheduling.lastFix=clock;scheduling.scheduleGpsRecovery();assert.equal(recoveries,2);
+ clock+=12000;scheduling.scheduleGpsRecovery();assert.equal(recoveries,3);
+ clock+=3000;scheduling.scheduleGpsRecovery();assert.equal(recoveries,4);
+ scheduling.document.hidden=true;clock+=60000;scheduling.scheduleGpsRecovery();assert.equal(recoveries,4);
+ scheduling.checkpointWorkout();assert.equal(checkpoints,1);assert.equal(stepRefreshes,1);
+ scheduling.document.hidden=false;scheduling.restoreVisibleWorkout();assert.equal(recoveries,5);assert.equal(stepRefreshes,2);
+ scheduling.trip.demo=true;scheduling.checkpointWorkout();scheduling.restoreVisibleWorkout();scheduling.scheduleGpsRecovery();assert.equal(recoveries,5);assert.equal(checkpoints,1);
+ scheduling.trip={state:'done'};scheduling.scheduleGpsRecovery();scheduling.checkpointWorkout();scheduling.restoreVisibleWorkout();assert.equal(recoveries,5);assert.equal(checkpoints,1);
+ console.log('Adaptive GPS recovery and background checkpoint regression: PASS');
