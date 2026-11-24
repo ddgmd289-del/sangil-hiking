@@ -59,6 +59,31 @@ jobs:
           PY
           printf 'source_commit=%s\nsource_ref=%s\nbuild_run=%s\n' "$GITHUB_SHA" "$GITHUB_REF_NAME" "$GITHUB_RUN_ID" > app/src/main/assets/build-info.txt
           cp -r icons app/src/main/assets/
+          python3 -m pip install --quiet Pillow
+          # Bundle attributed seasonal photos at build time, never fetch on app startup.
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib, urllib.parse, subprocess
+          from PIL import Image
+          import io
+          photos = {
+              'spring': 'Jirisan_in_spring.jpg',
+              'summer': 'Seoraksan_National_Park,_Summer.jpg',
+              'autumn': 'Seoraksan_in_the_Fall_1-_설악산_단풍.jpg',
+              'winter': '겨울_설악산_풍경.jpg',
+          }
+          dest = Path('app/src/main/assets/scenery')
+          dest.mkdir(exist_ok=True)
+          for season, filename in photos.items():
+              digest = hashlib.md5(filename.encode()).hexdigest()
+              encoded = urllib.parse.quote(filename, safe='')
+              url = f'https://upload.wikimedia.org/wikipedia/commons/{digest[0]}/{digest[:2]}/{encoded}'
+              data = subprocess.check_output(['curl','--fail','--location','--retry','3','--max-time','90','--silent','--show-error','--user-agent','SangilTrekkingBuild/1.0 (github.com/ddgmd289-del/sangil-hiking)',url])
+              with Image.open(io.BytesIO(data)) as photo:
+                  photo.thumbnail((1200,900))
+                  photo.convert('RGB').save(dest / (season+'.jpg'), 'JPEG', quality=84, optimize=True)
+              print(season, (dest / (season+'.jpg')).stat().st_size)
+          PY
           mkdir -p app/src/main/res/drawable
           python3 -m pip install --quiet cairosvg
           python3 - <<'PY'
@@ -669,7 +694,7 @@ jobs:
                   if flavor == 'release': continue
                   raise SystemExit('Missing debug APK')
               with zipfile.ZipFile(apk) as z:
-                  for filename in ('index.html','build-info.txt'):
+                  for filename in ('index.html','build-info.txt','scenery/spring.jpg','scenery/summer.jpg','scenery/autumn.jpg','scenery/winter.jpg'):
                       name='assets/'+filename
                       if name not in z.namelist():
                           raise SystemExit(f'{apk}: missing {name}')
