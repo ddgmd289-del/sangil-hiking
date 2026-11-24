@@ -64,7 +64,7 @@ body.hike-fullscreen .map-wrap #map{width:100%;height:100%}
 <div class="section-head"><h2>⛰ 전국 산·등산코스</h2><span class="sub">산 검색·지도·기록 공유</span></div>
 <div class="note-card" style="margin-top:0"><label class="ext-label" for="mountainSearch">산 이름 검색</label><div class="ext-stack"><input class="ext-field" id="mountainSearch" placeholder="예: 지리산, 설악산, 무학산" maxlength="60"><button class="ext-action-primary" type="button" id="mountainFind">산 찾기</button></div><p class="foot">OpenStreetMap 공개 산 정보 검색입니다. 실제 등산로 코스·난이도·소요시간은 확인된 데이터만 표시합니다.</p></div>
 <div id="mountainResults" class="note-card">산 이름을 검색하거나 홈 지도에서 산 주변을 눌러 보세요.</div>
-<div class="note-card"><h3>내 산행 코스 공유</h3><p>내가 기록한 GPS 경로를 GPX 파일로 내보내 다른 사람에게 전달할 수 있습니다. 공개 코스 게시판은 서버 연결 후 제공됩니다.</p><button class="btn secondary" id="mountainMyRecords" type="button">내 산행 기록 열기</button></div>
+<div class="note-card"><h3>내 산행 코스 공유</h3><p>내가 기록한 GPS 경로를 GPX 파일로 내보내 다른 사람에게 전달할 수 있습니다. 공개 코스 게시판은 서버 연결 후 제공됩니다.</p><button class="btn secondary" id="mountainMyRecords" type="button">내 산행 기록 열기</button><label class="btn secondary" for="gpxImport">GPX 경로 불러오기</label><input id="gpxImport" type="file" accept=".gpx,application/gpx+xml,application/xml,text/xml" hidden><p class="sub">불러온 경로는 지도에서만 확인하며 운동 기록으로 저장하지 않습니다.</p></div>
 </main></section>
 <section class="screen" id="screen-club"><main class="body">
 <div class="section-head"><h2>🌿 동호회</h2><span class="sub">모임·일정·참여관리</span></div>
@@ -529,6 +529,31 @@ function exportHikeResultImage(record){
  download('산길_산행결과_'+new Date(record.started).toISOString().slice(0,10)+'.svg',svg,'image/svg+xml;charset=utf-8');
  toast('산행 결과 이미지(SVG)를 저장했습니다.');
 }
+function parseGpxPreview(text){
+ if(/<!DOCTYPE|<!ENTITY/i.test(text))throw Error('지원하지 않는 XML 형식');
+ const doc=new DOMParser().parseFromString(text,'application/xml');
+ if(doc.getElementsByTagName('parsererror').length||doc.documentElement.localName!=='gpx')throw Error('올바른 GPX 파일이 아닙니다.');
+ const segments=[];let count=0;
+ for(const el of Array.from(doc.getElementsByTagNameNS('*','trkseg')).concat(Array.from(doc.getElementsByTagNameNS('*','rte')))){
+  let segment=[];
+  for(const p of Array.from(el.children)){
+   if(p.localName!=='trkpt'&&p.localName!=='rtept')continue;
+   if(++count>100000)throw Error('경로 좌표가 너무 많습니다.');
+   const a=p.getAttribute('lat'),b=p.getAttribute('lon'),lat=Number(a),lon=Number(b);
+   if(a===null||b===null||!a.trim()||!b.trim()||!Number.isFinite(lat)||!Number.isFinite(lon)||Math.abs(lat)>90||Math.abs(lon)>180||(lat===0&&lon===0)){if(segment.length)segments.push(segment);segment=[];continue;}
+   segment.push({lat,lon});
+  }
+  if(segment.length)segments.push(segment);
+ }
+ if(!segments.length)throw Error('표시할 경로가 없습니다.');
+ return {imported:true,name:'GPX 참고 경로',points:segments.flat(),segments};
+}
+$('#gpxImport').addEventListener('change',async e=>{
+ const file=e.target.files?.[0];e.target.value='';if(!file)return;
+ if(trip){toast('운동을 종료한 후 GPX 경로를 열어 주세요.');return;}
+ if(file.size>10*1024*1024){toast('GPX 파일은 10MB 이하만 지원합니다.');return;}
+ try{const record=parseGpxPreview(await file.text());if(trip)return;showSavedRoute(record);}catch(e){toast(e.message||'GPX 불러오기 실패');}
+});
 function showSavedRoute(record){
  if(!map){toast('지도가 준비되지 않았습니다.');return}
  viewedRecord=record;
@@ -537,7 +562,12 @@ function showSavedRoute(record){
  const duration=fmtTime(Math.max(0,(Number(record.accMs)||0)/1000));const dist=(Number(record.distance)||0).toFixed(2);
  if(!pts.length){toast('이 기록에는 GPS 경로가 없습니다.');viewedRecord=null;return}
  savedRouteLayer=L.layerGroup().addTo(map);
- for(const seg of routeSegments(record.points)){if(seg.length>1)L.polyline(seg.map(p=>[Number(p.lat),Number(p.lon)]),{color:'#1976d2',weight:3,opacity:.9}).addTo(savedRouteLayer)}
+ for(const seg of (record.imported?record.segments:routeSegments(record.points))){if(seg.length>1)L.polyline(seg.map(p=>[Number(p.lat),Number(p.lon)]),{color:'#1976d2',weight:3,opacity:.9}).addTo(savedRouteLayer)}
+ if(record.imported){
+  for(const seg of record.segments)if(seg.length===1)L.circleMarker([seg[0].lat,seg[0].lon],{radius:4,color:'#1976d2'}).addTo(savedRouteLayer);
+  tab('home');setTimeout(()=>{if(map&&viewedRecord===record){map.invalidateSize();if(pts.length>1)map.fitBounds(L.latLngBounds(pts),{padding:[45,45],maxZoom:17});else map.setView(pts[0],16)}},200);
+  $('#mapNote').textContent='GPX 참고 경로 · 운동 기록에 저장되지 않음';toast('GPX 경로를 표시했습니다.');return;
+ }
  L.circleMarker(record.startPoint&&Number.isFinite(Number(record.startPoint.lat))&&Number.isFinite(Number(record.startPoint.lon))&&Math.abs(Number(record.startPoint.lat))<=90&&Math.abs(Number(record.startPoint.lon))<=180&&!(Number(record.startPoint.lat)===0&&Number(record.startPoint.lon)===0)?[Number(record.startPoint.lat),Number(record.startPoint.lon)]:pts[0],{radius:9,color:'#fff',weight:3,fillColor:'#18824c',fillOpacity:1}).bindPopup('출발 · '+new Date(record.started).toLocaleTimeString('ko-KR')).addTo(savedRouteLayer);
  L.circleMarker(record.endPoint&&Number.isFinite(Number(record.endPoint.lat))&&Number.isFinite(Number(record.endPoint.lon))&&Math.abs(Number(record.endPoint.lat))<=90&&Math.abs(Number(record.endPoint.lon))<=180&&!(Number(record.endPoint.lat)===0&&Number(record.endPoint.lon)===0)?[Number(record.endPoint.lat),Number(record.endPoint.lon)]:pts[pts.length-1],{radius:9,color:'#fff',weight:3,fillColor:'#c14b33',fillOpacity:1}).bindPopup('도착 · '+new Date(record.ended||record.started).toLocaleTimeString('ko-KR')).addTo(savedRouteLayer);
  tab('home');
