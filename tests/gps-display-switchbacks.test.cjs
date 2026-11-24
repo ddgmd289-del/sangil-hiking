@@ -15,5 +15,6 @@ assert.equal(context.displayRoutePoints(switchback).length,3,'high confidence ou
 const lowConfidence=[p(35,128,1000,5),p(35.0002,128,2000,40),p(35.00001,128,3000,5)];
 assert.equal(context.displayRoutePoints(lowConfidence).length,2,'low confidence isolated spike can be suppressed');
 assert.equal(context.displayRoutePoints(switchback.slice(0,2)).length,2,'short route remains intact');
-assert(html.includes("L.polyline(routeLines,{color:'#1678d4',weight:3"),'live route uses thin line');
+assert(html.includes("L.polyline(routeLines,{color:'#1678d4',weight:4,opacity:1"),'live route uses intended high-contrast line');
+assert(html.includes("lineCap:'round',interactive:false"),'route does not intercept map gestures');
 console.log('GPS display route switchback regression: passed');
