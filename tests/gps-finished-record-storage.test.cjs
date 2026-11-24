@@ -140,3 +140,26 @@ console.log('Demo lifecycle isolates native GPS and saved records: PASS');
  scheduling.trip.demo=true;scheduling.checkpointWorkout();scheduling.restoreVisibleWorkout();scheduling.scheduleGpsRecovery();assert.equal(recoveries,5);assert.equal(checkpoints,1);
  scheduling.trip={state:'done'};scheduling.scheduleGpsRecovery();scheduling.checkpointWorkout();scheduling.restoreVisibleWorkout();assert.equal(recoveries,5);assert.equal(checkpoints,1);
  console.log('Adaptive GPS recovery and background checkpoint regression: PASS');
+
+ // Execute actual checkpoint persistence with an in-memory storage fixture.
+ const persistStart=html.indexOf('function persist(){');
+ const persistEnd=html.indexOf('function km(',persistStart);
+ assert.ok(persistStart>=0&&persistEnd>persistStart);
+ let checkpointRaw=null,checkpointWrites=0,checkpointFailures=0,writeBlocked=false,readBlocked=false;
+ const pc={trip:{id:123,state:'running',distance:0,points:[]},CURRENT:'current',toast:()=>checkpointFailures++,localStorage:{
+  getItem:()=>{if(readBlocked)throw Error('storage read unavailable');return checkpointRaw;},
+  setItem:(_key,value)=>{if(writeBlocked)throw Error('quota');checkpointRaw=value;checkpointWrites++;}
+ }};
+ vm.runInNewContext(html.slice(persistStart,persistEnd),pc);
+ pc.persist();assert.equal(checkpointWrites,1);
+ pc.persist();assert.equal(checkpointWrites,1,'identical checkpoint does not write');
+ pc.trip.distance=1;pc.trip.points.push({lat:35,lon:128});writeBlocked=true;
+ pc.persist();assert.equal(checkpointFailures,1);assert.equal(JSON.parse(checkpointRaw).distance,0);
+ writeBlocked=false;pc.persist();assert.equal(checkpointWrites,2);assert.equal(JSON.parse(checkpointRaw).distance,1);
+ pc.trip.state='paused';pc.persist();assert.equal(checkpointWrites,3);
+ readBlocked=true;pc.trip.state='running';pc.persist();assert.equal(checkpointFailures,2);
+ readBlocked=false;pc.persist();assert.equal(checkpointWrites,4);
+ checkpointRaw=null;pc.persist();assert.equal(checkpointWrites,5,'restore missing checkpoint even if object unchanged');
+ pc.trip.demo=true;pc.persist();assert.equal(checkpointWrites,5);
+ pc.trip=null;pc.persist();assert.equal(checkpointWrites,5);
+ console.log('Checkpoint deduplication and write retry regression: PASS');
