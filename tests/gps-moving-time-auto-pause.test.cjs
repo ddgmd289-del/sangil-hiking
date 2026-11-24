@@ -55,3 +55,21 @@ console.log('Moving time excludes auto/manual pauses: PASS');
  assert.equal(fields.homeTodayMin.textContent,15);
  assert.equal(fields.homeTodaySpeed.textContent,'6.7');
  console.log('Home and saved statistics consistency: PASS');
+
+ // Exercise calorie estimates execute the production function, not a copied formula.
+ const calorieStart=html.indexOf('function calorieEstimate(r){');
+ const calorieEnd=html.indexOf('function updateCalorieLabel()',calorieStart);
+ assert.ok(calorieStart>=0&&calorieEnd>calorieStart);
+ let weightSetting='65';
+ const calorieContext={Math,Number,localStorage:{getItem:()=>weightSetting}};
+ vm.runInNewContext(html.slice(calorieStart,calorieEnd),calorieContext);
+ const estimate=calorieContext.calorieEstimate;
+ assert.equal(estimate({activity:'걷기',distance:5}),228);
+ assert.equal(estimate({activity:'산행',distance:5}),276);
+ assert.equal(estimate({activity:'등산',distance:5}),276);
+ assert.equal(estimate({activity:'달리기',distance:5}),325);
+ for(const invalid of [null,'','invalid','Infinity','-1','251']){weightSetting=invalid;assert.equal(estimate({activity:'산행',distance:5}),276);}
+ weightSetting='80';assert.equal(estimate({activity:'산행',distance:5}),340);
+ for(const invalid of [NaN,Infinity,-1,0,null,'invalid'])assert.equal(estimate({activity:'산행',distance:invalid}),0);
+ assert.equal(estimate(null),0);
+ console.log('Production calorie estimate regression: PASS');
