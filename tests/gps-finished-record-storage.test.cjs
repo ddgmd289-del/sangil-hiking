@@ -219,3 +219,21 @@ console.log('Demo lifecycle isolates native GPS and saved records: PASS');
   const result=nativeDeletionOrderFixture(options);assert.equal(result.store.size,1);assert.equal(result.store.get('unrelated'),'data');assert.ok(result.calls.some(x=>x.includes('삭제했습니다')));
  }
  console.log('Confirmed personal data deletion and native failure guard regression: PASS');
+
+ // Exercise real account login and logout handlers without external network access.
+ async function verifyAccountWorkoutGuard(){
+  const begin=html.indexOf('async function accountLogin(provider){');
+  const finish=html.indexOf("$('#exitApp').addEventListener",begin);
+  assert.ok(begin>=0&&finish>begin);
+  const handlers={},calls=[];
+  const context={trip:{state:'running'},authClient:{signInWithRedirect:async p=>calls.push(p.kind),signOut:async()=>calls.push('logout')},firebase:{auth:{GoogleAuthProvider:class{constructor(){this.kind='google'}},OAuthProvider:class{constructor(id){this.kind=id}}}},toast:()=>{},$:id=>({addEventListener:(_event,fn)=>handlers[id]=fn})};
+  vm.runInNewContext(html.slice(begin,finish),context);
+  await context.accountLogin('google');await context.accountLogin('kakao');await handlers['#logoutAccount']();
+  assert.equal(calls.length,0,'active workout blocks account redirects and logout');
+  context.trip={state:'done'};await context.accountLogin('google');assert.equal(calls.length,0,'pending record blocks redirect');
+  context.trip=null;await context.accountLogin('invalid');assert.equal(calls.length,0);
+  await context.accountLogin('google');await context.accountLogin('kakao');await handlers['#logoutAccount']();
+  assert.deepEqual(calls,['google','oidc.kakao','logout']);
+  console.log('Account workout protection regression: PASS');
+ }
+ verifyAccountWorkoutGuard().catch(e=>{console.error(e);process.exitCode=1;});
