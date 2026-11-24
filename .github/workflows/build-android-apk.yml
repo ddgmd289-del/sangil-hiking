@@ -257,6 +257,17 @@ jobs:
                   }
               }
               inner class Bridge {
+                  @JavascriptInterface fun deleteGpsBackup(): Boolean {
+                      val task = java.util.concurrent.FutureTask<Boolean> {
+                          if (startAfterPermission || TrackingService.active) false
+                          else try {
+                              val backup = java.io.File(filesDir, "tracking_backup.jsonl")
+                              (!backup.exists() || backup.delete()) && !backup.exists()
+                          } catch (e: Exception) { false }
+                      }
+                      return try { runOnUiThread(task); task.get(3, java.util.concurrent.TimeUnit.SECONDS) }
+                      catch (e: Exception) { task.cancel(false); false }
+                  }
                   @JavascriptInterface fun deleteStepData(): Boolean {
                       return try {
                           getSharedPreferences("sangil_steps", MODE_PRIVATE).edit().clear().commit()
@@ -387,10 +398,12 @@ jobs:
           import android.os.*
           import org.json.JSONObject
           class TrackingService : Service(), LocationListener {
+              companion object { @Volatile var active = false; private set }
               private lateinit var location: LocationManager
               override fun onBind(intent: Intent?): IBinder? = null
               override fun onCreate() {
                   super.onCreate()
+                  active = true
                   location = getSystemService(LOCATION_SERVICE) as LocationManager
                   val channel = NotificationChannel("hiking", "산길 트레킹 GPS 기록", NotificationManager.IMPORTANCE_LOW)
                   (getSystemService(NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(channel)
@@ -436,6 +449,7 @@ jobs:
                   return START_NOT_STICKY
               }
               override fun onLocationChanged(loc: Location) {
+                  if (!active) return
                   // Reject cached/stale fixes; never relabel old positions with the current time.
                   val fixTime = loc.time
                   val now = System.currentTimeMillis()
@@ -453,7 +467,7 @@ jobs:
                       .putExtra("alt",if (loc.hasAltitude()) loc.altitude else 0.0)
                       .putExtra("acc",loc.accuracy).putExtra("t",fixTime))
               }
-              override fun onDestroy() { try { location.removeUpdates(this) } catch (_: Exception) {}; super.onDestroy() }
+              override fun onDestroy() { try { location.removeUpdates(this) } catch (_: Exception) {}; active = false; super.onDestroy() }
           }
           EOF
       - name: Verify native step counter lifecycle and storage wiring
