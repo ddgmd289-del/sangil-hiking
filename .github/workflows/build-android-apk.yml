@@ -252,6 +252,11 @@ jobs:
                   }
               }
               inner class Bridge {
+                  @JavascriptInterface fun deleteStepData(): Boolean {
+                      return try {
+                          getSharedPreferences("sangil_steps", MODE_PRIVATE).edit().clear().commit()
+                      } catch (e: Exception) { false }
+                  }
                   @JavascriptInterface fun savedSteps(): String {
                       val prefs = getSharedPreferences("sangil_steps", MODE_PRIVATE)
                       val day = java.text.SimpleDateFormat("yyyy-MM-dd", Locale.US).format(java.util.Date())
