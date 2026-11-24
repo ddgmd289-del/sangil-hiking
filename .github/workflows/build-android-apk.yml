@@ -452,6 +452,21 @@ jobs:
               override fun onDestroy() { try { location.removeUpdates(this) } catch (_: Exception) {}; super.onDestroy() }
           }
           EOF
+      - name: Verify native step counter lifecycle and storage wiring
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          src = Path('app/src/main/java/kr/sangil/myhiking/MainActivity.kt').read_text()
+          assert 'TYPE_STEP_COUNTER' in src
+          assert 'sameDay && sameBoot && last >= 0L && count >= last' in src
+          assert 'if (sameDay) prefs.getLong("total", 0L) else 0L' in src
+          assert 'putInt("boot", boot)' in src
+          assert 'if (stepListening || stepSensor == null) return' in src
+          assert 'override fun onPause() { super.onPause() }' in src
+          assert 'override fun onDestroy() { stepManager.unregisterListener(stepListener)' in src
+          assert 'fun deleteStepData(): Boolean' in src
+          print('Native step counter wiring checks passed')
+          PY
       - name: Verify permission grant never starts an unrequested trip
         run: |
           python3 - <<'PY'
