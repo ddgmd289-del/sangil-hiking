@@ -37,11 +37,14 @@ vm.createContext(sc);
 vm.runInContext(html.slice(storageStart,storageEnd),sc);
 for(const invalid of ['{broken','{}','null','42']){
  raw=invalid;
+ assert.ok(Array.isArray(sc.loadRecords()),'malformed storage must not crash callers');
+ assert.equal(sc.loadRecords().length,0);
  assert.equal(sc.saveRecords([]),false);
  assert.equal(raw,invalid);
 }
 assert.equal(writes,0);
 raw='[{"id":1}]';
+assert.equal(sc.loadRecords()[0].id,1);
 blocked=true;
 assert.equal(sc.saveRecords([{id:2}]),false);
 assert.equal(raw,'[{"id":1}]');
