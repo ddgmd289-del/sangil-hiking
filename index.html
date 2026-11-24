@@ -433,7 +433,9 @@ function gpx(record){const segs=routeSegments(record.points).map(seg=>'<trkseg>'
 async function exportHikeResultPng(record,share=false){
  const pts=displayRoutePoints(record.points||[]);
  if(pts.length<2){toast('GPS 경로가 2개 이상 있어야 결과 이미지를 만들 수 있습니다.');return}
- let region=String(record.placeName||record.mountain?.name||'').trim();
+ let region=String(record.placeName||'').trim();
+ if(!region&&window.SangilNative?.resolveLocality){try{region=String(window.SangilNative.resolveLocality(Number(pts[0].lat),Number(pts[0].lon))||'').trim().slice(0,80)}catch(e){}}
+ if(!region)region=String(record.mountain?.name||'').trim();
  if(!region){const entered=window.prompt('결과 이미지 상단에 표시할 운동 지역을 입력하세요. 예: 경상남도 창원시 의창구 동정동 (취소하면 지역명 미지정으로 표시)','');region=String(entered||'').trim().slice(0,80)}
  const W=900,H=1200,mapTop=180,mapBottom=960,mapHeight=mapBottom-mapTop;
  const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;const ctx=canvas.getContext('2d');
