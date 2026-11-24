@@ -886,6 +886,8 @@ document.addEventListener('DOMContentLoaded',()=>{
 <script>
 window.sangilStepStatus=function(message){document.getElementById('homeStepStatus').textContent=message;};
 window.sangilStepUpdate=function(count){if(!Number.isFinite(count)||count<0)return;document.getElementById('homeSteps').textContent=Math.floor(count).toLocaleString('ko-KR');const p=document.getElementById('homeStepProgress');p.hidden=false;p.value=Math.min(count,10000);window.sangilStepStatus('센서 연동 후 측정된 걸음수');};
+window.sangilRefreshSteps=function(){try{if(!window.SangilNative?.savedSteps)return;const state=JSON.parse(window.SangilNative.savedSteps());if(!state.available){window.sangilStepStatus('걸음수 센서 없음');return;}if(!state.allowed){window.sangilStepStatus('신체 활동 권한을 허용해 주세요.');return;}window.sangilStepUpdate(state.count);}catch(e){window.sangilStepStatus('걸음수 확인 실패');}};
+window.sangilRefreshSteps();window.addEventListener('focus',window.sangilRefreshSteps);setInterval(window.sangilRefreshSteps,15000);
 document.getElementById('enableHomeSteps').addEventListener('click',()=>{if(window.SangilNative?.enableSteps){window.sangilStepStatus('센서 연결 및 권한 확인 중');window.SangilNative.enableSteps();}else window.sangilStepStatus('안드로이드 앱에서 연동 가능합니다.');});
 </script>
 </body></html>
