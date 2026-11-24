@@ -69,3 +69,28 @@ assert.equal(nativeCalls.length,0);
 assert.equal(demoWrites,0);
 assert.equal(demoRemovals,0);
 console.log('Demo lifecycle isolates native GPS and saved records: PASS');
+
+ // GPX production parser: DOM fixture tests for segment boundaries and invalid coordinates.
+ const gpxStart=html.indexOf('function parseGpxPreview(text){');
+ const gpxEnd=html.indexOf("$('#gpxImport').addEventListener",gpxStart);
+ assert.ok(gpxStart>=0&&gpxEnd>gpxStart);
+ const point=(lat,lon,localName='trkpt')=>({localName,getAttribute:k=>k==='lat'?lat:lon});
+ let fixture={root:'gpx',errors:[],tracks:[],routes:[]};
+ class FixtureParser{parseFromString(){return {documentElement:{localName:fixture.root},getElementsByTagName:()=>fixture.errors,getElementsByTagNameNS:(_ns,name)=>name==='trkseg'?fixture.tracks:fixture.routes}}}
+ const gpxContext={DOMParser:FixtureParser};
+ vm.runInNewContext(html.slice(gpxStart,gpxEnd),gpxContext);
+ const parse=gpxContext.parseGpxPreview;
+ fixture.tracks=[{children:[point('35','128'),point('35.01','128.01'),point('bad','128'),point('35.03','128.03')]},{children:[point('36','129'),point('36.01','129.01')]}];
+ fixture.routes=[{children:[point('37','127','rtept'),point('37.01','127.01','rtept')]}];
+ const preview=parse('<gpx/>');
+ assert.equal(preview.imported,true);
+ assert.equal(JSON.stringify(preview.segments.map(s=>s.length)),'[2,1,2,2]');
+ assert.equal(preview.points.length,7);
+ for(const p of [point(null,'128'),point('','128'),point('91','128'),point('35','181'),point('0','0')]){
+  fixture.tracks=[{children:[p]}];fixture.routes=[];
+  assert.throws(()=>parse('<gpx/>'),/표시할 경로/);
+ }
+ assert.throws(()=>parse('<!DOCTYPE gpx><gpx/>'),/지원하지 않는/);
+ fixture.errors=[{}];assert.throws(()=>parse('<gpx/>'),/올바른 GPX/);
+ fixture.errors=[];fixture.root='html';assert.throws(()=>parse('<html/>'),/올바른 GPX/);
+ console.log('GPX preview segment and coordinate checks: PASS (DOM fixtures)');
