@@ -196,7 +196,8 @@ jobs:
                       val lastBoot = prefs.getInt("boot", -1)
                       val sameBoot = boot >= 0 && lastBoot == boot
                       val total = calculateSteps(previous, sameDay, sameBoot, last, count)
-                      prefs.edit().putString("day", day).putLong("last", count).putLong("total", total).putInt("boot", boot).apply()
+                      val lifetime = prefs.getLong("lifetime", 0L) + if (sameBoot && last >= 0L && count >= last) count - last else 0L
+                      prefs.edit().putString("day", day).putLong("last", count).putLong("total", total).putLong("lifetime", lifetime).putInt("boot", boot).apply()
                       web.evaluateJavascript("window.sangilStepUpdate?.($total)", null)
                   }
               }
@@ -265,7 +266,7 @@ jobs:
                       val prefs = getSharedPreferences("sangil_steps", MODE_PRIVATE)
                       val day = java.text.SimpleDateFormat("yyyy-MM-dd", Locale.US).format(java.util.Date())
                       val allowed = Build.VERSION.SDK_INT < 29 || checkSelfPermission(Manifest.permission.ACTIVITY_RECOGNITION) == PackageManager.PERMISSION_GRANTED
-                      return org.json.JSONObject().put("available", stepSensor != null).put("allowed", allowed).put("count", if (prefs.getString("day", "") == day) prefs.getLong("total", 0L) else 0L).toString()
+                      return org.json.JSONObject().put("available", stepSensor != null).put("allowed", allowed).put("count", if (prefs.getString("day", "") == day) prefs.getLong("total", 0L) else 0L).put("lifetime", prefs.getLong("lifetime", 0L)).put("boot", android.provider.Settings.Global.getInt(contentResolver, "boot_count", -1)).put("ready", prefs.getLong("last", -1L) >= 0L && prefs.getInt("boot", -1) >= 0 && prefs.getInt("boot", -1) == android.provider.Settings.Global.getInt(contentResolver, "boot_count", -1)).toString()
                   }
                   @JavascriptInterface fun enableSteps() { runOnUiThread {
                       if (stepSensor == null) { web.evaluateJavascript("window.sangilStepStatus?.('걸음수 센서 없음')", null); return@runOnUiThread }
