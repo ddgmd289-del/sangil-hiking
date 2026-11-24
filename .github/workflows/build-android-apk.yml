@@ -178,6 +178,9 @@ jobs:
               private val stepManager by lazy { getSystemService(SENSOR_SERVICE) as android.hardware.SensorManager }
               private val stepSensor by lazy { stepManager.getDefaultSensor(android.hardware.Sensor.TYPE_STEP_COUNTER) }
               private var stepListening = false
+              private fun calculateSteps(previous: Long, sameDay: Boolean, sameBoot: Boolean, last: Long, count: Long): Long {
+                  return previous + if (sameDay && sameBoot && last >= 0L && count >= last) count - last else 0L
+              }
               private val stepListener = object : android.hardware.SensorEventListener {
                   override fun onAccuracyChanged(sensor: android.hardware.Sensor?, accuracy: Int) {}
                   override fun onSensorChanged(event: android.hardware.SensorEvent) {
@@ -192,7 +195,7 @@ jobs:
                       val boot = android.provider.Settings.Global.getInt(contentResolver, "boot_count", -1)
                       val lastBoot = prefs.getInt("boot", -1)
                       val sameBoot = boot >= 0 && lastBoot == boot
-                      val total = previous + if (sameDay && sameBoot && last >= 0L && count >= last) count - last else 0L
+                      val total = calculateSteps(previous, sameDay, sameBoot, last, count)
                       prefs.edit().putString("day", day).putLong("last", count).putLong("total", total).putInt("boot", boot).apply()
                       web.evaluateJavascript("window.sangilStepUpdate?.($total)", null)
                   }
@@ -465,8 +468,31 @@ jobs:
           assert 'override fun onPause() { super.onPause() }' in src
           assert 'override fun onDestroy() { stepManager.unregisterListener(stepListener)' in src
           assert 'fun deleteStepData(): Boolean' in src
+          assert 'val total = calculateSteps(previous, sameDay, sameBoot, last, count)' in src
           print('Native step counter wiring checks passed')
           PY
+      - name: Execute production step calculation regression
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          src = Path('app/src/main/java/kr/sangil/myhiking/MainActivity.kt').read_text()
+          fn = re.search(r'private fun calculateSteps\([^\n]+\n[^\n]+\n\s*\}', src)
+          assert fn
+          Path('/tmp/StepRegression.kt').write_text(fn.group(0) + """
+          fun main() {
+              check(calculateSteps(0, true, true, -1, 500) == 0L)
+              check(calculateSteps(100, true, true, 500, 520) == 120L)
+              check(calculateSteps(100, true, true, 520, 520) == 100L)
+              check(calculateSteps(100, true, false, 520, 900) == 100L)
+              check(calculateSteps(100, true, true, 520, 10) == 100L)
+              check(calculateSteps(0, false, true, 520, 900) == 0L)
+              println("Step calculation regression passed")
+          }
+          """)
+          PY
+          kotlinc /tmp/StepRegression.kt -include-runtime -d /tmp/StepRegression.jar
+          java -jar /tmp/StepRegression.jar
       - name: Verify permission grant never starts an unrequested trip
         run: |
           python3 - <<'PY'
