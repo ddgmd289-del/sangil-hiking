@@ -919,7 +919,8 @@ setInterval(()=>{
  if(age>20000){status.textContent='GPS 신호 대기 중 ('+Math.round(age/1000)+'초) · 위치 확인 필요';return}
  if(position&&position.accuracy>70){status.textContent='GPS 정확도 낮음 · 오차 약 '+Math.round(position.accuracy)+'m · 거리 누적 보류'}
 },5000);
-setInterval(()=>{if(trip?.state==='running'&&!trip.demo&&trip.stationarySince&&position&&position.accuracy<=70&&Date.now()-lastFix<30000&&Date.now()-trip.stationarySince>=120000)autoPause()},5000);
+// Auto-pause is evaluated only on fresh, accurate GPS fixes in the location handler.
+// A wall-clock timer cannot establish continuous stillness during GPS outages.
 })();
 </script><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script><script src="extensions.js" defer></script><script>if ("serviceWorker" in navigator && (location.protocol==="https:" || location.hostname==="localhost")) window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(()=>{}));</script><script>
 document.addEventListener('DOMContentLoaded',()=>{
