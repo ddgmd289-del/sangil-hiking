@@ -132,6 +132,7 @@ jobs:
           cat > app/src/main/AndroidManifest.xml <<'EOF'
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
               <uses-permission android:name="android.permission.INTERNET"/>
+              <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
               <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
               <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
               <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
@@ -174,6 +175,33 @@ jobs:
               private lateinit var web: WebView
               private var speech: TextToSpeech? = null
               private var startAfterPermission = false
+              private val stepManager by lazy { getSystemService(SENSOR_SERVICE) as android.hardware.SensorManager }
+              private val stepSensor by lazy { stepManager.getDefaultSensor(android.hardware.Sensor.TYPE_STEP_COUNTER) }
+              private var stepListening = false
+              private val stepListener = object : android.hardware.SensorEventListener {
+                  override fun onAccuracyChanged(sensor: android.hardware.Sensor?, accuracy: Int) {}
+                  override fun onSensorChanged(event: android.hardware.SensorEvent) {
+                      val raw = event.values.firstOrNull() ?: return
+                      if (!raw.isFinite() || raw < 0f) return
+                      val count = raw.toLong()
+                      val day = java.text.SimpleDateFormat("yyyy-MM-dd", Locale.US).format(java.util.Date())
+                      val prefs = getSharedPreferences("sangil_steps", MODE_PRIVATE)
+                      val last = prefs.getLong("last", -1L)
+                      val sameDay = prefs.getString("day", "") == day
+                      val previous = if (sameDay) prefs.getLong("total", 0L) else 0L
+                      val total = previous + if (sameDay && last >= 0L && count >= last) count - last else 0L
+                      prefs.edit().putString("day", day).putLong("last", count).putLong("total", total).apply()
+                      web.evaluateJavascript("window.sangilStepUpdate?.($total)", null)
+                  }
+              }
+              private fun startSteps() {
+                  if (stepListening || stepSensor == null) return
+                  if (Build.VERSION.SDK_INT >= 29 && checkSelfPermission(Manifest.permission.ACTIVITY_RECOGNITION) != PackageManager.PERMISSION_GRANTED) return
+                  stepListening = stepManager.registerListener(stepListener, stepSensor, android.hardware.SensorManager.SENSOR_DELAY_NORMAL)
+              }
+              override fun onResume() { super.onResume(); startSteps() }
+              override fun onPause() { stepManager.unregisterListener(stepListener); stepListening = false; super.onPause() }
+
               private val gpsErrorReceiver = object : android.content.BroadcastReceiver() {
                   override fun onReceive(context: android.content.Context?, intent: Intent?) {
                       val reason = intent?.getStringExtra("reason") ?: return
@@ -221,6 +249,12 @@ jobs:
                   }
               }
               inner class Bridge {
+                  @JavascriptInterface fun enableSteps() { runOnUiThread {
+                      if (stepSensor == null) { web.evaluateJavascript("window.sangilStepStatus?.('걸음수 센서 없음')", null); return@runOnUiThread }
+                      if (Build.VERSION.SDK_INT >= 29 && checkSelfPermission(Manifest.permission.ACTIVITY_RECOGNITION) != PackageManager.PERMISSION_GRANTED) requestPermissions(arrayOf(Manifest.permission.ACTIVITY_RECOGNITION), 21)
+                      else startSteps()
+                  } }
+
                   @JavascriptInterface fun resolveLocality(lat: Double, lon: Double): String {
                       if (!lat.isFinite() || !lon.isFinite() || lat !in -90.0..90.0 || lon !in -180.0..180.0 || (lat == 0.0 && lon == 0.0)) return ""
                       return try {
@@ -308,6 +342,7 @@ jobs:
               }
               override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
                   super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+                  if (requestCode == 21) { startSteps(); return }
                   if (requestCode != 10) return
                   val shouldStart = startAfterPermission
                   startAfterPermission = false
