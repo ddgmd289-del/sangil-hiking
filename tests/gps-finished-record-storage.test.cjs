@@ -197,6 +197,7 @@ console.log('Demo lifecycle isolates native GPS and saved records: PASS');
  const partial=deletionFixture({failedKey:'records'});assert.equal(partial.entries.get('records'),'personal');assert.ok(partial.alerts[0].includes('실패'));
  console.log('Confirmed personal data deletion and failure handling regression: PASS');
 
+ {
  // Exercise actual confirmed local deletion handler with isolated storage fixtures.
  const deletionStart=html.indexOf("$('#deleteLocalPersonalData').addEventListener('click',");
  const deletionEnd=html.indexOf('\n',deletionStart);
@@ -219,6 +220,8 @@ console.log('Demo lifecycle isolates native GPS and saved records: PASS');
   const result=nativeDeletionOrderFixture(options);assert.equal(result.store.size,1);assert.equal(result.store.get('unrelated'),'data');assert.ok(result.calls.some(x=>x.includes('삭제했습니다')));
  }
  console.log('Confirmed personal data deletion and native failure guard regression: PASS');
+
+ }
 
  // Exercise real account login and logout handlers without external network access.
  async function verifyAccountWorkoutGuard(){
