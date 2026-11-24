@@ -217,14 +217,14 @@ function draw(){
  const segments=[];let segment=[];
  for(const p of route){
   const prev=segment.at(-1);
-  const gap=prev&&(!Number.isFinite(Number(p.t))||!Number.isFinite(Number(prev.t))||Number(p.t)<=Number(prev.t)||Number(p.t)-Number(prev.t)>180000||km(prev,p)>.5||p.breakBefore);
+  const gap=prev&&routeGap(prev,p);
   if(gap){if(segment.length)segments.push(segment);segment=[]}
   segment.push(p);
  }
  if(segment.length)segments.push(segment);
  const pts=segments.flat().map(p=>[Number(p.lat),Number(p.lon)]);
  const routeLines=segments.map(seg=>seg.map(p=>[Number(p.lat),Number(p.lon)]));
- if(!trackLine)trackLine=L.polyline(routeLines,{color:'#1678d4',weight:3,opacity:.95,lineJoin:'round',lineCap:'round'}).addTo(map);
+ if(!trackLine)trackLine=L.polyline(routeLines,{color:'#1678d4',weight:4,opacity:1,lineJoin:'round',lineCap:'round',interactive:false}).addTo(map);
  else trackLine.setLatLngs(routeLines);
  if(!marksLayer)marksLayer=L.layerGroup().addTo(map);
  marksLayer.clearLayers();
@@ -563,7 +563,7 @@ function showSavedRoute(record){
  const duration=fmtTime(Math.max(0,(Number(record.accMs)||0)/1000));const dist=(Number(record.distance)||0).toFixed(2);
  if(!pts.length){toast('이 기록에는 GPS 경로가 없습니다.');viewedRecord=null;return}
  savedRouteLayer=L.layerGroup().addTo(map);
- for(const seg of (record.imported?record.segments:routeSegments(record.points))){if(seg.length>1)L.polyline(seg.map(p=>[Number(p.lat),Number(p.lon)]),{color:'#1976d2',weight:3,opacity:.9}).addTo(savedRouteLayer)}
+ for(const seg of (record.imported?record.segments:routeSegments(record.points))){if(seg.length>1)L.polyline(seg.map(p=>[Number(p.lat),Number(p.lon)]),{color:'#1976d2',weight:4,opacity:1,lineJoin:'round',lineCap:'round',interactive:false}).addTo(savedRouteLayer)}
  if(record.imported){
   for(const seg of record.segments)if(seg.length===1)L.circleMarker([seg[0].lat,seg[0].lon],{radius:4,color:'#1976d2'}).addTo(savedRouteLayer);
   tab('home');setTimeout(()=>{if(map&&viewedRecord===record){map.invalidateSize();if(pts.length>1)map.fitBounds(L.latLngBounds(pts),{padding:[45,45],maxZoom:17});else map.setView(pts[0],16)}},200);
