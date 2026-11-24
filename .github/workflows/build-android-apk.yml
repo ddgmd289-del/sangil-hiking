@@ -203,7 +203,8 @@ jobs:
                   stepListening = stepManager.registerListener(stepListener, stepSensor, android.hardware.SensorManager.SENSOR_DELAY_NORMAL)
               }
               override fun onResume() { super.onResume(); startSteps() }
-              override fun onPause() { stepManager.unregisterListener(stepListener); stepListening = false; super.onPause() }
+              // Keep the listener while the activity exists, including screen-off pauses. Android may suspend delivery in background.
+              override fun onPause() { super.onPause() }
 
               private val gpsErrorReceiver = object : android.content.BroadcastReceiver() {
                   override fun onReceive(context: android.content.Context?, intent: Intent?) {
@@ -369,7 +370,7 @@ jobs:
               }
               override fun onStart() { super.onStart(); val filter = android.content.IntentFilter("kr.sangil.myhiking.FIX"); val errors = android.content.IntentFilter("kr.sangil.myhiking.GPS_ERROR"); if (Build.VERSION.SDK_INT >= 33) { registerReceiver(receiver, filter, android.content.Context.RECEIVER_NOT_EXPORTED); registerReceiver(gpsErrorReceiver, errors, android.content.Context.RECEIVER_NOT_EXPORTED) } else { registerReceiver(receiver, filter); registerReceiver(gpsErrorReceiver, errors) } }
               override fun onStop() { unregisterReceiver(receiver); unregisterReceiver(gpsErrorReceiver); super.onStop() }
-              override fun onDestroy() { speech?.shutdown(); web.destroy(); super.onDestroy() }
+              override fun onDestroy() { stepManager.unregisterListener(stepListener); stepListening = false; speech?.shutdown(); web.destroy(); super.onDestroy() }
           }
           EOF
           cat > app/src/main/java/kr/sangil/myhiking/TrackingService.kt <<'EOF'
