@@ -63,6 +63,24 @@ body.hike-fullscreen .map-wrap #map{width:100%;height:100%}
 .hero{padding:12px 16px 10px;border-radius:0 0 16px 16px}.hero:before{display:none}.hero .brand{margin:0;gap:8px}.hero .brand-name{font-size:22px;line-height:1.2}.hero .brand-name small{font-size:15px}.hero .avatar{width:30px;height:30px;font-size:17px}.hero .tagline{font-size:12px;line-height:1.4;margin:5px 0;color:#d3e8dd}.hero .status{margin:4px 0 0;padding:3px 8px;font-size:11px;line-height:1.4;max-width:100%;white-space:normal;overflow-wrap:anywhere}.hero .status .dot{flex-shrink:0}
 
 .home-overview{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 12px}.home-overview>*{min-width:0}.home-overview .today-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:8px}.today-card small{display:block;color:var(--muted);font-size:12px}.today-card strong{font-size:23px;color:var(--forest)}.today-card p{font-size:12px;margin:6px 0}.home-scenery{border-radius:14px;overflow:hidden;position:relative;min-height:210px;background:#174d3c;color:white;display:flex;flex-direction:column;justify-content:flex-end}.home-scenery svg{position:absolute;inset:0;width:100%;height:100%}.home-scenery figcaption{position:relative;padding:12px;background:linear-gradient(transparent,#123b32);font-size:12px}.home-scenery{margin:0 0 8px}.home-start{width:100%;margin-bottom:14px}
+
+/* Compact phone layout: preserve system-safe insets and readable exercise values. */
+.bottomnav{padding:5px 3px calc(5px + env(safe-area-inset-bottom));min-height:56px}
+.bottomnav .navbtn{min-width:0;min-height:44px;padding:3px 0;font-size:clamp(9px,2.6vw,11px);white-space:nowrap;gap:1px;line-height:1.25}
+.bottomnav .navbtn b{font-size:21px;line-height:1.2}
+.app{padding-bottom:calc(66px + env(safe-area-inset-bottom))}
+body.hike-fullscreen .hike-hud{top:calc(env(safe-area-inset-top) + 6px);left:10px;right:10px;padding:8px 10px;gap:6px 12px;border-radius:14px}
+body.hike-fullscreen .hike-hud .hike-stat{flex-direction:column;align-items:flex-start;gap:1px}
+body.hike-fullscreen .hike-hud .hike-stat small{font-size:11px;line-height:1.2}
+body.hike-fullscreen .hike-hud .hike-stat strong{text-align:left}
+body.hike-fullscreen .hike-hud .hike-stat:nth-child(-n+2) strong{font-size:clamp(18px,5vw,23px)}
+body.hike-fullscreen .hike-hud .hike-stat:nth-child(n+3){flex-direction:row;align-items:center;justify-content:space-between}
+body.hike-fullscreen .hike-hud .hike-stat:nth-child(n+3) strong{font-size:clamp(11px,3.5vw,15px);text-align:right}
+body.hike-fullscreen .hike-hud button{grid-column:1/-1;justify-self:end;padding:4px 8px;font-size:11px;min-height:30px}
+body.hike-fullscreen .float-controls{right:8px;gap:4px;max-height:calc(100dvh - var(--hike-controls-top,180px) - 76px - env(safe-area-inset-bottom));overflow-y:auto}
+body.hike-fullscreen .float-controls .square{width:38px;height:38px;border-radius:10px;font-size:17px;min-height:38px}
+body.hike-fullscreen .hike-toolbar{bottom:calc(env(safe-area-inset-bottom) + 8px);left:10px;right:10px;gap:8px}
+body.hike-fullscreen .hike-toolbar button{min-height:48px;padding:10px 5px;font-size:15px;border-radius:14px}
 </style>
 </head>
 <body><div class="app">
@@ -442,6 +460,8 @@ function refreshGpsDiagnostics(){
   if(!status)return;
   if(!d.finePermission){status.textContent='GPS 위치 권한 없음 · 앱 설정에서 정확한 위치 허용';return}
   if(!d.gpsEnabled&&!d.networkEnabled){status.textContent='휴대폰 위치 서비스 꺼짐 · 위치 켜기';return}
+  if(!trip||trip.state==='done'){status.textContent=position?'GPS 위치 확인됨 · 운동 시작 시 실시간 측정':'GPS 대기 · 운동 시작 시 위치 측정';return}
+  if(trip.demo){status.textContent='체험 모드 · 실제 GPS 측정 아님';return}
   if(d.serviceError){status.textContent='Android GPS 오류 · '+d.serviceError;return}
   if(age!==null&&age<25){status.textContent='Android GPS 수신 중 · '+age+'초 전 · 오차 '+Math.round(d.lastAccuracy)+'m · '+(d.lastProvider||'위치');return}
   if(d.serviceStarted&&Date.now()-d.serviceStarted<30000){status.textContent='Android GPS 위성 신호 대기 · 야외에서 확인';return}
