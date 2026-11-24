@@ -17,3 +17,8 @@ assert.equal(pace({...base,restStarted:1400000,pauseReason:'auto'}),600,'active 
 assert.equal(pace({...base,restStarted:1400000,pauseReason:'manual'}),400,'active manual pause excluded');
 assert.equal(pace({...base,rests:[{started:1100000,ended:1300000,type:'manual'},{started:1200000,ended:1400000,type:'manual'}]}),300,'overlapping manual rests merged');
 console.log('GPS conservative pace pause regression: PASS');
+
+// Auto-pause must never be triggered by a wall-clock interval without a fresh GPS fix.
+assert.doesNotMatch(html,/setInterval\s*\(\s*\(\)\s*=>\s*\{[^\n]*autoPause\s*\(/,'timer must not bypass GPS stillness checks');
+assert.match(html,/stationarySince&&cur\.t-trip\.stationarySince>=180000&&cur\.accuracy<=20&&anchorDistance<\.020\)autoPause\(\)/,'fresh accurate GPS stillness gate retained');
+console.log('Auto-pause timer bypass guard: PASS');
