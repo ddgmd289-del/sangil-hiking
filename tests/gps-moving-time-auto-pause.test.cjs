@@ -93,3 +93,24 @@ console.log('Moving time excludes auto/manual pauses: PASS');
  assert.equal(voiceSaves,2);
  for(const bad of [NaN,Infinity,-1,null,'bad'])assert.equal(voice.distanceVoiceStep(bad),0);
  console.log('Voice distance milestones regression: PASS');
+
+ // Execute actual SVG result export, checking saved statistics and disconnected paths.
+ const svgStart=html.indexOf('function exportHikeResultImage(record){');
+ const svgEnd=html.indexOf('function parseGpxPreview(',svgStart);
+ const gapStart=html.indexOf('function routeGap('),gapEnd=html.indexOf('function routeSegments(',gapStart);
+ const kmStart=html.indexOf('function km('),kmEnd=html.indexOf('function fmtTime(',kmStart);
+ const fmtStart=kmEnd,fmtEnd=html.indexOf('\n',fmtStart);
+ assert.ok(svgStart>=0&&svgEnd>svgStart&&gapEnd>gapStart&&kmEnd>kmStart&&fmtEnd>fmtStart);
+ let resultSvg='';
+ const resultContext={Date,Math,Number,String,paceSeconds:sandbox.paceSeconds,speedDenominatorSeconds:sandbox.speedDenominatorSeconds,toast:()=>{},download:(_name,svg)=>{resultSvg=svg}};
+ vm.runInNewContext(html.slice(kmStart,kmEnd)+html.slice(fmtStart,fmtEnd)+'\n'+html.slice(gapStart,gapEnd)+html.slice(svgStart,svgEnd),resultContext);
+ resultContext.exportHikeResultImage({started:t,ended:t+600000,distance:1,rests:[{type:'auto',started:t+120000,ended:t+300000}],name:'A & B',points:[{lat:35,lon:128,t},{lat:35.001,lon:128.001,t:t+60000},{lat:35.002,lon:128.002,t:t+300000,breakBefore:true},{lat:35.003,lon:128.003,t:t+360000}]});
+ assert.ok(resultSvg.includes('00:07'));
+ assert.ok(resultSvg.includes('6.0 km/h'));
+ assert.ok(resultSvg.includes('1.00 km'));
+ assert.ok(resultSvg.includes('A &amp; B'));
+ const routePath=resultSvg.match(/<path d="(M[^"]+)" fill="none" stroke="#ffffff" stroke-width="10"/)[1];
+ assert.equal((routePath.match(/M/g)||[]).length,2);
+ assert.equal((routePath.match(/L/g)||[]).length,2);
+ assert.equal((resultSvg.match(/rotate\(/g)||[]).length,2);
+ console.log('SVG result statistics and route gap regression: PASS');
