@@ -147,3 +147,20 @@ console.log('Moving time excludes auto/manual pauses: PASS');
  assert.equal(largePoints.length,150000);
  assert.equal(largePoints[75000].breakBefore,true);
  console.log('Large 150000-point SVG export regression: PASS');
+
+
+{
+ const start=html.indexOf('function closeMarkPanel()');
+ const end=html.indexOf("$('#mapCheck').addEventListener",start);
+ assert.ok(start>=0&&end>start,'waypoint startup bindings exist');
+ const buttons=['휴식','전망','위험','기타'].map(mark=>({dataset:{mark},addEventListener(event,fn){this.click=fn}}));
+ const panel={hidden:true};const toggle={addEventListener(event,fn){this.click=fn},setAttribute(key,value){this[key]=value}};
+ const close={addEventListener(event,fn){this.click=fn}};const marks=[];
+ const elements={'#markPanel':panel,'#markToggle':toggle,'#markClose':close};
+ const ctx={document:{querySelectorAll(sel){assert.equal(sel,'[data-mark]');return buttons}},$:sel=>elements[sel],trip:{state:'running'},addMark:label=>marks.push(label)};
+ vm.runInNewContext(html.slice(start,end),ctx);
+ toggle.click();assert.equal(panel.hidden,false);
+ buttons[2].click();assert.deepEqual(marks,['위험']);assert.equal(panel.hidden,true);
+ ctx.trip=null;toggle.click();assert.equal(panel.hidden,true);
+ console.log('Waypoint startup and selection regression: PASS');
+}
