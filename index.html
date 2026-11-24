@@ -993,8 +993,8 @@ document.getElementById('enableHomeSteps').addEventListener('click',()=>{if(wind
  let current=-1;
  function refreshSeason(){const index=seasonIndex(new Date().getMonth()+1);if(index===current)return;current=index;
  const [season,mountain,file,author,license,licenseUrl]=photos[index];const img=document.getElementById('seasonPhoto'),title=document.getElementById('seasonTitle'),desc=document.getElementById('seasonDescription'),credit=document.getElementById('seasonCredit');
- const encoded=encodeURIComponent(file);title.textContent=season+'의 산길';desc.textContent=mountain+' · 계절 사진 (화면 맞춤)';credit.href='https://commons.wikimedia.org/wiki/File:'+encoded;credit.textContent=author+' · 출처';credit.hidden=false;const licenseLink=document.getElementById('seasonLicense');licenseLink.href=licenseUrl;licenseLink.textContent=license;img.hidden=true;img.alt=season+' '+mountain+' 풍경';
- img.onload=()=>{img.hidden=false;desc.textContent=mountain+' · 계절 사진 (화면 맞춤)'};
+ const encoded=encodeURIComponent(file);title.textContent=season+'의 산길';desc.textContent=mountain+' · 계절 사진';credit.href='https://commons.wikimedia.org/wiki/File:'+encoded;credit.textContent=author+' · 출처';credit.hidden=false;const licenseLink=document.getElementById('seasonLicense');licenseLink.href=licenseUrl;licenseLink.textContent=license;img.hidden=true;img.alt=season+' '+mountain+' 풍경';
+ img.onload=()=>{img.hidden=false;desc.textContent=mountain+' · 계절 사진'};
  img.onerror=()=>{img.hidden=true;desc.textContent=mountain+' · 사진을 불러오지 못했습니다'};
  img.src=window.SangilNative?'./scenery/'+['spring','summer','autumn','winter'][index]+'.jpg':'https://commons.wikimedia.org/wiki/Special:FilePath/'+encoded+'?width=640';
  }
