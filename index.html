@@ -309,7 +309,7 @@ function onFix(p){const c=p.coords;const cur={lat:c.latitude,lon:c.longitude,alt
     const dt=prev?(cur.t-prev.t)/1000:0;
     // Keep ordinary walking fixes: a strict 8–30 m filter hid real movement.
     // Use a modest noise floor and retain points even at short GPS intervals.
-    const noiseKm=prev?Math.max(.003,Math.min(.012,(cur.accuracy+(prev.accuracy||0))*.18/1000)):0;
+    const noiseKm=prev?Math.max(.003,Math.min(.012,(cur.accuracy+(prev.accuracy||0))*.18/1000),cur.accuracy>=35&&prev.accuracy>=35?Math.min(.020,Math.min(cur.accuracy,prev.accuracy)*.0004):0):0;
     const plausibleSpeed=dt>0&&diff/dt<=(trip.activity==='달리기'?.0055:.0033); // 19.8 km/h: walking/running ceiling; reject abrupt jumps
     // Preserve real walking fixes; GPS may report multiple points with equal timestamps.
     // After a GPS outage, restart a new segment instead of rejecting all later fixes
@@ -428,7 +428,7 @@ function recoverNativeGps(){
    const dt=(p.t-prev.t)/1000,dist=km(prev,p);
    if(dt<=0)continue;
    const reacquired=dt>30&&p.accuracy<=65;
-   const noise=Math.max(.003,Math.min(.012,(p.accuracy+(prev.accuracy||0))*.18/1000));
+   const noise=Math.max(.003,Math.min(.012,(p.accuracy+(prev.accuracy||0))*.18/1000),p.accuracy>=35&&prev.accuracy>=35?Math.min(.020,Math.min(p.accuracy,prev.accuracy)*.0004):0);
    // Keep already recorded live fixes during backup merge; filtering them can erase route geometry.
    if(!reacquired&&(dist/dt>(trip.activity==='달리기'?.0055:.0033)||dist<noise)&&!liveFixKeys.has(p.t+':'+p.lat+':'+p.lon))continue;
    const safeBridge=reacquired&&dt<=180&&dist<=.5&&dist/dt<=(trip.activity==='달리기'?.0055:.0033)&&p.accuracy!=null&&p.accuracy!==''&&Number.isFinite(Number(p.accuracy))&&Number(p.accuracy)>=0&&Number(p.accuracy)<=35&&prev.accuracy!=null&&prev.accuracy!==''&&Number.isFinite(Number(prev.accuracy))&&Number(prev.accuracy)>=0&&Number(prev.accuracy)<=35;
