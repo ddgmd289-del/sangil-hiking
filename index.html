@@ -337,6 +337,10 @@ function onFix(p){const c=p.coords;const cur={lat:c.latitude,lon:c.longitude,alt
         direct<=Math.max(.025,Math.min(.060,(Number(prev.accuracy)||20)*1.5/1000))&&
         detour>=.035&&detour>=direct*1.5);
       if(spike){
+        // Persist rejected fix identities so native recovery cannot resurrect the spike.
+        if(!Array.isArray(trip.rejectedGpsFixes))trip.rejectedGpsFixes=[];
+        const rejectedKey=prev.t+':'+prev.lat+':'+prev.lon;
+        if(!trip.rejectedGpsFixes.includes(rejectedKey))trip.rejectedGpsFixes.push(rejectedKey);
         trip.points.pop();
         trip.distance=Math.max(0,trip.distance-legIn);
         // The new fix is kept: it connects directly to the last reliable point.
@@ -375,7 +379,7 @@ function recoverNativeGps(){
  try{
   const raw=window.SangilNative.getTrackBackup();if(!raw)return;
   const liveFixKeys=new Set((trip.points||[]).map(p=>p.t+':'+p.lat+':'+p.lon));
-  const existing=new Set(liveFixKeys);
+  const existing=new Set([...liveFixKeys,...(Array.isArray(trip.rejectedGpsFixes)?trip.rejectedGpsFixes:[])]);
   // A false auto-pause may hide real walking. Require multiple accurate native
   // fixes with sustained plausible displacement before repairing that interval.
   const backupFixes=raw.split(/\r?\n/).flatMap(line=>{try{
