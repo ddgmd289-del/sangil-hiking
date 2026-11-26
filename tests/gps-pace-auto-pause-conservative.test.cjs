@@ -1,0 +1,24 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const vm=require('node:vm');
+const html=fs.readFileSync('index.html','utf8');
+const start=html.indexOf('function paceSeconds(');
+const end=html.indexOf('function elapsed()',start);
+assert.ok(start>=0&&end>start,'production paceSeconds exists');
+const sandbox={Date:{now:()=>1600000},Number,Math,Array};
+vm.runInNewContext(html.slice(start,end),sandbox,{timeout:3000});
+const pace=sandbox.speedDenominatorSeconds;
+assert.equal(typeof pace,'function','Conservative speed helper exists');
+const base={started:1000000,ended:1600000};
+assert.equal(pace({...base,rests:[{started:1100000,ended:1300000,type:'auto'}]}),600,'unverified auto pause must not inflate pace');
+assert.equal(pace({...base,rests:[{started:1100000,ended:1300000,type:'manual'}]}),400,'manual pause excluded');
+assert.equal(pace({...base,rests:[{started:1100000,ended:1300000,type:'auto'},{started:1200000,ended:1400000,type:'manual'}]}),400,'overlapping auto and manual rests only exclude manual');
+assert.equal(pace({...base,restStarted:1400000,pauseReason:'auto'}),600,'active auto pause included in conservative elapsed time');
+assert.equal(pace({...base,restStarted:1400000,pauseReason:'manual'}),400,'active manual pause excluded');
+assert.equal(pace({...base,rests:[{started:1100000,ended:1300000,type:'manual'},{started:1200000,ended:1400000,type:'manual'}]}),300,'overlapping manual rests merged');
+console.log('GPS conservative pace pause regression: PASS');
+
+// Auto-pause must never be triggered by a wall-clock interval without a fresh GPS fix.
+assert.doesNotMatch(html,/setInterval\s*\(\s*\(\)\s*=>\s*\{[^\n]*autoPause\s*\(/,'timer must not bypass GPS stillness checks');
+assert.match(html,/stationarySince&&cur\.t-trip\.stationarySince>=180000&&cur\.accuracy<=20&&anchorDistance<\.020\)autoPause\(\)/,'fresh accurate GPS stillness gate retained');
+console.log('Auto-pause timer bypass guard: PASS');

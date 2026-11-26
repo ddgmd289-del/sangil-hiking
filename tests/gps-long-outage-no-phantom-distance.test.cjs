@@ -1,0 +1,25 @@
+// Guard against phantom distance when a GPS receiver resumes after a long outage.
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const vm=require('node:vm');
+const html=fs.readFileSync('index.html','utf8');
+const a=html.indexOf('function recoverNativeGps(){');
+const b=html.indexOf('function refreshGpsDiagnostics(){',a);
+assert.ok(a>=0&&b>a);
+const source=html.slice(a,b);
+const now=Date.now()-3600000;
+const p=(i,seconds)=>({lat:35+i*.001,lon:128,accuracy:5,t:now+seconds*1000});
+const first=p(0,0),last=p(3,600);
+const trip={started:now,state:'active',activity:'걷기',points:[first],distance:0,rests:[],restStarted:0};
+const backup=[first,last].map(x=>JSON.stringify({lat:x.lat,lng:x.lon,accuracy:x.accuracy,time:x.t})).join('\n');
+const km=(x,y)=>Math.abs(y.lat-x.lat)*111.195;
+let saved=0;
+const ctx={trip,window:{SangilNative:{getTrackBackup:()=>backup}},km,persist(){saved++},updateStats(){},draw(){},console,Date,Number,Math,Set,JSON,Array};
+vm.runInNewContext(source+'\nrecoverNativeGps();',ctx,{timeout:5000});
+assert.equal(trip.points.length,2,'retain the post-outage fix for the route');
+assert.equal(trip.points[1].breakBefore,true,'long GPS outage must remain a route break');
+assert.equal(trip.distance,0,'do not invent traveled distance across a ten-minute signal outage');
+vm.runInNewContext(source+'\nrecoverNativeGps();',ctx,{timeout:5000});
+assert.equal(trip.distance,0,'replaying backup must not add phantom distance');
+assert.equal(trip.points.length,2,'replay must not duplicate fixes');
+console.log('Long GPS outage distance protection: PASS');
