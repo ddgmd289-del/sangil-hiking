@@ -722,6 +722,11 @@ function renderRecords(){
    ['최저속도',minSpeed===null?'—':minSpeed.toFixed(1)+' km/h'],
    ['최저고도',alts.length?Math.round(alts.reduce((a,b)=>Math.min(a,b),Infinity))+' m':'—']
   ];
+  // Show diagnostics only on records that actually contain measured values.
+  for(const [key,label] of [['distanceBeforeFinalFilter','GPS 보정 전'],['rawRouteDistance','GPS 원본 경로'],['filteredRouteDistance','GPS 필터 경로']]){
+   if(typeof r[key]==='number'&&Number.isFinite(r[key])&&r[key]>=0)metrics.push([label,r[key].toFixed(3)+' km']);
+  }
+  if(Number.isSafeInteger(r.routeSegmentCount)&&r.routeSegmentCount>0)metrics.push(['GPS 경로 구간',r.routeSegmentCount+'개']);
   const header=document.createElement('button');header.type='button';header.className='record-summary';header.setAttribute('aria-expanded','false');
   const thumbnail=document.createElement('div');thumbnail.className='record-thumb';
   // Local vector preview from stored coordinates; no external map or GPS upload.
