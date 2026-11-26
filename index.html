@@ -554,7 +554,7 @@ async function exportHikeResultPng(record,share=false){
  ctx.fillStyle='rgba(12,38,28,.10)';ctx.fillRect(0,mapTop,W,mapHeight);
  const xy=i=>({x:(projection[i].x-originX)*256,y:mapTop+(projection[i].y-originY)*256});
  ctx.lineJoin='round';ctx.lineCap='round';
- for(const [color,width] of [['#ffffff',9],['#1678d4',5]]){ctx.beginPath();projection.forEach((p,i)=>{const v=xy(i);const prev=pts[i-1];const gap=prev&&routeGap(prev,pts[i]);i&&!gap?ctx.lineTo(v.x,v.y):ctx.moveTo(v.x,v.y)});ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke()}
+ for(const [color,width] of [['#ffffff',6],['#1678d4',3.5]]){ctx.beginPath();projection.forEach((p,i)=>{const v=xy(i);const prev=pts[i-1];const gap=prev&&routeGap(prev,pts[i]);i&&!gap?ctx.lineTo(v.x,v.y):ctx.moveTo(v.x,v.y)});ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke()}
  const step=Math.max(1,Math.floor(pts.length/10));ctx.strokeStyle='#ffffff';ctx.lineWidth=3;
  for(let i=step;i<pts.length;i+=step){const a=xy(i-1),b=xy(i),ang=Math.atan2(b.y-a.y,b.x-a.x);if(routeGap(pts[i-1],pts[i])||Math.hypot(b.x-a.x,b.y-a.y)<2)continue;ctx.save();ctx.translate(b.x,b.y);ctx.rotate(ang);ctx.beginPath();ctx.moveTo(-7,-5);ctx.lineTo(5,0);ctx.lineTo(-7,5);ctx.stroke();ctx.restore()}
  const nearStartEnd=Math.hypot(xy(0).x-xy(pts.length-1).x,xy(0).y-xy(pts.length-1).y)<75;
