@@ -506,9 +506,12 @@ function finalizeRouteDistance(record){
  // Do not invent distance from missing geometry or rewrite historic records.
  // For a complete continuous track, use its visible, conservatively filtered length.
  // With discontinuities, preserve existing distance until the gaps can be verified.
- if(segments.length!==1)return;
+ // Keep diagnostic lengths even for discontinuous tracks without changing their distance.
  record.distanceBeforeFinalFilter=prior;
  record.rawRouteDistance=raw;
+ record.filteredRouteDistance=valid;
+ record.routeSegmentCount=segments.length;
+ if(segments.length!==1)return;
  record.distance=valid;
 }
 function finish(){if(!trip)return;if(trip.state==='done'){completeFinishedRecord();return}if(!trip.demo)recoverNativeGps();if(!confirm(trip.demo?'체험 모드를 종료할까요? 실제 기록으로는 저장되지 않습니다.':'운동을 종료하고 기록을 저장할까요?'))return;updateWorkoutSteps();if(!trip.demo)finalizeRouteDistance(trip);if(trip.state==='running')trip.accMs+=Date.now()-trip.segmentStarted;else closeRest();trip.state='done';if(!trip.demo&&window.SangilNative)try{window.SangilNative.stopTracking()}catch(e){};trip.ended=Date.now();trip.endPoint=trip.points?.length?{...trip.points.at(-1)}:(trip.startPoint?{...trip.startPoint}:null);trip.memo=$('#hikeMemo').value.trim();if(selectedMountain&&!trip.demo)trip.mountain={...selectedMountain};completeFinishedRecord();}
